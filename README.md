@@ -6,6 +6,8 @@
 
 预印本 | Foundational Preprint | Version 1.0 | 2026-05-30
 
+> 📖 [Read this in English](README_EN.md)
+
 ---
 
 ## 前言 / Preface
