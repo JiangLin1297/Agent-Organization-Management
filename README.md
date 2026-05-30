@@ -4,7 +4,7 @@
 
 不是用 AI 管人，是用管理学管 AI。
 
-预印本 | Foundational Preprint | Version 1.0 | 2026-05-30
+预印本 | Foundational Preprint | Version 2.0 | 2026-05-30
 
 > 📖 [Read this in English](README_EN.md)
 
@@ -53,6 +53,11 @@
 - ✅ 提出双向赋能路径：用 Agent 仿真作为管理学的"粒子对撞机"
 - ✅ 坦诚界定学科适用边界，指出控制与涌现的根本张力
 - ✅ 给出产品化愿景：基于管理架构的 Agent 工作台（MAW）
+- ✅ **[v2.0 新增]** 最小可行性实验设计：1,900次模拟实验验证动态拓扑优势
+- ✅ **[v2.0 新增]** 理论创新：提出"控制-涌现平衡猜想"等AOM原创假设
+- ✅ **[v2.0 新增]** 相关工作定位：与COT、MARL、可扩展监督、ONA的系统性对比
+- ✅ **[v2.0 新增]** 系统性局限性分析：10条局限性及缓解路径
+- ✅ **[v2.0 新增]** 最小产品原型：AOM-Lite Weekend Hackathon MVP设计
 
 ---
 
@@ -60,8 +65,11 @@
 
 ```
 ├── README.md                                              # 本文件
+├── README_EN.md                                           # 英文版 README
 ├── paper/
-│   └── agent_organizational_management_v1.pdf             # 论文全文（预印本 v1.0）
+│   ├── agent_organizational_management_v2.docx            # 论文全文（预印本 v2.0）
+│   ├── agent_organizational_management_v1.docx            # 论文全文（预印本 v1.0）
+│   └── v1_supplement_five_dimensions.md                   # v2.0 五维度补充材料原文
 ├── LICENSE                                                # 开源许可证
 └── assets/                                                # 图表与可视化素材（若有）
 ```
@@ -83,10 +91,10 @@
 ### BibTeX
 
 ```bibtex
-@unpublished{hao2026aom,
+@unpublished{jiang2026aom,
   author    = {Haoran Jiang},
   title     = {Agent Organizational Management: When Multi-Agent Systems Meet Management Theory},
-  note      = {Foundational Preprint, Version 1.0},
+  note      = {Foundational Preprint, Version 2.0},
   year      = {2026},
   month     = may,
   url       = {https://github.com/JiangLin1297/Agent-Organization-Management}

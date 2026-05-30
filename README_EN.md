@@ -2,7 +2,7 @@
 
 > **Not managing humans with AI — managing AI with the wisdom of management science.**
 >
-> Foundational Preprint | Version 1.0 | 2026-05-30
+> Foundational Preprint | Version 2.0 | 2026-05-30
 
 > 📖 [阅读中文版](README.md)
 
@@ -52,6 +52,11 @@ The paper further argues that AOM is not merely "using management to govern AI."
 - ✅ **Bidirectional empowerment** pathway: using agent simulation as a "particle collider" for management science
 - ✅ Candid discussion of **boundary conditions**, identifying the fundamental tension between control and emergence
 - ✅ **Product vision**: the Management-Architecture-Based Agent Workbench (MAW)
+- ✅ **[v2.0 New]** Minimum viable experiment design: 1,900 simulated experiments validating dynamic topology advantages
+- ✅ **[v2.0 New]** Theoretical innovation: AOM-original hypotheses including the "Control-Emergence Balance Conjecture"
+- ✅ **[v2.0 New]** Related work positioning: systematic comparison with COT, MARL, Scalable Oversight, and ONA
+- ✅ **[v2.0 New]** Systematic limitations analysis: 10 identified limitations with mitigation paths
+- ✅ **[v2.0 New]** Minimum product prototype: AOM-Lite Weekend Hackathon MVP design
 
 ---
 
@@ -61,7 +66,9 @@ The paper further argues that AOM is not merely "using management to govern AI."
 ├── README.md                        # Chinese README
 ├── README_EN.md                     # This file (English README)
 ├── paper/
-│   └── agent_organizational_management_v1.docx  # Full paper (Preprint v1.0)
+│   ├── agent_organizational_management_v2.docx  # Full paper (Preprint v2.0)
+│   ├── agent_organizational_management_v1.docx  # Full paper (Preprint v1.0)
+│   └── v1_supplement_five_dimensions.md         # v2.0 supplement materials
 ├── LICENSE                          # CC BY 4.0
 └── assets/                          # Figures and visual assets (if any)
 ```
@@ -82,7 +89,7 @@ If this paper informs your work, please cite it as follows:
 @unpublished{jiang2026aom,
   author    = {Haoran Jiang},
   title     = {Agent Organizational Management: When Multi-Agent Systems Meet Management Theory},
-  note      = {Foundational Preprint, Version 1.0},
+  note      = {Foundational Preprint, Version 2.0},
   year      = {2026},
   month     = may,
   url       = {https://github.com/JiangLin1297/Agent-Organization-Management}
