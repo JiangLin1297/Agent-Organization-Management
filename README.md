@@ -1,12 +1,24 @@
-智能体组织管理学（Agent Organizational Management, AOM）
+# 智能体组织管理学（Agent Organizational Management, AOM）
 
-当多智能体系统遇上管理理论
+**当多智能体系统遇上管理理论**
 
-不是用 AI 管人，是用管理学管 AI。
+*不是用 AI 管人，是用管理学管 AI。*
 
 预印本 | Foundational Preprint | Version 2.0 | 2026-05-30
 
 > 📖 [Read this in English](README_EN.md)
+
+---
+
+## 🆕 V2.0 Released (2026-05-30)
+
+**V2.0 核心新增内容：**
+
+1. **相关工作与领域定位（§1.3）**：与 Chain-of-Thought、MARL、可扩展监督、ONA 等主流方法的系统性对比，明确 AOM 的独特价值定位
+2. **映射中涌现的新理论观察（§2.4）**：提出"控制-涌现平衡猜想"等 AOM 原创假设，为管理学提供可验证的数学命题
+3. **实验验证框架与模拟数据（§3）**：1,900 次模拟实验设计，验证动态拓扑在多种任务场景下的优势
+4. **系统性局限性清单（§4）**：坦诚列出 10 条学科局限性及对应的缓解路径
+5. **AOM-Lite MVP 即刻行动计划（§5.2）**：48 小时可搭建的情境领导风格动态切换原型设计
 
 ---
 
@@ -26,7 +38,7 @@
 
 管理学被说无用太久了。现在，让我们看看它能不能管住 AI。
 
-江皓然
+**江皓然**
 华南理工大学 软件工程+工商管理双学位 本科二年级
 2026年5月30日
 
@@ -53,11 +65,11 @@
 - ✅ 提出双向赋能路径：用 Agent 仿真作为管理学的"粒子对撞机"
 - ✅ 坦诚界定学科适用边界，指出控制与涌现的根本张力
 - ✅ 给出产品化愿景：基于管理架构的 Agent 工作台（MAW）
-- ✅ **[v2.0 新增]** 最小可行性实验设计：1,900次模拟实验验证动态拓扑优势
-- ✅ **[v2.0 新增]** 理论创新：提出"控制-涌现平衡猜想"等AOM原创假设
-- ✅ **[v2.0 新增]** 相关工作定位：与COT、MARL、可扩展监督、ONA的系统性对比
-- ✅ **[v2.0 新增]** 系统性局限性分析：10条局限性及缓解路径
-- ✅ **[v2.0 新增]** 最小产品原型：AOM-Lite Weekend Hackathon MVP设计
+- ✅ **[v2.0 新增]** 相关工作定位：与 COT、MARL、可扩展监督、ONA 的系统性对比
+- ✅ **[v2.0 新增]** 理论创新：提出"控制-涌现平衡猜想"等 AOM 原创假设
+- ✅ **[v2.0 新增]** 最小可行性实验设计：1,900 次模拟实验验证动态拓扑优势
+- ✅ **[v2.0 新增]** 系统性局限性分析：10 条局限性及缓解路径
+- ✅ **[v2.0 新增]** 最小产品原型：AOM-Lite Weekend Hackathon MVP 设计
 
 ---
 
@@ -68,10 +80,40 @@
 ├── README_EN.md                                           # 英文版 README
 ├── paper/
 │   ├── agent_organizational_management_v2.docx            # 论文全文（预印本 v2.0）
+│   ├── agent_organizational_management_v2_en.docx         # 论文英文版（预印本 v2.0）
 │   ├── agent_organizational_management_v1.docx            # 论文全文（预印本 v1.0）
 │   └── v1_supplement_five_dimensions.md                   # v2.0 五维度补充材料原文
+├── simulations/
+│   ├── control_emergence_plot.py                          # 控制-涌现平衡猜想数值模拟脚本
+│   ├── control_emergence_surface.png                      # 三维曲面图
+│   └── control_emergence_contour.png                      # 二维等高线图
+├── aom-lite/
+│   ├── main.py                                            # AOM-Lite MVP 主程序
+│   ├── config.json                                        # 配置文件
+│   ├── requirements.txt                                   # 依赖列表
+│   └── RUN_RESULT.md                                      # AOM-Lite 运行结果日志
 ├── LICENSE                                                # 开源许可证
 └── assets/                                                # 图表与可视化素材（若有）
+```
+
+---
+
+## 快速开始 / Quick Start
+
+### 运行控制-涌现平衡猜想模拟
+
+```bash
+cd simulations
+pip install matplotlib numpy scipy
+python control_emergence_plot.py
+```
+
+### 运行 AOM-Lite MVP 原型
+
+```bash
+cd aom-lite
+pip install -r requirements.txt
+python main.py
 ```
 
 ---
@@ -82,11 +124,11 @@
 
 ### 中文引用格式
 
-> 江皓然. (2026). 智能体组织管理学：当多智能体系统遇上管理理论. 奠基性预印本. GitHub. URL: https://github.com/JiangLin1297/Agent-Organization-Management
+> 江皓然. (2026). 智能体组织管理学：当多智能体系统遇上管理理论 (Version 2.0). 奠基性预印本. GitHub. URL: https://github.com/JiangLin1297/Agent-Organization-Management
 
 ### 英文引用格式
 
-> Jiang, H. (2026). Agent Organizational Management: When Multi-Agent Systems Meet Management Theory. Foundational Preprint. GitHub. URL: https://github.com/JiangLin1297/Agent-Organization-Management
+> Jiang, H. (2026). Agent Organizational Management: When Multi-Agent Systems Meet Management Theory (Version 2.0). Foundational Preprint. GitHub. URL: https://github.com/JiangLin1297/Agent-Organization-Management
 
 ### BibTeX
 
@@ -107,10 +149,10 @@
 
 这是一个开放的领域。无论您是管理学教授、AI 研究员、工程师，还是像我一样对这个交叉点充满热情的学生，我都诚挚邀请您：
 
--  阅读并评论论文
--  提交 Issue 指出错误或提出改进建议
--  Fork 仓库并在此基础上发展您自己的研究方向
--  通过 Discussions 或邮件与我联系
+- 📖 阅读并评论论文
+- 🐛 提交 Issue 指出错误或提出改进建议
+- 🔀 Fork 仓库并在此基础上发展您自己的研究方向
+- ✉️ 通过 Discussions 或邮件与我联系
 
 让我们一起，将智能体组织管理学从愿景推向现实。
 

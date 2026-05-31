@@ -1,0 +1,30 @@
+{
+  "aom_lite_config": {
+    "version": "1.0.0",
+    "description": "AOM-Lite MVP 配置文件 - 情境领导风格动态切换",
+
+    "readiness_calculation": {
+      "description": "准备度计算参数 (参考论文 §2.2.1)",
+      "formula": "readiness = gamma * HTSR + (1 - gamma) * Confidence",
+      "gamma": 0.6,
+      "htsr_window": 5,
+      "htsr_description": "历史任务成功率窗口大小（最近N个任务）",
+      "confidence_description": "Agent自我报告的能力置信度 [0, 1]"
+    },
+
+    "readiness_thresholds": {
+      "description": "准备度阈值映射到领导风格 (参考论文 §2.2.1, Hersey-Blanchard模型)",
+      "R1": {"range": "[0.0, 0.25)", "style": "S1_TELLING"},
+      "R2": {"range": "[0.25, 0.50)", "style": "S2_SELLING"},
+      "R3": {"range": "[0.50, 0.75)", "style": "S3_PARTICIPATING"},
+      "R4": {"range": "[0.75, 1.0]", "style": "S4_DELEGATING"}
+    },
+
+    "simulation_settings": {
+      "description": "模拟执行设置（MVP阶段使用随机数据）",
+      "success_base_rate": 0.7,
+      "token_range": [100, 2000],
+      "note": "这些参数仅用于模拟，真实部署时需替换为LLM API调用"
+    }
+  }
+}
