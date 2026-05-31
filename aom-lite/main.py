@@ -18,11 +18,14 @@ Agent Organizational Management - Lightweight Minimum Viable Product
 """
 
 import json
+import os
+import time
 import random
 import numpy as np
 from dataclasses import dataclass, field
 from typing import List, Dict, Tuple, Optional
 from enum import Enum
+from openai import OpenAI
 
 
 # ============================================================================
@@ -260,31 +263,28 @@ def execute_task(
     agent: Agent,
     task: Task,
     style: LeadershipStyle,
-    config: Dict
+    config: Dict,
+    client: OpenAI = None,
+    model: str = "mimo-v2.5-pro"
 ) -> ExecutionResult:
     """
-    模拟执行任务
+    执行任务（真实 LLM 调用）
 
-    ⚠️ 注意：此函数为模拟实现，所有结果均为随机生成。
-    ⚠️ 真实部署时，应替换为 LLM API 调用。
-
-    模拟逻辑：
-    1. 根据 Agent 准备度和领导风格计算基础成功率
-    2. 加入随机扰动
-    3. 生成随机的 token 消耗
+    使用 LLM API 真实执行任务，记录真实的 token 消耗和执行时间。
 
     参数:
         agent: 执行任务的 Agent
         task: 待执行的任务
         style: 选择的领导风格
         config: 配置参数
+        client: OpenAI 客户端实例
+        model: 使用的模型名称
 
     返回:
         ExecutionResult: 执行结果
     """
-    # 模拟数据，未调用真实 LLM
     print(f"\n{'='*60}")
-    print(f"📋 模拟执行任务: {task.description}")
+    print(f"📋 执行任务: {task.description}")
     print(f"{'='*60}")
 
     # 获取指令模板（根据风格和实际任务动态生成）
@@ -303,76 +303,124 @@ def execute_task(
     print(f"   - Task Uncertainty (不确定性): {task.uncertainty:.2%}")
     print(f"\n🎯 风格选择: {style.value}")
 
-    # 打印指令模板
-    print(f"\n📝 指令模板:")
-    print(f"   类型: {instruction_template['type']}")
-    print(f"   详细程度: {instruction_template['detail_level']}")
-    print(f"   自主程度: {instruction_template['autonomy_level']}")
-    print(f"\n   指令内容:")
-    example = instruction_template['instruction']
-    for key, value in example.items():
-        if isinstance(value, list):
-            print(f"   {key}:")
-            for item in value[:3]:  # 只显示前3项
-                print(f"     - {item}")
-            if len(value) > 3:
-                print(f"     - ... (共{len(value)}项)")
-        else:
-            print(f"   {key}: {value}")
-
-    # 模拟执行结果
-    # 基础成功率 = 0.5 + 0.4 * readiness + 0.1 * (1 - task_uncertainty)
-    base_success_rate = 0.5 + 0.4 * readiness + 0.1 * (1 - task.uncertainty)
-
-    # 添加风格匹配度调整
-    # 高准备度 + 低指导性风格 = 更高成功率
-    style_bonus = {
-        LeadershipStyle.S1_TELLING: -0.05,
-        LeadershipStyle.S2_SELLING: 0.0,
-        LeadershipStyle.S3_PARTICIPATING: 0.05,
-        LeadershipStyle.S4_DELEGATING: 0.1
+    # 构建系统提示词
+    style_descriptions = {
+        LeadershipStyle.S1_TELLING: "你是一个执行严格指令的助手。请按照给定的步骤逐一执行，不要偏离指令。每步完成后进行验证。",
+        LeadershipStyle.S2_SELLING: "你是一个专业的分析助手。请理解任务目标后按计划执行，同时解释你的推理过程。如有疑问请提出。",
+        LeadershipStyle.S3_PARTICIPATING: "你是一个协作型助手。任务目标已明确，但执行路径由你自主决定。请在关键决策点说明你的推理。",
+        LeadershipStyle.S4_DELEGATING: "你是一个高度自主的专家助手。目标明确，实现方式由你全权决定。只需提交高质量的最终结果。"
     }
 
-    # 风格匹配度：如果高准备度用高指导性风格，反而降低效率
-    if readiness > 0.7 and style in [LeadershipStyle.S1_TELLING, LeadershipStyle.S2_SELLING]:
-        style_match_penalty = -0.1
-    elif readiness < 0.4 and style in [LeadershipStyle.S3_PARTICIPATING, LeadershipStyle.S4_DELEGATING]:
-        style_match_penalty = -0.15
-    else:
-        style_match_penalty = 0.0
+    system_prompt = style_descriptions[style]
 
-    # 最终成功率
-    success_rate = np.clip(
-        base_success_rate + style_bonus[style] + style_match_penalty + random.uniform(-0.1, 0.1),
-        0.0, 1.0
-    )
+    # 构建用户提示词（包含指令模板）
+    instruction = instruction_template['instruction']
+    user_prompt_parts = [f"任务：{task.description}\n"]
 
-    # 模拟数据，未调用真实 LLM
-    success = random.random() < success_rate
-    tokens_consumed = random.randint(
-        config["simulation_settings"]["token_range"][0],
-        config["simulation_settings"]["token_range"][1]
-    )
+    if 'steps' in instruction:
+        user_prompt_parts.append("执行步骤：")
+        for step in instruction['steps']:
+            user_prompt_parts.append(f"  {step}")
+
+    if 'constraints' in instruction:
+        user_prompt_parts.append("\n约束条件：")
+        for c in instruction['constraints']:
+            user_prompt_parts.append(f"  - {c}")
+
+    if 'acceptance_criteria' in instruction:
+        user_prompt_parts.append("\n验收标准：")
+        for a in instruction['acceptance_criteria']:
+            user_prompt_parts.append(f"  - {a}")
+
+    if 'background' in instruction:
+        user_prompt_parts.append(f"\n背景：{instruction['background']}")
+    if 'why' in instruction:
+        user_prompt_parts.append(f"\n原因：{instruction['why']}")
+    if 'objective' in instruction:
+        user_prompt_parts.append(f"\n目标：{instruction['objective']}")
+    if 'success_metrics' in instruction:
+        user_prompt_parts.append("\n成功指标：")
+        for m in instruction['success_metrics']:
+            user_prompt_parts.append(f"  - {m}")
+
+    user_prompt = "\n".join(user_prompt_parts)
+
+    # 调用 LLM API
+    tokens_consumed = 0
+    execution_time = 0.0
+    output_text = ""
+    error_message = ""
+    success = False
+
+    if client is None:
+        client = OpenAI(
+            api_key=os.environ.get("OPENAI_API_KEY", ""),
+            base_url=os.environ.get("OPENAI_BASE_URL", "https://token-plan-cn.xiaomimimo.com/v1"),
+            timeout=120.0
+        )
+
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            start_time = time.time()
+            response = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                max_tokens=1500,
+                temperature=0.7,
+                timeout=120.0
+            )
+            end_time = time.time()
+
+            execution_time = end_time - start_time
+            output_text = response.choices[0].message.content or ""
+            tokens_consumed = response.usage.total_tokens if response.usage else 0
+
+            success = (
+                len(output_text.strip()) > 30 and
+                "抱歉" not in output_text[:100] and
+                "无法" not in output_text[:100] and
+                "I cannot" not in output_text[:100] and
+                "I'm sorry" not in output_text[:100]
+            )
+
+            print(f"\n📈 执行结果:")
+            print(f"   结果: {'✅ 成功' if success else '❌ 失败'}")
+            print(f"   Token 消耗: {tokens_consumed}")
+            print(f"   执行时间: {execution_time:.2f}s")
+            print(f"   输出长度: {len(output_text)} 字符")
+            break  # 成功，退出重试循环
+
+        except Exception as e:
+            error_message = str(e)
+            if attempt < max_retries - 1:
+                wait_time = (attempt + 1) * 5
+                print(f"\n⚠️ API 调用失败 (尝试 {attempt+1}/{max_retries}): {error_message}")
+                print(f"   等待 {wait_time}s 后重试...")
+                time.sleep(wait_time)
+            else:
+                print(f"\n❌ API 调用失败 (已重试 {max_retries} 次): {error_message}")
+                success = False
 
     # 生成执行日志
     execution_log = f"""
-模拟执行日志 (SIMULATED - NOT REAL LLM CALL):
+执行日志 (REAL LLM CALL):
 ----------------------------------------------
 Agent: {agent.name}
 Task: {task.description}
 Style: {style.value}
 Readiness: {readiness:.2%}
-Success Rate (calculated): {success_rate:.2%}
+Model: {model}
 Result: {'SUCCESS' if success else 'FAILURE'}
 Tokens Consumed: {tokens_consumed}
+Execution Time: {execution_time:.2f}s
+Output Length: {len(output_text)} characters
+Error: {error_message if error_message else 'None'}
 ----------------------------------------------
-⚠️ 以上数据为模拟生成，未调用真实LLM API
 """
-
-    print(f"\n📈 执行结果:")
-    print(f"   成功率计算: {success_rate:.2%}")
-    print(f"   结果: {'✅ 成功' if success else '❌ 失败'}")
-    print(f"   Token 消耗: {tokens_consumed}")
 
     return ExecutionResult(
         success=success,
@@ -403,9 +451,9 @@ def main():
     print("""
 ╔══════════════════════════════════════════════════════════════════╗
 ║                    AOM-Lite MVP 演示                            ║
-║        情境领导风格动态切换原型 (模拟版本)                        ║
+║        情境领导风格动态切换原型 (真实 LLM 版本)                   ║
 ║                                                                  ║
-║  ⚠️  所有执行结果均为模拟数据，未调用真实 LLM API                 ║
+║  ✅ 使用真实 LLM API 调用                                       ║
 ╚══════════════════════════════════════════════════════════════════╝
 """)
 
@@ -418,6 +466,21 @@ def main():
         print("❌ 错误：未找到 config.json 文件")
         print("请确保 config.json 与 main.py 在同一目录下")
         return
+
+    # 初始化 LLM 客户端
+    api_key = os.environ.get("OPENAI_API_KEY", "")
+    base_url = os.environ.get("OPENAI_BASE_URL", "https://token-plan-cn.xiaomimimo.com/v1")
+    model = os.environ.get("LLM_MODEL", "mimo-v2.5-pro")
+
+    if not api_key:
+        print("❌ 错误：未设置 OPENAI_API_KEY 环境变量")
+        print("请设置环境变量后重试：export OPENAI_API_KEY=your_key")
+        return
+
+    client = OpenAI(api_key=api_key, base_url=base_url)
+    print(f"✅ LLM 客户端初始化成功")
+    print(f"   模型: {model}")
+    print(f"   API: {base_url}\n")
 
     # 创建不同能力水平的 Agent
     # 模拟数据，未调用真实 LLM
@@ -481,14 +544,14 @@ def main():
         )
 
         # 执行任务
-        result = execute_task(agent, task, style, config)
+        result = execute_task(agent, task, style, config, client=client, model=model)
         results.append((agent, result))
 
     # 输出汇总报告
     print("\n" + "=" * 70)
     print("📊 汇总报告")
     print("=" * 70)
-    print(f"\n⚠️  以下数据均为模拟生成，未调用真实 LLM API\n")
+    print(f"\n✅ 以下数据为真实 LLM API 调用结果\n")
     print(f"{'Agent':<15} {'Readiness':<12} {'Style':<18} {'Result':<10} {'Tokens':<10}")
     print("-" * 65)
 
