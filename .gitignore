@@ -24,6 +24,10 @@ env/
 *.swo
 *~
 
+# Environment variables (secrets)
+.env
+.env.*
+
 # Temp files
 *.tmp
 ~$*
