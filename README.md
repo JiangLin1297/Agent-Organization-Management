@@ -4,13 +4,26 @@
 
 *不是用 AI 管人，是用管理学管 AI。*
 
-预印本 | Foundational Preprint | Version 2.0 | 2026-05-30
+预印本 | Foundational Preprint | Version 3.0 | 2026-06-01
 
 > 📖 [Read this in English](README_EN.md)
 
 ---
 
-## 🆕 V2.0 Released (2026-05-30)
+## 🆕 V3.0 Released (2026-06-01)
+
+**V3.0 核心新增内容：大规模效率实验与诚实发现**
+
+1. **大规模真实实验（N=90）**：4个异质Agent × 9任务 × 2条件 × 5重复 = 90次实验，360次LLM调用
+2. **效率指标深度分析**：Token消耗、完成时间、协调开销的系统性测量
+3. **重要发现——自主性-冗长度权衡**：AOM-DT消耗更多Token（+5~11%）但保持同等成功率和质量
+4. **诚实的学术态度**：不回避反直觉结果，深入分析机制并提出改进方向
+5. **完整可视化**：Token对比图、时间对比图、Agent Token分布散点图
+6. **V3论文（DOCX格式）**：包含效率分析、自主性-冗长度权衡讨论、改进路径
+
+---
+
+## V2.0 Released (2026-05-30)
 
 **V2.0 核心新增内容：**
 
@@ -79,9 +92,11 @@
 ├── README.md                                              # 本文件
 ├── README_EN.md                                           # 英文版 README
 ├── paper/
+│   ├── agent_organizational_management_v3.docx            # 论文全文（预印本 v3.0）🆕
 │   ├── agent_organizational_management_v2.docx            # 论文全文（预印本 v2.0）
 │   ├── agent_organizational_management_v2_en.docx         # 论文英文版（预印本 v2.0）
 │   ├── agent_organizational_management_v1.docx            # 论文全文（预印本 v1.0）
+│   ├── generate_v3_paper.py                               # V3论文生成脚本 🆕
 │   └── v1_supplement_five_dimensions.md                   # v2.0 五维度补充材料原文
 ├── simulations/
 │   ├── control_emergence_plot.py                          # 控制-涌现平衡猜想数值模拟脚本
@@ -89,11 +104,17 @@
 │   └── control_emergence_contour.png                      # 二维等高线图
 ├── aom-lite/
 │   ├── main.py                                            # AOM-Lite MVP 主程序
+│   ├── experiment_v3.py                                   # V3大规模实验脚本 🆕
+│   ├── generate_v3_charts.py                              # V3可视化脚本 🆕
+│   ├── experiment_v3_results.csv                          # V3实验结果（90次）🆕
 │   ├── config.json                                        # 配置文件
 │   ├── requirements.txt                                   # 依赖列表
 │   └── RUN_RESULT.md                                      # AOM-Lite 运行结果日志
 ├── LICENSE                                                # 开源许可证
-└── assets/                                                # 图表与可视化素材（若有）
+└── assets/
+    ├── v3_token_comparison.png                            # Token对比柱状图 🆕
+    ├── v3_time_comparison.png                             # 时间对比柱状图 🆕
+    └── v3_agent_token_distribution.png                    # Agent Token分布散点图 🆕
 ```
 
 ---
@@ -116,6 +137,16 @@ pip install -r requirements.txt
 python main.py
 ```
 
+### 运行 V3 大规模实验
+
+```bash
+cd aom-lite
+export OPENAI_API_KEY=your_key
+export OPENAI_BASE_URL=https://token-plan-cn.xiaomimimo.com/v1
+python experiment_v3.py        # 运行90次实验（约2小时）
+python generate_v3_charts.py   # 生成可视化图表
+```
+
 ---
 
 ## 如何引用 / How to Cite
@@ -124,7 +155,7 @@ python main.py
 
 ### 中文引用格式
 
-> 江皓然. (2026). 智能体组织管理学：当多智能体系统遇上管理理论 (Version 2.0). 奠基性预印本. GitHub. URL: https://github.com/JiangLin1297/Agent-Organization-Management
+> 江皓然. (2026). 智能体组织管理学：当多智能体系统遇上管理理论 (Version 3.0). 奠基性预印本. GitHub. URL: https://github.com/JiangLin1297/Agent-Organization-Management
 
 ### 英文引用格式
 
