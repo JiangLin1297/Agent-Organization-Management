@@ -18,6 +18,9 @@
 4. **Academic honesty**: Counter-intuitive results analyzed transparently with improvement directions
 5. **Complete visualizations**: Token comparison, time comparison, agent token distribution charts
 6. **V3 paper (DOCX)**: Includes efficiency analysis, autonomy-verbosity trade-off discussion, and improvement pathways
+7. **Version Evolution Analysis (§5.1.1)**: Systematic reconciliation of V2 (−16% tokens) vs V3 (+7% tokens) experimental findings, revealing the autonomy-verbosity trade-off as an LLM behavioral property rather than a framework deficiency
+8. **Agent Organizational Governance (§1.5)**: New dialogue with Tsinghua University's "Agent Management" report, clarifying the complementary relationship between governance layer and collaborative engineering layer
+9. **Bilingual papers**: V3 Chinese and English versions updated in sync
 
 ---
 
@@ -91,29 +94,29 @@ The paper further argues that AOM is not merely "using management to govern AI."
 ├── README.md                        # Chinese README
 ├── README_EN.md                     # This file (English README)
 ├── paper/
-│   ├── agent_organizational_management_v3.docx    # Full paper (Preprint v3.0) 🆕
+│   ├── agent_organizational_management_v3.docx    # Full paper (Preprint v3.0, with version evolution analysis)
+│   ├── agent_organizational_management_v3_cn.docx # Chinese paper (Preprint v3.0) 🆕
 │   ├── agent_organizational_management_v2.docx    # Full paper (Preprint v2.0)
 │   ├── agent_organizational_management_v2_en.docx # Full paper English version (Preprint v2.0)
 │   ├── agent_organizational_management_v1.docx    # Full paper (Preprint v1.0)
-│   ├── generate_v3_paper.py                       # V3 paper generation script 🆕
+│   ├── generate_v3_paper.py                       # V3 English paper generation script
+│   ├── generate_v3_paper_cn.py                    # V3 Chinese paper generation script 🆕
 │   └── v1_supplement_five_dimensions.md           # v2.0 supplement materials
 ├── simulations/
-│   ├── control_emergence_plot.py    # Control-Emergence Balance Conjecture simulation
 │   ├── control_emergence_surface.png  # 3D surface plot
 │   └── control_emergence_contour.png  # 2D contour plot
 ├── aom-lite/
 │   ├── main.py                      # AOM-Lite MVP main program
-│   ├── experiment_v3.py             # V3 large-scale experiment script 🆕
-│   ├── generate_v3_charts.py        # V3 visualization script 🆕
-│   ├── experiment_v3_results.csv    # V3 experiment results (90 trials) 🆕
+│   ├── experiment_v3.py             # V3 large-scale experiment script
+│   ├── experiment_v3_results.csv    # V3 experiment results (90 trials)
 │   ├── config.json                  # Configuration file
 │   ├── requirements.txt             # Dependencies
 │   └── RUN_RESULT.md                # AOM-Lite run result log
 ├── LICENSE                          # CC BY 4.0
 └── assets/
-    ├── v3_token_comparison.png      # Token comparison bar chart 🆕
-    ├── v3_time_comparison.png       # Time comparison bar chart 🆕
-    └── v3_agent_token_distribution.png  # Agent token distribution scatter 🆕
+    ├── v3_token_comparison.png      # Token comparison bar chart
+    ├── v3_time_comparison.png       # Time comparison bar chart
+    └── v3_agent_token_distribution.png  # Agent token distribution scatter
 ```
 
 ---
@@ -152,7 +155,7 @@ If this paper informs your work, please cite it as follows:
 @unpublished{jiang2026aom,
   author    = {Haoran Jiang},
   title     = {Agent Organizational Management: When Multi-Agent Systems Meet Management Theory},
-  note      = {Foundational Preprint, Version 2.0},
+  note      = {Foundational Preprint, Version 3.0},
   year      = {2026},
   month     = may,
   url       = {https://github.com/JiangLin1297/Agent-Organization-Management}

@@ -20,6 +20,9 @@
 4. **诚实的学术态度**：不回避反直觉结果，深入分析机制并提出改进方向
 5. **完整可视化**：Token对比图、时间对比图、Agent Token分布散点图
 6. **V3论文（DOCX格式）**：包含效率分析、自主性-冗长度权衡讨论、改进路径
+7. **版本演进分析（§5.1.1）**：系统梳理V1→V2→V3的演进逻辑，调和V2（-16% Token）与V3（+7% Token）实验数据的表面矛盾，揭示"自主性-冗长度权衡"是LLM行为特性而非框架缺陷
+8. **智能体组织治理（§1.5）**：新增与清华大学《智能体管理学》报告的对话，厘清组织治理层与协作工程层的互补关系
+9. **中英文双版论文**：V3中文版与英文版同步更新
 
 ---
 
@@ -92,29 +95,29 @@
 ├── README.md                                              # 本文件
 ├── README_EN.md                                           # 英文版 README
 ├── paper/
-│   ├── agent_organizational_management_v3.docx            # 论文全文（预印本 v3.0）🆕
+│   ├── agent_organizational_management_v3.docx            # 论文全文（预印本 v3.0，含版本演进分析）
+│   ├── agent_organizational_management_v3_cn.docx         # 论文中文版（预印本 v3.0）🆕
 │   ├── agent_organizational_management_v2.docx            # 论文全文（预印本 v2.0）
 │   ├── agent_organizational_management_v2_en.docx         # 论文英文版（预印本 v2.0）
 │   ├── agent_organizational_management_v1.docx            # 论文全文（预印本 v1.0）
-│   ├── generate_v3_paper.py                               # V3论文生成脚本 🆕
+│   ├── generate_v3_paper.py                               # V3英文论文生成脚本
+│   ├── generate_v3_paper_cn.py                            # V3中文论文生成脚本 🆕
 │   └── v1_supplement_five_dimensions.md                   # v2.0 五维度补充材料原文
 ├── simulations/
-│   ├── control_emergence_plot.py                          # 控制-涌现平衡猜想数值模拟脚本
 │   ├── control_emergence_surface.png                      # 三维曲面图
 │   └── control_emergence_contour.png                      # 二维等高线图
 ├── aom-lite/
 │   ├── main.py                                            # AOM-Lite MVP 主程序
-│   ├── experiment_v3.py                                   # V3大规模实验脚本 🆕
-│   ├── generate_v3_charts.py                              # V3可视化脚本 🆕
-│   ├── experiment_v3_results.csv                          # V3实验结果（90次）🆕
+│   ├── experiment_v3.py                                   # V3大规模实验脚本
+│   ├── experiment_v3_results.csv                          # V3实验结果（90次）
 │   ├── config.json                                        # 配置文件
 │   ├── requirements.txt                                   # 依赖列表
 │   └── RUN_RESULT.md                                      # AOM-Lite 运行结果日志
 ├── LICENSE                                                # 开源许可证
 └── assets/
-    ├── v3_token_comparison.png                            # Token对比柱状图 🆕
-    ├── v3_time_comparison.png                             # 时间对比柱状图 🆕
-    └── v3_agent_token_distribution.png                    # Agent Token分布散点图 🆕
+    ├── v3_token_comparison.png                            # Token对比柱状图
+    ├── v3_time_comparison.png                             # 时间对比柱状图
+    └── v3_agent_token_distribution.png                    # Agent Token分布散点图
 ```
 
 ---
@@ -159,7 +162,7 @@ python generate_v3_charts.py   # 生成可视化图表
 
 ### 英文引用格式
 
-> Jiang, H. (2026). Agent Organizational Management: When Multi-Agent Systems Meet Management Theory (Version 2.0). Foundational Preprint. GitHub. URL: https://github.com/JiangLin1297/Agent-Organization-Management
+> Jiang, H. (2026). Agent Organizational Management: When Multi-Agent Systems Meet Management Theory (Version 3.0). Foundational Preprint. GitHub. URL: https://github.com/JiangLin1297/Agent-Organization-Management
 
 ### BibTeX
 
@@ -167,7 +170,7 @@ python generate_v3_charts.py   # 生成可视化图表
 @unpublished{jiang2026aom,
   author    = {Haoran Jiang},
   title     = {Agent Organizational Management: When Multi-Agent Systems Meet Management Theory},
-  note      = {Foundational Preprint, Version 2.0},
+  note      = {Foundational Preprint, Version 3.0},
   year      = {2026},
   month     = may,
   url       = {https://github.com/JiangLin1297/Agent-Organization-Management}
