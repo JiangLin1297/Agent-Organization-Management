@@ -21,6 +21,8 @@
 7. **Version Evolution Analysis (§5.1.1)**: Systematic reconciliation of V2 (−16% tokens) vs V3 (+7% tokens) experimental findings, revealing the autonomy-verbosity trade-off as an LLM behavioral property rather than a framework deficiency
 8. **Agent Organizational Governance (§1.5)**: New dialogue with Tsinghua University's "Agent Management" report, clarifying the complementary relationship between governance layer and collaborative engineering layer
 9. **Bilingual papers**: V3 Chinese and English versions updated in sync
+10. **Theoretical Solutions to the Autonomy-Verbosity Trade-off (§2.5)**: Drawing from four management theories—Toyota A3 Report, Management by Exception, Simon's Bounded Rationality, and Mintzberg's Informational Roles—engineered into four prompt design principles (Structural Constraint, Deviation Filtering, Satisficing Stopping Rule, Information Filtering), with a unified constrained delegation prompt template and model-agnostic implementation plan
+11. **AOM Ultimate Vision (§7)**: New vision declaration in the conclusion—empowering every individual to manage their own AI Agent team as fluently as managing a company, achieving with one person plus a team of AI employees what once required an entire organization, truly liberating individual productivity
 
 ---
 
