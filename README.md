@@ -4,27 +4,36 @@
 
 *不是用 AI 管人，是用管理学管 AI。*
 
-预印本 | Foundational Preprint | Version 3.0 | 2026-06-01
+预印本 | Foundational Preprint | Version 4.0 | 2026-06-02
 
 > 📖 [Read this in English](README_EN.md)
 
 ---
 
-## 🆕 V3.0 Released (2026-06-01)
+## 🆕 V4.0 Released (2026-06-02)
 
-**V3.0 核心新增内容：大规模效率实验与诚实发现**
+**V4.0 核心新增内容：三组对照实验——证明组织管理学的实证价值**
 
-1. **大规模真实实验（N=90）**：4个异质Agent × 9任务 × 2条件 × 5重复 = 90次实验，360次LLM调用
-2. **效率指标深度分析**：Token消耗、完成时间、协调开销的系统性测量
-3. **重要发现——自主性-冗长度权衡**：AOM-DT消耗更多Token（+5~11%）但保持同等成功率和质量
-4. **诚实的学术态度**：不回避反直觉结果，深入分析机制并提出改进方向
-5. **完整可视化**：Token对比图、时间对比图、Agent Token分布散点图
-6. **V3论文（DOCX格式）**：包含效率分析、自主性-冗长度权衡讨论、改进路径
-7. **版本演进分析（§5.1.1）**：系统梳理V1→V2→V3的演进逻辑，调和V2（-16% Token）与V3（+7% Token）实验数据的表面矛盾，揭示"自主性-冗长度权衡"是LLM行为特性而非框架缺陷
-8. **智能体组织治理（§1.5）**：新增与清华大学《智能体管理学》报告的对话，厘清组织治理层与协作工程层的互补关系
-9. **中英文双版论文**：V3中文版与英文版同步更新
-10. **自主性-冗长度权衡的理论解（§2.5）**：从管理学理论出发，选择丰田A3报告、例外管理、西蒙有限理性、明茨伯格信息角色四个理论，工程化为四条Prompt设计原则（结构约束、偏差过滤、满意化停止规则、信息过滤），给出统一约束授权Prompt模板和模型无关实现方案
-11. **AOM最终愿景（§7）**：在结论中新增愿景宣言——让每个人都能像管理公司一样管理自己的AI Agent团队，一个人加一群AI员工实现过去需要整个组织才能做到的事，真正解放个体生产力
+1. **三组对照实验设计**：对照组A（单Agent单次）、对照组B（单Agent迭代7轮）、实验组（6角色组织团队），同一任务、可比预算
+2. **核心发现——组织管理的双重价值**：实验组以42,166 Token完成任务，迭代方案消耗124,280 Token（3:1优势），同时代码质量更优
+3. **Token膨胀根因分析**：迭代方案的Token成本呈指数增长——每轮改进必须嵌入前一版完整代码，形成正反馈循环；组织分解通过角色分工避免了这一结构性缺陷
+4. **测试环节的实证价值**：测试角色发现了四个由前端与游戏逻辑开发者接口不一致导致的阻断性Bug——这在单智能体工作流中不可能被发现
+5. **V4论文（DOCX格式）**：第3节完全重写，以V4实验为主体，包含6张数据表、代码质量逐维度对比、Token膨胀公式分析
+6. **V3→V4实验互补**：V3证明风格匹配的效率收益有限，V4证明组织结构的质量和效率收益显著——AOM应优先发展结构性原则而非风格适配
+7. **V4实验完整代码**：`aom-lite/v4_experiment/` 包含对照组A、对照组B、实验组的完整可运行脚本和Prompt文件
+8. **中英文双版论文**：V4中文版与英文版同步更新
+
+---
+
+## V3.0 Released (2026-06-01)
+
+**V3.0 核心内容：大规模效率实验与诚实发现**
+
+1. **大规模真实实验（N=90）**：4个异质Agent × 9任务 × 2条件 × 5重复
+2. **重要发现——自主性-冗长度权衡**：AOM-DT消耗更多Token但保持同等成功率和质量
+3. **版本演进分析（§5.1.1）**：系统梳理V1→V2→V3的演进逻辑
+4. **自主性-冗长度权衡的理论解（§2.5）**：四条Prompt设计原则
+5. **AOM最终愿景**：让每个人都能像管理公司一样管理自己的AI Agent团队
 
 ---
 
@@ -97,8 +106,10 @@
 ├── README.md                                              # 本文件
 ├── README_EN.md                                           # 英文版 README
 ├── paper/
-│   ├── agent_organizational_management_v3.docx            # 论文全文（预印本 v3.0，含版本演进分析）
-│   ├── agent_organizational_management_v3_cn.docx         # 论文中文版（预印本 v3.0）🆕
+│   ├── agent_organizational_management_v4.docx            # 论文全文（预印本 v4.0，三组对照实验）🆕
+│   ├── agent_organizational_management_v4_cn.docx         # 论文中文版（预印本 v4.0）🆕
+│   ├── agent_organizational_management_v3.docx            # 论文全文（预印本 v3.0）
+│   ├── agent_organizational_management_v3_cn.docx         # 论文中文版（预印本 v3.0）
 │   ├── agent_organizational_management_v2.docx            # 论文全文（预印本 v2.0）
 │   ├── agent_organizational_management_v2_en.docx         # 论文英文版（预印本 v2.0）
 │   ├── agent_organizational_management_v1.docx            # 论文全文（预印本 v1.0）
@@ -160,7 +171,7 @@ python generate_v3_charts.py   # 生成可视化图表
 
 ### 中文引用格式
 
-> 江皓然. (2026). 智能体组织管理学：当多智能体系统遇上管理理论 (Version 3.0). 奠基性预印本. GitHub. URL: https://github.com/JiangLin1297/Agent-Organization-Management
+> 江皓然. (2026). 智能体组织管理学：当多智能体系统遇上管理理论 (Version 4.0). 奠基性预印本. GitHub. URL: https://github.com/JiangLin1297/Agent-Organization-Management
 
 ### 英文引用格式
 
@@ -172,7 +183,7 @@ python generate_v3_charts.py   # 生成可视化图表
 @unpublished{jiang2026aom,
   author    = {Haoran Jiang},
   title     = {Agent Organizational Management: When Multi-Agent Systems Meet Management Theory},
-  note      = {Foundational Preprint, Version 3.0},
+  note      = {Foundational Preprint, Version 4.0},
   year      = {2026},
   month     = may,
   url       = {https://github.com/JiangLin1297/Agent-Organization-Management}

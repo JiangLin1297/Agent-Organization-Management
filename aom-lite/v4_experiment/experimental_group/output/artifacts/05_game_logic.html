@@ -1,0 +1,498 @@
+<!-- ========== 游戏逻辑开发产出 START ========== -->
+
+<script>
+  // ---- 游戏配置 ----
+  const GAME_CONFIG = {
+    gridSize: 20,       // 网格大小（像素）
+    gridCount: 20,      // 网格数量（20x20）
+    initialSpeed: 150,  // 初始速度（毫秒/更新）
+    speedIncrement: 2,  // 每增加10分，速度提升值（毫秒）
+    maxSpeed: 50,       // 最快速度限制
+    scoreIncrement: 10  // 每吃一个食物的分数
+  };
+
+  // ---- 游戏状态 ----
+  let gameState = {
+    snake: [],          // 蛇身坐标数组，头部在前
+    food: null,         // 食物坐标
+    direction: 'right', // 当前方向
+    nextDirection: 'right', // 下一方向（缓冲输入）
+    score: 0,           // 当前分数
+    highScore: 0,       // 最高分
+    speed: GAME_CONFIG.initialSpeed, // 当前速度
+    isRunning: false,   // 游戏是否运行中
+    currentScreen: 'start', // 当前界面
+    gameLoopId: null,   // 游戏循环ID
+    lastUpdateTime: 0   // 上次更新时间
+  };
+
+  // ---- 核心函数 ----
+  
+  // 初始化游戏
+  function initGame() {
+    // 加载历史最高分
+    loadHighScore();
+    // 显示开始界面
+    ScreenManager.switchTo('start');
+    // 绑定输入事件
+    InputHandler.bindControls();
+    // 监听开始按钮
+    const startButton = document.getElementById('startButton');
+    if (startButton) {
+      startButton.addEventListener('click', startGame);
+    }
+  }
+
+  // 开始游戏
+  function startGame() {
+    // 重置游戏状态
+    resetGameState();
+    // 切换界面
+    ScreenManager.switchTo('playing');
+    // 启动游戏循环
+    startGameLoop();
+    // 游戏开始时隐藏开始按钮
+    hideStartButton();
+  }
+
+  // 重置游戏状态
+  function resetGameState() {
+    // 初始化蛇（长度为3，在网格中央）
+    const centerX = Math.floor(GAME_CONFIG.gridCount / 2);
+    const centerY = Math.floor(GAME_CONFIG.gridCount / 2);
+    gameState.snake = [
+      {x: centerX, y: centerY},     // 头部
+      {x: centerX - 1, y: centerY}, // 身体
+      {x: centerX - 2, y: centerY}  // 尾部
+    ];
+    
+    // 初始化方向
+    gameState.direction = 'right';
+    gameState.nextDirection = 'right';
+    
+    // 重置分数和速度
+    gameState.score = 0;
+    gameState.speed = GAME_CONFIG.initialSpeed;
+    gameState.isRunning = true;
+    
+    // 生成第一个食物
+    spawnFood();
+    
+    // 更新分数显示
+    updateScoreDisplay();
+  }
+
+  // 启动游戏循环
+  function startGameLoop() {
+    gameState.lastUpdateTime = performance.now();
+    gameState.gameLoopId = requestAnimationFrame(gameLoop);
+  }
+
+  // 游戏主循环
+  function gameLoop(timestamp) {
+    if (!gameState.isRunning) return;
+    
+    const deltaTime = timestamp - gameState.lastUpdateTime;
+    
+    // 按速度间隔更新游戏
+    if (deltaTime >= gameState.speed) {
+      gameState.lastUpdateTime = timestamp;
+      const gameOver = updateGameState();
+      
+      if (gameOver) {
+        endGame();
+        return;
+      }
+      
+      // 通知渲染器更新画面
+      if (Renderer && Renderer.render) {
+        Renderer.render(gameState);
+      }
+    }
+    
+    // 继续循环
+    gameState.gameLoopId = requestAnimationFrame(gameLoop);
+  }
+
+  // 更新游戏状态（返回游戏是否结束）
+  function updateGameState() {
+    // 应用缓冲的下一方向
+    gameState.direction = gameState.nextDirection;
+    
+    // 更新蛇的位置
+    const newHead = calculateNewHeadPosition();
+    
+    // 碰撞检测
+    if (checkWallCollision(newHead) || checkSelfCollision(newHead)) {
+      return true; // 游戏结束
+    }
+    
+    // 检查是否吃到食物
+    const ateFood = checkFoodCollision(newHead);
+    
+    // 移动蛇
+    moveSnake(newHead, ateFood);
+    
+    // 如果吃到食物，生成新食物并更新分数
+    if (ateFood) {
+      spawnFood();
+      updateScore();
+    }
+    
+    return false;
+  }
+
+  // 计算蛇头新位置
+  function calculateNewHeadPosition() {
+    const head = {...gameState.snake[0]};
+    
+    switch (gameState.direction) {
+      case 'up':
+        head.y -= 1;
+        break;
+      case 'down':
+        head.y += 1;
+        break;
+      case 'left':
+        head.x -= 1;
+        break;
+      case 'right':
+        head.x += 1;
+        break;
+    }
+    
+    return head;
+  }
+
+  // 撞墙检测
+  function checkWallCollision(head) {
+    return head.x < 0 || 
+           head.x >= GAME_CONFIG.gridCount || 
+           head.y < 0 || 
+           head.y >= GAME_CONFIG.gridCount;
+  }
+
+  // 撞自己检测
+  function checkSelfCollision(head) {
+    // 跳过头部（因为会移动）
+    for (let i = 1; i < gameState.snake.length; i++) {
+      if (gameState.snake[i].x === head.x && gameState.snake[i].y === head.y) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // 吃食物检测
+  function checkFoodCollision(head) {
+    return gameState.food && 
+           head.x === gameState.food.x && 
+           head.y === gameState.food.y;
+  }
+
+  // 移动蛇
+  function moveSnake(newHead, ateFood) {
+    // 在头部添加新位置
+    gameState.snake.unshift(newHead);
+    
+    // 如果没吃到食物，移除尾部
+    if (!ateFood) {
+      gameState.snake.pop();
+    }
+  }
+
+  // 生成食物
+  function spawnFood() {
+    let foodPosition;
+    let isFoodOnSnake;
+    
+    do {
+      foodPosition = {
+        x: Math.floor(Math.random() * GAME_CONFIG.gridCount),
+        y: Math.floor(Math.random() * GAME_CONFIG.gridCount)
+      };
+      
+      // 检查食物是否生成在蛇身上
+      isFoodOnSnake = gameState.snake.some(segment => 
+        segment.x === foodPosition.x && segment.y === foodPosition.y
+      );
+    } while (isFoodOnSnake);
+    
+    gameState.food = foodPosition;
+  }
+
+  // 更新分数
+  function updateScore() {
+    gameState.score += GAME_CONFIG.scoreIncrement;
+    
+    // 更新最高分
+    if (gameState.score > gameState.highScore) {
+      gameState.highScore = gameState.score;
+      saveHighScore();
+    }
+    
+    // 调整速度（每10分加速）
+    if (gameState.score % (GAME_CONFIG.scoreIncrement * 10) === 0) {
+      adjustSpeed();
+    }
+    
+    // 更新显示
+    updateScoreDisplay();
+  }
+
+  // 调整游戏速度
+  function adjustSpeed() {
+    const speedReduction = Math.floor(gameState.score / 100) * GAME_CONFIG.speedIncrement;
+    gameState.speed = Math.max(
+      GAME_CONFIG.maxSpeed,
+      GAME_CONFIG.initialSpeed - speedReduction
+    );
+  }
+
+  // 更新分数显示
+  function updateScoreDisplay() {
+    const scoreElement = document.getElementById('score');
+    if (scoreElement) {
+      scoreElement.textContent = `分数: ${gameState.score}`;
+    }
+    
+    const highScoreElement = document.getElementById('highScore');
+    if (highScoreElement) {
+      highScoreElement.textContent = `最高分: ${gameState.highScore}`;
+    }
+  }
+
+  // 键盘输入处理
+  function handleKeyDown(event) {
+    const directionMap = {
+      'ArrowUp': 'up',
+      'ArrowDown': 'down',
+      'ArrowLeft': 'left',
+      'ArrowRight': 'right',
+      'w': 'up',
+      's': 'down',
+      'a': 'left',
+      'd': 'right'
+    };
+    
+    const newDirection = directionMap[event.key];
+    
+    if (newDirection && isValidDirectionChange(newDirection)) {
+      gameState.nextDirection = newDirection;
+      event.preventDefault(); // 防止方向键滚动页面
+    }
+  }
+
+  // 验证方向变化（防止180度反转）
+  function isValidDirectionChange(newDirection) {
+    const current = gameState.direction;
+    
+    // 相反方向无效
+    if (
+      (current === 'up' && newDirection === 'down') ||
+      (current === 'down' && newDirection === 'up') ||
+      (current === 'left' && newDirection === 'right') ||
+      (current === 'right' && newDirection === 'left')
+    ) {
+      return false;
+    }
+    
+    return true;
+  }
+
+  // 虚拟方向键输入处理
+  function handleVirtualDirection(direction) {
+    if (isValidDirectionChange(direction)) {
+      gameState.nextDirection = direction;
+    }
+  }
+
+  // 触屏滑动输入处理
+  function handleTouchStart(event) {
+    gameState.touchStartX = event.touches[0].clientX;
+    gameState.touchStartY = event.touches[0].clientY;
+  }
+
+  function handleTouchEnd(event) {
+    if (!gameState.touchStartX || !gameState.touchStartY) return;
+    
+    const touchEndX = event.changedTouches[0].clientX;
+    const touchEndY = event.changedTouches[0].clientY;
+    
+    const deltaX = touchEndX - gameState.touchStartX;
+    const deltaY = touchEndY - gameState.touchStartY;
+    
+    // 确定滑动方向（阈值为30像素）
+    const minSwipeDistance = 30;
+    
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+      // 水平滑动
+      handleVirtualDirection(deltaX > 0 ? 'right' : 'left');
+    } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > minSwipeDistance) {
+      // 垂直滑动
+      handleVirtualDirection(deltaY > 0 ? 'down' : 'up');
+    }
+    
+    // 重置触摸状态
+    gameState.touchStartX = null;
+    gameState.touchStartY = null;
+  }
+
+  // 游戏结束
+  function endGame() {
+    gameState.isRunning = false;
+    
+    // 取消游戏循环
+    if (gameState.gameLoopId) {
+      cancelAnimationFrame(gameState.gameLoopId);
+      gameState.gameLoopId = null;
+    }
+    
+    // 显示结束界面
+    showEndScreen();
+    
+    // 通知渲染器显示游戏结束效果
+    if (Renderer && Renderer.showGameOverEffect) {
+      Renderer.showGameOverEffect();
+    }
+  }
+
+  // 显示结束界面
+  function showEndScreen() {
+    const finalScoreElement = document.getElementById('finalScore');
+    if (finalScoreElement) {
+      finalScoreElement.textContent = gameState.score;
+    }
+    
+    const highScoreEndElement = document.getElementById('highScoreEnd');
+    if (highScoreEndElement) {
+      highScoreEndElement.textContent = gameState.highScore;
+    }
+    
+    ScreenManager.switchTo('end');
+    
+    // 绑定重新开始按钮
+    const restartButton = document.getElementById('restartButton');
+    if (restartButton) {
+      restartButton.addEventListener('click', restartGame);
+    }
+  }
+
+  // 重新开始游戏
+  function restartGame() {
+    // 重置游戏状态
+    resetGameState();
+    // 切换界面
+    ScreenManager.switchTo('playing');
+    // 隐藏结束界面
+    hideEndScreen();
+    // 重新启动游戏循环
+    startGameLoop();
+  }
+
+  // 保存最高分
+  function saveHighScore() {
+    try {
+      localStorage.setItem('snakeHighScore', gameState.highScore.toString());
+    } catch (e) {
+      console.warn('无法保存最高分:', e);
+    }
+  }
+
+  // 加载最高分
+  function loadHighScore() {
+    try {
+      const savedHighScore = localStorage.getItem('snakeHighScore');
+      if (savedHighScore) {
+        gameState.highScore = parseInt(savedHighScore, 10) || 0;
+      }
+    } catch (e) {
+      console.warn('无法加载最高分:', e);
+      gameState.highScore = 0;
+    }
+  }
+
+  // 隐藏开始按钮
+  function hideStartButton() {
+    const startButton = document.getElementById('startButton');
+    if (startButton) {
+      startButton.style.display = 'none';
+    }
+  }
+
+  // 隐藏结束界面
+  function hideEndScreen() {
+    const endScreen = document.getElementById('endScreen');
+    if (endScreen) {
+      endScreen.style.display = 'none';
+    }
+  }
+
+  // ---- 输入处理器（InputHandler模块）----
+  const InputHandler = {
+    bindControls: function() {
+      // 键盘事件
+      document.addEventListener('keydown', handleKeyDown);
+      
+      // 虚拟方向键事件
+      const directionButtons = document.querySelectorAll('.direction-btn');
+      directionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const direction = this.getAttribute('data-direction');
+          if (direction) {
+            handleVirtualDirection(direction);
+          }
+        });
+      });
+      
+      // 触屏事件
+      const gameArea = document.getElementById('gameArea');
+      if (gameArea) {
+        gameArea.addEventListener('touchstart', handleTouchStart, {passive: true});
+        gameArea.addEventListener('touchend', handleTouchEnd, {passive: true});
+      }
+    }
+  };
+
+  // ---- 屏幕管理器（ScreenManager模块）----
+  const ScreenManager = {
+    switchTo: function(screen) {
+      gameState.currentScreen = screen;
+      
+      // 隐藏所有界面
+      const screens = document.querySelectorAll('.screen');
+      screens.forEach(s => s.style.display = 'none');
+      
+      // 显示目标界面
+      const targetScreen = document.getElementById(`${screen}Screen`);
+      if (targetScreen) {
+        targetScreen.style.display = 'block';
+      }
+      
+      // 游戏界面特殊处理
+      if (screen === 'playing') {
+        const gameContainer = document.getElementById('gameContainer');
+        if (gameContainer) {
+          gameContainer.style.display = 'block';
+        }
+      }
+    }
+  };
+
+  // ---- 渲染器接口（Renderer占位符）----
+  const Renderer = {
+    render: function(state) {
+      // 前端开发将实现此函数
+      console.log('Renderer.render被调用，需要前端实现');
+    },
+    showGameOverEffect: function() {
+      // 前端开发将实现此函数
+      console.log('Renderer.showGameOverEffect被调用，需要前端实现');
+    }
+  };
+
+  // ---- 初始化 ----
+  document.addEventListener('DOMContentLoaded', initGame);
+</script>
+
+<!-- ========== 游戏逻辑开发产出 END ========== -->

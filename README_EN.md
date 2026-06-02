@@ -2,27 +2,35 @@
 
 > **Not managing humans with AI — managing AI with the wisdom of management science.**
 >
-> Foundational Preprint | Version 3.0 | 2026-06-01
+> Foundational Preprint | Version 4.0 | 2026-06-02
 
 > 📖 [阅读中文版](README.md)
 
 ---
 
-## 🆕 V3.0 Released (2026-06-01)
+## 🆕 V4.0 Released (2026-06-02)
+
+**V4.0 Key additions: Three-Group Controlled Experiment — Proving the Empirical Value of Organizational Management**
+
+1. **Three-group controlled experiment**: Condition A (single agent, single call), Condition B (single agent, 7 iterative rounds), Condition C (6-role organizational team) — same task, comparable budgets
+2. **Core finding — Dual value of organizational management**: AOM team completes with 42,166 tokens; iterative approach consumes 124,280 tokens (3:1 advantage), while achieving superior code quality
+3. **Token inflation root cause analysis**: Iterative approach suffers exponential token growth — each improvement round must embed the full previous code, creating a positive feedback loop; organizational decomposition avoids this through role-based context splitting
+4. **Testing role's empirical value**: Tester caught four blocking bugs caused by frontend/game-logic interface inconsistencies — bugs invisible to single-agent workflows
+5. **V4 paper (DOCX)**: Section 3 fully rewritten with V4 experiment as core evidence — 6 data tables, code quality multi-dimensional comparison, token inflation formula analysis
+6. **V3↔V4 complementarity**: V3 showed style matching has limited efficiency benefit; V4 showed organizational structure has significant quality and efficiency benefits — AOM should prioritize structural principles over stylistic adaptation
+7. **V4 experiment code**: `aom-lite/v4_experiment/` contains complete runnable scripts and prompt files for all three conditions
+8. **Bilingual papers**: V4 Chinese and English versions updated in sync
+
+---
+
+## V3.0 Released (2026-06-01)
 
 **V3.0 Key additions: Large-Scale Efficiency Experiment with Honest Findings**
 
-1. **Large-scale real experiment (N=90)**: 4 heterogeneous agents × 9 tasks × 2 conditions × 5 repetitions = 90 experiments, 360 LLM calls
-2. **Deep efficiency analysis**: Systematic measurement of token consumption, completion time, and coordination overhead
-3. **Key finding — Autonomy-Verbosity Trade-off**: AOM-DT uses more tokens (+5–11%) but achieves equal success rate and quality
-4. **Academic honesty**: Counter-intuitive results analyzed transparently with improvement directions
-5. **Complete visualizations**: Token comparison, time comparison, agent token distribution charts
-6. **V3 paper (DOCX)**: Includes efficiency analysis, autonomy-verbosity trade-off discussion, and improvement pathways
-7. **Version Evolution Analysis (§5.1.1)**: Systematic reconciliation of V2 (−16% tokens) vs V3 (+7% tokens) experimental findings, revealing the autonomy-verbosity trade-off as an LLM behavioral property rather than a framework deficiency
-8. **Agent Organizational Governance (§1.5)**: New dialogue with Tsinghua University's "Agent Management" report, clarifying the complementary relationship between governance layer and collaborative engineering layer
-9. **Bilingual papers**: V3 Chinese and English versions updated in sync
-10. **Theoretical Solutions to the Autonomy-Verbosity Trade-off (§2.5)**: Drawing from four management theories—Toyota A3 Report, Management by Exception, Simon's Bounded Rationality, and Mintzberg's Informational Roles—engineered into four prompt design principles (Structural Constraint, Deviation Filtering, Satisficing Stopping Rule, Information Filtering), with a unified constrained delegation prompt template and model-agnostic implementation plan
-11. **AOM Ultimate Vision (§7)**: New vision declaration in the conclusion—empowering every individual to manage their own AI Agent team as fluently as managing a company, achieving with one person plus a team of AI employees what once required an entire organization, truly liberating individual productivity
+1. **Large-scale real experiment (N=90)**: 4 heterogeneous agents × 9 tasks × 2 conditions × 5 repetitions
+2. **Key finding — Autonomy-Verbosity Trade-off**: AOM-DT uses more tokens but achieves equal success rate and quality
+3. **Theoretical Solutions (§2.5)**: Four prompt design principles from management theory
+4. **AOM Ultimate Vision**: Empowering every individual to manage their own AI Agent team
 
 ---
 
@@ -96,8 +104,10 @@ The paper further argues that AOM is not merely "using management to govern AI."
 ├── README.md                        # Chinese README
 ├── README_EN.md                     # This file (English README)
 ├── paper/
-│   ├── agent_organizational_management_v3.docx    # Full paper (Preprint v3.0, with version evolution analysis)
-│   ├── agent_organizational_management_v3_cn.docx # Chinese paper (Preprint v3.0) 🆕
+│   ├── agent_organizational_management_v4.docx    # Full paper (Preprint v4.0, three-group experiment) 🆕
+│   ├── agent_organizational_management_v4_cn.docx # Chinese paper (Preprint v4.0) 🆕
+│   ├── agent_organizational_management_v3.docx    # Full paper (Preprint v3.0)
+│   ├── agent_organizational_management_v3_cn.docx # Chinese paper (Preprint v3.0)
 │   ├── agent_organizational_management_v2.docx    # Full paper (Preprint v2.0)
 │   ├── agent_organizational_management_v2_en.docx # Full paper English version (Preprint v2.0)
 │   ├── agent_organizational_management_v1.docx    # Full paper (Preprint v1.0)
@@ -149,7 +159,7 @@ If this paper informs your work, please cite it as follows:
 
 ### APA Style
 
-> Jiang, H. (2026). *Agent Organizational Management: When Multi-Agent Systems Meet Management Theory* (Version 3.0) [Foundational Preprint]. Retrieved from https://github.com/JiangLin1297/Agent-Organization-Management
+> Jiang, H. (2026). *Agent Organizational Management: When Multi-Agent Systems Meet Management Theory* (Version 4.0) [Foundational Preprint]. Retrieved from https://github.com/JiangLin1297/Agent-Organization-Management
 
 ### BibTeX
 
@@ -157,7 +167,7 @@ If this paper informs your work, please cite it as follows:
 @unpublished{jiang2026aom,
   author    = {Haoran Jiang},
   title     = {Agent Organizational Management: When Multi-Agent Systems Meet Management Theory},
-  note      = {Foundational Preprint, Version 3.0},
+  note      = {Foundational Preprint, Version 4.0},
   year      = {2026},
   month     = may,
   url       = {https://github.com/JiangLin1297/Agent-Organization-Management}
