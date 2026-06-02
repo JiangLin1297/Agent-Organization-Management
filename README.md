@@ -4,13 +4,29 @@
 
 *不是用 AI 管人，是用管理学管 AI。*
 
-预印本 | Foundational Preprint | Version 4.0 | 2026-06-02
+预印本 | Foundational Preprint | Version 5.0 | 2026-06-02
 
 > 📖 [Read this in English](README_EN.md)
 
 ---
 
-## 🆕 V4.0 Released (2026-06-02)
+## 🆕 V5.0 Released (2026-06-02)
+
+**V5.0 核心内容：机制-算法-系统三层整合**
+
+1. **机制层**：形式化五个结构性效率机制（CAE/CDE/IRC/COS/AVT），含假设、因果链、边界条件
+2. **成本模型**：TotalCost = ComputationCost + CoordinationCost + CommunicationCost，含最优团队大小k*推导
+3. **OIMAC算法**：完整7-Phase伪代码，含可计算决策规则（SPLIT/MERGE/CENTRALIZE/STYLE_DOWNGRADE/CONTEXT_LIMIT）
+4. **系统架构**：九模块可实现设计，Context Controller通过三条规则断链CAE成立条件
+5. **CAE命题强化**：加入显式边界条件(a)(b)，证明梗概逻辑链更严格，新增边界条件段
+6. **机制隔离论证强化**：明确定义自变量（上下文传递架构）和因变量（Token消耗）
+7. **理论贡献强化**：情境领导理论/韦伯科层制/法约尔原则统一为(a)(b)(c)(d)结构
+8. **文件夹重构**：paper/archive/存放V1-V4，paper/figures/按实验分类，experiments/独立存放
+9. **主论文整合**：paper/main/AOM_paper_v5.docx 为唯一主论文
+
+---
+
+## V4.0 Released (2026-06-02)
 
 **V4.0 核心新增内容：三组对照实验——证明组织管理学的实证价值**
 
@@ -85,18 +101,20 @@
 
 ## 核心贡献 / Core Contributions
 
+**V5 核心贡献（机制-算法-系统整合）：**
+- ✅ 识别并形式化上下文积累效应（CAE）——迭代式LLM自我改进的Omega(n^2)成本陷阱
+- ✅ 提出OIMAC算法——将迭代成本从Omega(n^2)降至O(k)，含完整伪代码和复杂度分析
+- ✅ 设计九模块系统架构——Context Controller在架构层面断链CAE成立条件
+- ✅ 形式化五个结构性效率机制（CAE/CDE/IRC/COS/AVT），含假设、因果链、边界条件
+- ✅ 统一成本模型：TotalCost = ComputationCost + CoordinationCost + CommunicationCost
+- ✅ 对情境领导理论/韦伯科层制/法约尔原则进行压力测试，识别边界条件并提出领域特定修正
+
+**V1-V4 贡献：**
 - ✅ 首次提出智能体组织管理学（AOM）的完整概念与研究纲领
 - ✅ 将法约尔 14 项原则、韦伯科层制、明茨伯格构型理论精确映射为 Agent 拓扑设计
 - ✅ 将情境领导理论工程化为动态领导风格切换算法（包含可计算的"准备度"指标）
-- ✅ 将目标管理（MBO）与期望理论编译为目标函数与资源分配机制
-- ✅ 提出双向赋能路径：用 Agent 仿真作为管理学的"粒子对撞机"
-- ✅ 坦诚界定学科适用边界，指出控制与涌现的根本张力
-- ✅ 给出产品化愿景：基于管理架构的 Agent 工作台（MAW）
-- ✅ **[v2.0 新增]** 相关工作定位：与 COT、MARL、可扩展监督、ONA 的系统性对比
-- ✅ **[v2.0 新增]** 理论创新：提出"控制-涌现平衡猜想"等 AOM 原创假设
-- ✅ **[v2.0 新增]** 最小可行性实验设计：1,900 次模拟实验验证动态拓扑优势
-- ✅ **[v2.0 新增]** 系统性局限性分析：10 条局限性及缓解路径
-- ✅ **[v2.0 新增]** 最小产品原型：AOM-Lite Weekend Hackathon MVP 设计
+- ✅ V3大规模实验（N=90）：发现自主性-冗长度权衡
+- ✅ V4三组对照实验：组织团队42,166 Token vs 迭代方案124,280 Token（3:1优势）
 
 ---
 
@@ -105,32 +123,48 @@
 ```
 ├── README.md                                              # 本文件
 ├── README_EN.md                                           # 英文版 README
-├── paper/
-│   ├── agent_organizational_management_v4.docx            # 论文全文（预印本 v4.0，三组对照实验）🆕
-│   ├── agent_organizational_management_v4_cn.docx         # 论文中文版（预印本 v4.0）🆕
-│   ├── agent_organizational_management_v3.docx            # 论文全文（预印本 v3.0）
-│   ├── agent_organizational_management_v3_cn.docx         # 论文中文版（预印本 v3.0）
-│   ├── agent_organizational_management_v2.docx            # 论文全文（预印本 v2.0）
-│   ├── agent_organizational_management_v2_en.docx         # 论文英文版（预印本 v2.0）
-│   ├── agent_organizational_management_v1.docx            # 论文全文（预印本 v1.0）
-│   ├── generate_v3_paper.py                               # V3英文论文生成脚本
-│   ├── generate_v3_paper_cn.py                            # V3中文论文生成脚本 🆕
-│   └── v1_supplement_five_dimensions.md                   # v2.0 五维度补充材料原文
-├── simulations/
-│   ├── control_emergence_surface.png                      # 三维曲面图
-│   └── control_emergence_contour.png                      # 二维等高线图
-├── aom-lite/
-│   ├── main.py                                            # AOM-Lite MVP 主程序
-│   ├── experiment_v3.py                                   # V3大规模实验脚本
-│   ├── experiment_v3_results.csv                          # V3实验结果（90次）
-│   ├── config.json                                        # 配置文件
-│   ├── requirements.txt                                   # 依赖列表
-│   └── RUN_RESULT.md                                      # AOM-Lite 运行结果日志
 ├── LICENSE                                                # 开源许可证
-└── assets/
-    ├── v3_token_comparison.png                            # Token对比柱状图
-    ├── v3_time_comparison.png                             # 时间对比柱状图
-    └── v3_agent_token_distribution.png                    # Agent Token分布散点图
+│
+├── paper/
+│   ├── main/
+│   │   └── AOM_paper_v5.docx                             # ⭐唯一主论文（V5机制-算法-系统整合版）
+│   ├── figures/
+│   │   ├── v3_experiment/                                 # V3实验图表
+│   │   │   ├── v3_token_comparison.png
+│   │   │   ├── v3_time_comparison.png
+│   │   │   └── v3_agent_token_distribution.png
+│   │   └── simulations/                                   # 控制-涌现平衡模拟图
+│   │       ├── control_emergence_surface.png
+│   │       └── control_emergence_contour.png
+│   ├── supplement/
+│   │   └── v1_five_dimensions.docx                        # V1五维度补充材料
+│   └── archive/                                           # 历史版本存档
+│       ├── v1/                                            # V1理论框架
+│       ├── v2/                                            # V2模拟验证
+│       ├── v3/                                            # V3效率测试
+│       └── v4/                                            # V4三组对照实验
+│
+├── algorithm/
+│   └── OIMAC_Framework.docx                               # OIMAC算法框架（机制+成本模型+伪代码）
+│
+├── system/
+│   ├── architecture_spec.docx                             # 系统架构规范（9模块+CAE断链）
+│   └── module_spec.docx                                   # 机制-模块映射表
+│
+├── experiments/
+│   ├── v4_results/                                        # V4三组对照实验完整数据
+│   │   ├── control_group/                                 # 条件A：基线
+│   │   ├── control_group_b/                               # 条件B：迭代
+│   │   └── experimental_group/                            # 条件C：AOM组织
+│   ├── v3_results/                                        # V3大规模实验数据（N=90）
+│   └── logs/                                              # 运行日志
+│
+├── aom-lite/                                              # AOM-Lite MVP 原型代码
+│   ├── main.py
+│   ├── config.json
+│   └── requirements.txt
+│
+└── assets/                                                # 原始图片资源
 ```
 
 ---
@@ -171,7 +205,7 @@ python generate_v3_charts.py   # 生成可视化图表
 
 ### 中文引用格式
 
-> 江皓然. (2026). 智能体组织管理学：当多智能体系统遇上管理理论 (Version 4.0). 奠基性预印本. GitHub. URL: https://github.com/JiangLin1297/Agent-Organization-Management
+> 江皓然. (2026). 智能体组织管理学：当多智能体系统遇上管理理论 (Version 5.0). 奠基性预印本. GitHub. URL: https://github.com/JiangLin1297/Agent-Organization-Management
 
 ### 英文引用格式
 

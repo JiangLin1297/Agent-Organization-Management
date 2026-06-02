@@ -1,0 +1,385 @@
+```html
+<!-- ========== 前端开发产出 START ========== -->
+
+<!-- HTML结构 -->
+<div id="start-screen" class="screen active">
+    <div class="screen-content">
+        <h1 class="game-title">Modern Snake</h1>
+        <p class="subtitle">经典贪吃蛇，现代新体验</p>
+        <button id="start-btn" class="btn btn-primary">开始游戏</button>
+        <p class="hint">按任意键或点击按钮开始</p>
+    </div>
+</div>
+
+<div id="game-screen" class="screen">
+    <div id="score-board">
+        <span class="score-label">分数:</span>
+        <span id="score-value">0</span>
+    </div>
+    <!-- 游戏画布容器，尺寸将由游戏逻辑通过JS设置 -->
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+    </div>
+    <!-- 移动端虚拟方向键，默认隐藏，将通过CSS媒体查询和JS控制显示 -->
+    <div id="virtual-controls" class="hidden-on-desktop">
+        <button id="btn-up" class="direction-btn">▲</button>
+        <div class="middle-controls">
+            <button id="btn-left" class="direction-btn">◄</button>
+            <button id="btn-down" class="direction-btn">▼</button>
+            <button id="btn-right" class="direction-btn">►</button>
+        </div>
+    </div>
+</div>
+
+<div id="end-screen" class="screen">
+    <div class="screen-content end-content">
+        <h2 class="end-title">游戏结束</h2>
+        <p class="final-score">最终得分: <span id="final-score-value">0</span></p>
+        <button id="restart-btn" class="btn btn-primary">重新开始</button>
+    </div>
+</div>
+
+<!-- CSS样式 -->
+<style>
+    /* 全局样式与变量 */
+    :root {
+        --bg-color: #1a1a1a;
+        --game-area-bg: #2d2d2d;
+        --snake-color: #00ff88;
+        --food-color: #ff4757;
+        --text-primary: #ffffff;
+        --text-secondary: #cccccc;
+        --btn-primary-bg: #00ff88;
+        --btn-primary-text: #1a1a1a;
+        --btn-hover-bg: #00cc6a;
+        --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: var(--font-family);
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden; /* 防止界面切换时出现滚动条 */
+    }
+
+    .screen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+        transition: opacity 0.3s ease;
+    }
+
+    .screen.active {
+        display: flex;
+    }
+
+    .screen-content {
+        padding: 2rem;
+    }
+
+    /* 按钮通用样式 */
+    .btn {
+        padding: 12px 36px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.15s ease, background-color 0.2s ease;
+        margin-top: 1.5rem;
+    }
+
+    .btn-primary {
+        background-color: var(--btn-primary-bg);
+        color: var(--btn-primary-text);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--btn-hover-bg);
+        transform: scale(1.05);
+    }
+
+    .btn:active {
+        transform: scale(0.98);
+    }
+
+    /* 开始界面 */
+    #start-screen .game-title {
+        font-size: 3.5rem;
+        font-weight: bold;
+        color: var(--snake-color);
+        margin-bottom: 0.5rem;
+        text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+    }
+
+    #start-screen .subtitle {
+        color: var(--text-secondary);
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+    }
+
+    #start-screen .hint {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-top: 1rem;
+        opacity: 0.7;
+    }
+
+    /* 游戏界面 */
+    #game-screen {
+        flex-direction: column;
+        justify-content: flex-start; /* 从顶部开始布局 */
+        padding-top: 20px;
+    }
+
+    #score-board {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    .score-label {
+        color: var(--text-secondary);
+    }
+
+    #score-value {
+        color: var(--snake-color);
+        margin-left: 5px;
+    }
+
+    #game-container {
+        background-color: var(--game-area-bg);
+        border-radius: 8px;
+        border: 2px solid #444;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        position: relative; /* 为可能的震动动画提供参考 */
+    }
+
+    #game-canvas {
+        display: block;
+    }
+
+    /* 虚拟方向键 (移动端) */
+    #virtual-controls {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        margin-top: 20px;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .direction-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+        background-color: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        color: var(--text-primary);
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: background-color 0.1s ease;
+    }
+
+    .direction-btn:active {
+        background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .middle-controls {
+        display: flex;
+        gap: 5px;
+    }
+
+    /* 结束界面 */
+    #end-screen {
+        background-color: rgba(0, 0, 0, 0.85); /* 半透明覆盖层 */
+        z-index: 10; /* 确保在游戏界面之上 */
+    }
+
+    #end-screen .end-content {
+        animation: popIn 0.3s ease-out;
+    }
+
+    #end-screen .end-title {
+        font-size: 2.5rem;
+        color: var(--food-color); /* 使用对比色突出显示 */
+        margin-bottom: 1rem;
+    }
+
+    #end-screen .final-score {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+
+    #final-score-value {
+        color: var(--snake-color);
+        font-weight: bold;
+    }
+
+    /* 游戏结束震动动画 */
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    @keyframes popIn {
+        from { transform: scale(0.8); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    /* 响应式适配 */
+    @media (max-width: 600px) {
+        #start-screen .game-title {
+            font-size: 2.5rem;
+        }
+
+        #start-screen .subtitle {
+            font-size: 1rem;
+        }
+
+        #score-board {
+            font-size: 1.2rem;
+        }
+
+        .direction-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+        }
+
+        #end-screen .end-title {
+            font-size: 2rem;
+        }
+
+        #end-screen .final-score {
+            font-size: 1.5rem;
+        }
+    }
+
+    /* 媒体查询：桌面端隐藏虚拟方向键 */
+    @media (min-width: 769px) {
+        .hidden-on-desktop {
+            display: none !important;
+        }
+    }
+</style>
+
+<!-- 界面切换JS (ScreenManager 部分) -->
+<script>
+    // ScreenManager 模块实现
+    const ScreenManager = {
+        screens: {
+            start: document.getElementById('start-screen'),
+            playing: document.getElementById('game-screen'),
+            end: document.getElementById('end-screen')
+        },
+        currentScreen: 'start',
+
+        // 切换到指定界面
+        switchTo(screenName) {
+            // 隐藏当前界面
+            if (this.screens[this.currentScreen]) {
+                this.screens[this.currentScreen].classList.remove('active');
+            }
+            // 显示新界面
+            if (this.screens[screenName]) {
+                this.screens[screenName].classList.add('active');
+                this.currentScreen = screenName;
+            }
+            // 根据界面调整身体样式（如结束界面的震动效果由游戏逻辑控制类添加）
+        },
+
+        // 初始化UI事件监听 (可由GameController调用)
+        initUIEvents() {
+            // 开始按钮
+            document.getElementById('start-btn').addEventListener('click', () => {
+                // 这里不直接启动游戏，而是触发事件或调用GameController的方法
+                // 为简化，此处示例直接切换状态，实际应由GameController协调
+                if (typeof GameController !== 'undefined') {
+                    GameController.startGame();
+                } else {
+                    console.error('GameController not found');
+                }
+            });
+
+            // 重新开始按钮
+            document.getElementById('restart-btn').addEventListener('click', () => {
+                if (typeof GameController !== 'undefined') {
+                    GameController.initGame(); // 重置并回到开始界面，或直接开始新游戏
+                    GameController.startGame(); // 根据需求，可能直接开始新游戏
+                }
+            });
+
+            // 绑定键盘事件（用于开始界面按任意键开始）
+            document.addEventListener('keydown', (e) => {
+                if (this.currentScreen === 'start') {
+                    if (typeof GameController !== 'undefined') {
+                        GameController.startGame();
+                    }
+                }
+            });
+        },
+
+        // 更新分数显示
+        updateScore(score) {
+            document.getElementById('score-value').textContent = score;
+        },
+
+        // 显示结束界面并设置分数
+        showEndScreen(finalScore) {
+            document.getElementById('final-score-value').textContent = finalScore;
+            this.switchTo('end');
+            // 可以在这里添加结束界面的视觉效果，如触发CSS动画
+            const endContent = document.querySelector('#end-screen .end-content');
+            if (endContent) {
+                endContent.style.animation = 'none';
+                // 触发重排以重新启动动画
+                void endContent.offsetWidth;
+                endContent.style.animation = 'popIn 0.3s ease-out';
+            }
+        },
+
+        // 显示游戏界面并设置Canvas尺寸 (由游戏逻辑调用)
+        prepareGameScreen(canvasWidth, canvasHeight) {
+            const canvas = document.getElementById('game-canvas');
+            const container = document.getElementById('game-container');
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            // 设置容器尺寸，可根据需要调整
+            container.style.width = canvasWidth + 'px';
+            container.style.height = canvasHeight + 'px';
+            this.switchTo('playing');
+        }
+    };
+
+    // 初始化UI事件（当DOM加载完成后）
+    document.addEventListener('DOMContentLoaded', () => {
+        ScreenManager.initUIEvents();
+    });
+</script>
+
+<!-- ========== 前端开发产出 END ========== -->
+```

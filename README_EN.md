@@ -2,13 +2,29 @@
 
 > **Not managing humans with AI — managing AI with the wisdom of management science.**
 >
-> Foundational Preprint | Version 4.0 | 2026-06-02
+> Foundational Preprint | Version 5.0 | 2026-06-02
 
 > 📖 [阅读中文版](README.md)
 
 ---
 
-## 🆕 V4.0 Released (2026-06-02)
+## 🆕 V5.0 Released (2026-06-02)
+
+**V5.0 Key additions: Mechanism-Algorithm-System Integration**
+
+1. **Mechanism Layer**: Five structural efficiency mechanisms formalized (CAE/CDE/IRC/COS/AVT) with assumptions, causal chains, boundary conditions
+2. **Cost Model**: TotalCost = ComputationCost + CoordinationCost + CommunicationCost, with optimal team size k* derivation
+3. **OIMAC Algorithm**: Complete 7-phase pseudocode with computable decision rules (SPLIT/MERGE/CENTRALIZE/STYLE_DOWNGRADE/CONTEXT_LIMIT)
+4. **System Architecture**: Nine-module implementable design; Context Controller architecturally breaks CAE conditions via three rules
+5. **CAE Proposition Strengthened**: Explicit boundary conditions (a)(b), tighter proof sketch, new boundary conditions section
+6. **Mechanism Isolation Strengthened**: Explicit IV (context passing architecture) and DV (token consumption) definitions
+7. **Theory Contribution Strengthened**: Situational Leadership / Weber / Fayol unified into (a)(b)(c)(d) structure
+8. **Folder Restructured**: paper/archive/ for V1-V4, paper/figures/ by experiment, experiments/ independent
+9. **Main Paper Consolidated**: paper/main/AOM_paper_v5.docx is the single main paper
+
+---
+
+## V4.0 Released (2026-06-02)
 
 **V4.0 Key additions: Three-Group Controlled Experiment — Proving the Empirical Value of Organizational Management**
 
@@ -83,18 +99,20 @@ The paper further argues that AOM is not merely "using management to govern AI."
 
 ## Core Contributions
 
+**V5 Core Contributions (Mechanism-Algorithm-System Integration):**
+- ✅ Identification and formalization of the **Context Accumulation Effect (CAE)** — Omega(n^2) cost trap in iterative LLM self-improvement
+- ✅ **OIMAC algorithm** — reduces iterative cost from Omega(n^2) to O(k), with complete pseudocode and complexity analysis
+- ✅ **Nine-module system architecture** — Context Controller architecturally breaks CAE conditions
+- ✅ Five structural efficiency mechanisms formalized (CAE/CDE/IRC/COS/AVT) with assumptions, causal chains, boundary conditions
+- ✅ **Unified cost model**: TotalCost = ComputationCost + CoordinationCost + CommunicationCost
+- ✅ **Stress-testing** of Situational Leadership / Weber / Fayol with boundary conditions and domain-specific repairs
+
+**V1-V4 Contributions:**
 - ✅ First complete definition and research agenda for **Agent Organizational Management (AOM)**
 - ✅ **Precise mapping** of Fayol's 14 Principles, Weber's bureaucracy, and Mintzberg's configurations to agent topology design
-- ✅ **Engineering implementation** of Situational Leadership Theory as a dynamic style-switching algorithm, with computable "readiness" metrics
-- ✅ **Compilation** of Management by Objectives (MBO) and Expectancy Theory into objective functions and resource allocation mechanisms
-- ✅ **Bidirectional empowerment** pathway: using agent simulation as a "particle collider" for management science
-- ✅ Candid discussion of **boundary conditions**, identifying the fundamental tension between control and emergence
-- ✅ **Product vision**: the Management-Architecture-Based Agent Workbench (MAW)
-- ✅ **[v2.0 New]** Related work positioning: systematic comparison with COT, MARL, Scalable Oversight, and ONA
-- ✅ **[v2.0 New]** Theoretical innovation: AOM-original hypotheses including the "Control-Emergence Balance Conjecture"
-- ✅ **[v2.0 New]** Minimum viable experiment design: 1,900 simulated experiments validating dynamic topology advantages
-- ✅ **[v2.0 New]** Systematic limitations analysis: 10 identified limitations with mitigation paths
-- ✅ **[v2.0 New]** Minimum product prototype: AOM-Lite Weekend Hackathon MVP design
+- ✅ **Engineering implementation** of Situational Leadership Theory as a dynamic style-switching algorithm
+- ✅ V3 large-scale experiment (N=90): discovery of the Autonomy-Verbosity Trade-off
+- ✅ V4 three-group experiment: organizational team 42,166 tokens vs iterative 124,280 tokens (3:1 advantage)
 
 ---
 
@@ -103,32 +121,35 @@ The paper further argues that AOM is not merely "using management to govern AI."
 ```
 ├── README.md                        # Chinese README
 ├── README_EN.md                     # This file (English README)
-├── paper/
-│   ├── agent_organizational_management_v4.docx    # Full paper (Preprint v4.0, three-group experiment) 🆕
-│   ├── agent_organizational_management_v4_cn.docx # Chinese paper (Preprint v4.0) 🆕
-│   ├── agent_organizational_management_v3.docx    # Full paper (Preprint v3.0)
-│   ├── agent_organizational_management_v3_cn.docx # Chinese paper (Preprint v3.0)
-│   ├── agent_organizational_management_v2.docx    # Full paper (Preprint v2.0)
-│   ├── agent_organizational_management_v2_en.docx # Full paper English version (Preprint v2.0)
-│   ├── agent_organizational_management_v1.docx    # Full paper (Preprint v1.0)
-│   ├── generate_v3_paper.py                       # V3 English paper generation script
-│   ├── generate_v3_paper_cn.py                    # V3 Chinese paper generation script 🆕
-│   └── v1_supplement_five_dimensions.md           # v2.0 supplement materials
-├── simulations/
-│   ├── control_emergence_surface.png  # 3D surface plot
-│   └── control_emergence_contour.png  # 2D contour plot
-├── aom-lite/
-│   ├── main.py                      # AOM-Lite MVP main program
-│   ├── experiment_v3.py             # V3 large-scale experiment script
-│   ├── experiment_v3_results.csv    # V3 experiment results (90 trials)
-│   ├── config.json                  # Configuration file
-│   ├── requirements.txt             # Dependencies
-│   └── RUN_RESULT.md                # AOM-Lite run result log
 ├── LICENSE                          # CC BY 4.0
-└── assets/
-    ├── v3_token_comparison.png      # Token comparison bar chart
-    ├── v3_time_comparison.png       # Time comparison bar chart
-    └── v3_agent_token_distribution.png  # Agent token distribution scatter
+│
+├── paper/
+│   ├── main/
+│   │   └── AOM_paper_v5.docx       # Main paper (V5 mechanism-algorithm-system integration)
+│   ├── figures/
+│   │   ├── v3_experiment/           # V3 experiment charts
+│   │   └── simulations/             # Control-emergence balance simulation plots
+│   ├── supplement/                  # Supplementary materials
+│   └── archive/                     # Historical versions (V1-V4)
+│
+├── algorithm/
+│   └── OIMAC_Framework.docx         # OIMAC algorithm framework (mechanisms + cost model + pseudocode)
+│
+├── system/
+│   ├── architecture_spec.docx       # System architecture spec (9 modules + CAE breaking)
+│   └── module_spec.docx             # Mechanism-to-module mapping table
+│
+├── experiments/
+│   ├── v4_results/                  # V4 three-group experiment data
+│   ├── v3_results/                  # V3 large-scale experiment data (N=90)
+│   └── logs/                        # Run logs
+│
+├── aom-lite/                        # AOM-Lite MVP prototype code
+│   ├── main.py
+│   ├── config.json
+│   └── requirements.txt
+│
+└── assets/                          # Original image resources
 ```
 
 ---
@@ -159,7 +180,7 @@ If this paper informs your work, please cite it as follows:
 
 ### APA Style
 
-> Jiang, H. (2026). *Agent Organizational Management: When Multi-Agent Systems Meet Management Theory* (Version 4.0) [Foundational Preprint]. Retrieved from https://github.com/JiangLin1297/Agent-Organization-Management
+> Jiang, H. (2026). *Agent Organizational Management: When Multi-Agent Systems Meet Management Theory* (Version 5.0) [Foundational Preprint]. Retrieved from https://github.com/JiangLin1297/Agent-Organization-Management
 
 ### BibTeX
 

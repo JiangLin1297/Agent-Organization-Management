@@ -1,0 +1,95 @@
+{
+  "experiment": "V4 Control Group B",
+  "condition": "single_agent_iterative",
+  "model": "mimo-v2.5-pro",
+  "timestamp": "20260602_140850",
+  "task": "贪吃蛇网页游戏",
+  "max_calls": 7,
+  "token_budget": 999999,
+  "total_api_calls": 10,
+  "total_tokens": 124280,
+  "total_time_seconds": 1009.8,
+  "html_length": 32620,
+  "details": [
+    {
+      "round": 1,
+      "phase": "生成初版",
+      "tokens": 7546,
+      "cumulative_tokens": 7546,
+      "time_seconds": 131.1,
+      "output_length": 31233
+    },
+    {
+      "round": 2,
+      "phase": "自我审查",
+      "tokens": 8677,
+      "cumulative_tokens": 16223,
+      "time_seconds": 41.9,
+      "output_length": 1528
+    },
+    {
+      "round": 3,
+      "phase": "迭代改进",
+      "tokens": 15970,
+      "cumulative_tokens": 32193,
+      "time_seconds": 140.8,
+      "output_length": 32292
+    },
+    {
+      "round": "3b",
+      "phase": "快速审查",
+      "tokens": 8724,
+      "cumulative_tokens": 40917,
+      "time_seconds": 36.4,
+      "output_length": 1216
+    },
+    {
+      "round": 4,
+      "phase": "迭代改进",
+      "tokens": 16051,
+      "cumulative_tokens": 56968,
+      "time_seconds": 145.5,
+      "output_length": 31715
+    },
+    {
+      "round": "4b",
+      "phase": "快速审查",
+      "tokens": 9494,
+      "cumulative_tokens": 66462,
+      "time_seconds": 50.1,
+      "output_length": 935
+    },
+    {
+      "round": 5,
+      "phase": "迭代改进",
+      "tokens": 15898,
+      "cumulative_tokens": 82360,
+      "time_seconds": 137.8,
+      "output_length": 32346
+    },
+    {
+      "round": "5b",
+      "phase": "快速审查",
+      "tokens": 9699,
+      "cumulative_tokens": 92059,
+      "time_seconds": 49.9,
+      "output_length": 3752
+    },
+    {
+      "round": 6,
+      "phase": "迭代改进",
+      "tokens": 17004,
+      "cumulative_tokens": 109063,
+      "time_seconds": 135.8,
+      "output_length": 31232
+    },
+    {
+      "round": 7,
+      "phase": "最终整合",
+      "tokens": 15217,
+      "cumulative_tokens": 124280,
+      "time_seconds": 140.4,
+      "output_length": 32620
+    }
+  ]
+}
