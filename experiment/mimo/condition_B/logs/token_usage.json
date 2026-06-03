@@ -1,0 +1,47 @@
+{
+  "condition": "B",
+  "provider": "mimo",
+  "model": "mimo-v2.5-pro",
+  "total_tokens": 102105,
+  "api_calls": 7,
+  "total_time": 1157.5,
+  "html_length": 27004,
+  "max_context": 180297,
+  "details": [
+    {
+      "round": 1,
+      "tokens": 8012,
+      "context_length": 372
+    },
+    {
+      "round": 2,
+      "tokens": 14432,
+      "context_length": 27199
+    },
+    {
+      "round": 3,
+      "tokens": 15741,
+      "context_length": 58835
+    },
+    {
+      "round": 4,
+      "tokens": 15777,
+      "context_length": 91899
+    },
+    {
+      "round": 5,
+      "tokens": 15736,
+      "context_length": 124214
+    },
+    {
+      "round": 6,
+      "tokens": 15952,
+      "context_length": 152369
+    },
+    {
+      "round": 7,
+      "tokens": 16455,
+      "context_length": 180297
+    }
+  ]
+}

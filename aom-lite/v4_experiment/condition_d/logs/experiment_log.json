@@ -1,0 +1,138 @@
+{
+  "experiment": "V4 Ablation Study - Condition D",
+  "condition": "multi_agent_organization_no_context_controller",
+  "description": "有组织管理但无Context Controller：每个Agent接收所有前序Agent的完整原始输出",
+  "ablation_variable": "上下文传递结构（Context Passing Strategy）",
+  "diff_from_condition_c": "condition_c使用filtered context（仅直接依赖），condition_d使用full raw context（所有前序输出）",
+  "model": "mimo-v2.5-pro",
+  "timestamp": "20260603_122337",
+  "task": "贪吃蛇网页游戏",
+  "organization": {
+    "structure": "科层制（Hierarchical）",
+    "roles": [
+      "协调者",
+      "产品经理",
+      "架构师",
+      "前端开发",
+      "游戏逻辑开发",
+      "测试"
+    ],
+    "reporting_lines": "协调者→{产品经理,架构师,前端开发,游戏逻辑开发,测试}",
+    "collaboration_flow": "需求→设计→并行开发→测试→整合",
+    "note": "组织结构与条件C完全一致，唯一差异是上下文传递方式"
+  },
+  "total_api_calls": 7,
+  "total_tokens": 50309,
+  "total_time_seconds": 417.1,
+  "html_length": 21971,
+  "max_context_size": 23928,
+  "context_growth": [
+    {
+      "step": 1,
+      "agent": "coordinator",
+      "context_length": 182
+    },
+    {
+      "step": 2,
+      "agent": "product_manager",
+      "context_length": 666
+    },
+    {
+      "step": 3,
+      "agent": "architect",
+      "context_length": 1787
+    },
+    {
+      "step": 4,
+      "agent": "frontend_dev",
+      "context_length": 3001
+    },
+    {
+      "step": 5,
+      "agent": "game_logic_dev",
+      "context_length": 13092
+    },
+    {
+      "step": 6,
+      "agent": "tester",
+      "context_length": 21658
+    },
+    {
+      "step": 7,
+      "agent": "coordinator",
+      "context_length": 23928
+    }
+  ],
+  "details": [
+    {
+      "step": 1,
+      "agent": "coordinator",
+      "phase": "任务分解",
+      "tokens": 1417,
+      "time_seconds": 22.8,
+      "output_length": 455,
+      "context_length": 182,
+      "summary": "## 任务分解方案\n\n### 1. 产品经理\n- 子任务：定义游戏规则、得分标准、三阶段（开始、游戏、结束）流程及UI文字描述。\n- 交付标准：明确的规则文档、每个界面的功能与元素清单、得分规则。\n\n### 2. 架构师\n- 子任务：设计游戏核心数据结构、模块划分（UI、游戏逻辑、输入控制）及数据流。\n- 交付标准：清晰的架构图或描述，定义关键对象（如蛇、食物）的状态。\n\n### 3. 前端开发\n..."
+    },
+    {
+      "step": 2,
+      "agent": "product_manager",
+      "phase": "需求定义",
+      "tokens": 2246,
+      "time_seconds": 30.5,
+      "output_length": 1082,
+      "context_length": 666,
+      "summary": "## 产品需求文档\n\n### 1. 产品定位（48字）\n面向休闲网页用户的经典贪吃蛇游戏，追求现代美观的UI、流畅的操控体验，适配桌面与移动设备。\n\n### 2. 功能需求（198字）\n| 功能 | 优先级 | 描述 |\n|------|--------|------|\n| 三阶段界面 | P0 | 实现开始、游戏、结束三个独立界面。 |\n| 键盘操控 | P0 | 支持方向键控制蛇的移动方向，响..."
+    },
+    {
+      "step": 3,
+      "agent": "architect",
+      "phase": "架构设计",
+      "tokens": 2890,
+      "time_seconds": 25.5,
+      "output_length": 1182,
+      "context_length": 1787,
+      "summary": "## 技术架构设计\n\n### 1. 技术选型（≤50字）\n- 渲染方式：Canvas\n- 为什么：单文件内高效绘制游戏元素，性能优于DOM操作，适合像素级控制。\n\n### 2. 模块划分（≤200字）\n```\n游戏引擎模块：管理游戏状态、逻辑更新、碰撞检测、计分\n渲染模块：负责Canvas绑定、绘制蛇、食物、分数及界面\nUI/输入模块：处理开始/结束界面、响应键盘与触摸事件、切换游戏阶段\n数据存储..."
+    },
+    {
+      "step": 4,
+      "agent": "frontend_dev",
+      "phase": "前端实现",
+      "tokens": 6284,
+      "time_seconds": 68.4,
+      "output_length": 10061,
+      "context_length": 3001,
+      "summary": "```html\n<!-- ========== 前端开发产出 START ========== -->\n\n<!-- HTML结构 -->\n<div id=\"start-screen\" class=\"screen active\">\n  <div class=\"container\">\n    <h1 class=\"title neon-glow\">Neon Snake</h1>\n    <p clas..."
+    },
+    {
+      "step": 5,
+      "agent": "game_logic_dev",
+      "phase": "游戏逻辑实现",
+      "tokens": 9736,
+      "time_seconds": 78.2,
+      "output_length": 8564,
+      "context_length": 13092,
+      "summary": "<!-- ========== 游戏逻辑开发产出 START ========== -->\n\n<script>\n// ---- 游戏配置 ----\nconst GAME_CONFIG = {\n  gridSize: 20,           // 网格单元大小（像素）\n  canvasLogicalSize: 20,  // 逻辑网格数量（20x20）\n  initialSnakeLength:..."
+    },
+    {
+      "step": 6,
+      "agent": "tester",
+      "phase": "测试审查",
+      "tokens": 10243,
+      "time_seconds": 44.8,
+      "output_length": 2190,
+      "context_length": 21658,
+      "summary": "## 测试报告\n\n### 阻断性问题（必须修复）\n| # | 问题描述 | 位置 | 修复建议 |\n|---|---------|------|---------|\n| 1 | **代码不完整，模块未集成**：游戏逻辑模块 (`togglePause` 函数) 被截断，代码不完整。`initGame` 等关键函数在前端模块中被调用 (`startGameLoop`, `initGame`, `on..."
+    },
+    {
+      "step": 7,
+      "agent": "coordinator",
+      "phase": "最终整合",
+      "tokens": 17493,
+      "time_seconds": 146.8,
+      "output_length": 21971,
+      "context_length": 23928,
+      "summary": "<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Neon Snake</title>\n    <style>\n        /* 全局..."
+    }
+  ]
+}

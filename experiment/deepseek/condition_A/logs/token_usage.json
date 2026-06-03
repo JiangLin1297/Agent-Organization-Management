@@ -1,0 +1,14 @@
+{
+  "condition": "A",
+  "provider": "deepseek",
+  "model": "deepseek-chat",
+  "total_tokens": 6587,
+  "api_calls": 1,
+  "total_time": 35.2,
+  "html_length": 24975,
+  "details": [
+    {
+      "tokens": 6587
+    }
+  ]
+}

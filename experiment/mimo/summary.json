@@ -1,0 +1,194 @@
+{
+  "provider": "mimo",
+  "model": "mimo-v2.5-pro",
+  "timestamp": "2026-06-03T20:37:29.076512",
+  "results": {
+    "A": {
+      "condition": "A",
+      "provider": "mimo",
+      "model": "mimo-v2.5-pro",
+      "total_tokens": 8251,
+      "api_calls": 1,
+      "total_time": 163.6,
+      "html_length": 28534,
+      "details": [
+        {
+          "tokens": 8251
+        }
+      ]
+    },
+    "B": {
+      "condition": "B",
+      "provider": "mimo",
+      "model": "mimo-v2.5-pro",
+      "total_tokens": 102105,
+      "api_calls": 7,
+      "total_time": 1157.5,
+      "html_length": 27004,
+      "max_context": 180297,
+      "details": [
+        {
+          "round": 1,
+          "tokens": 8012,
+          "context_length": 372
+        },
+        {
+          "round": 2,
+          "tokens": 14432,
+          "context_length": 27199
+        },
+        {
+          "round": 3,
+          "tokens": 15741,
+          "context_length": 58835
+        },
+        {
+          "round": 4,
+          "tokens": 15777,
+          "context_length": 91899
+        },
+        {
+          "round": 5,
+          "tokens": 15736,
+          "context_length": 124214
+        },
+        {
+          "round": 6,
+          "tokens": 15952,
+          "context_length": 152369
+        },
+        {
+          "round": 7,
+          "tokens": 16455,
+          "context_length": 180297
+        }
+      ]
+    },
+    "C": {
+      "condition": "C",
+      "provider": "mimo",
+      "model": "mimo-v2.5-pro",
+      "total_tokens": 49285,
+      "api_calls": 7,
+      "total_time": 550.6,
+      "html_length": 31305,
+      "max_context": 31560,
+      "details": [
+        {
+          "step": 1,
+          "agent": "coordinator",
+          "phase": "任务分解",
+          "tokens": 2359,
+          "context_length": 346
+        },
+        {
+          "step": 2,
+          "agent": "product_manager",
+          "phase": "需求定义",
+          "tokens": 3277,
+          "context_length": 3340
+        },
+        {
+          "step": 3,
+          "agent": "architect",
+          "phase": "架构设计",
+          "tokens": 3450,
+          "context_length": 2077
+        },
+        {
+          "step": 4,
+          "agent": "frontend_dev",
+          "phase": "前端实现",
+          "tokens": 6484,
+          "context_length": 4504
+        },
+        {
+          "step": 5,
+          "agent": "image_processing_dev",
+          "phase": "图像处理",
+          "tokens": 6547,
+          "context_length": 4506
+        },
+        {
+          "step": 6,
+          "agent": "tester",
+          "phase": "测试审查",
+          "tokens": 8539,
+          "context_length": 23997
+        },
+        {
+          "step": 7,
+          "agent": "coordinator",
+          "phase": "最终整合",
+          "tokens": 18629,
+          "context_length": 31560
+        }
+      ]
+    },
+    "D": {
+      "condition": "D",
+      "provider": "mimo",
+      "model": "mimo-v2.5-pro",
+      "total_tokens": 63050,
+      "api_calls": 7,
+      "total_time": 572.3,
+      "html_length": 29565,
+      "max_context": 35160,
+      "details": [
+        {
+          "step": 1,
+          "agent": "coordinator",
+          "phase": "任务分解",
+          "tokens": 2182,
+          "context_length": 352
+        },
+        {
+          "step": 2,
+          "agent": "product_manager",
+          "phase": "需求定义",
+          "tokens": 3174,
+          "context_length": 3016
+        },
+        {
+          "step": 3,
+          "agent": "architect",
+          "phase": "架构设计",
+          "tokens": 4841,
+          "context_length": 4524
+        },
+        {
+          "step": 4,
+          "agent": "frontend_dev",
+          "phase": "前端实现",
+          "tokens": 8269,
+          "context_length": 8690
+        },
+        {
+          "step": 5,
+          "agent": "image_processing_dev",
+          "phase": "图像处理",
+          "tokens": 11742,
+          "context_length": 22749
+        },
+        {
+          "step": 6,
+          "agent": "tester",
+          "phase": "测试审查",
+          "tokens": 12732,
+          "context_length": 32170
+        },
+        {
+          "step": 7,
+          "agent": "coordinator",
+          "phase": "最终整合",
+          "tokens": 20110,
+          "context_length": 35160
+        }
+      ]
+    }
+  },
+  "ratios": {
+    "C_vs_B": 2.07,
+    "D_vs_C": 1.28
+  }
+}

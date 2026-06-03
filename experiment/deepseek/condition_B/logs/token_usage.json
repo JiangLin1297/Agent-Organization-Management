@@ -1,0 +1,47 @@
+{
+  "condition": "B",
+  "provider": "deepseek",
+  "model": "deepseek-chat",
+  "total_tokens": 88494,
+  "api_calls": 7,
+  "total_time": 211.1,
+  "html_length": 23891,
+  "max_context": 144089,
+  "details": [
+    {
+      "round": 1,
+      "tokens": 6459,
+      "context_length": 372
+    },
+    {
+      "round": 2,
+      "tokens": 12810,
+      "context_length": 24121
+    },
+    {
+      "round": 3,
+      "tokens": 13009,
+      "context_length": 48188
+    },
+    {
+      "round": 4,
+      "tokens": 18379,
+      "context_length": 72254
+    },
+    {
+      "round": 5,
+      "tokens": 12401,
+      "context_length": 95406
+    },
+    {
+      "round": 6,
+      "tokens": 12700,
+      "context_length": 119748
+    },
+    {
+      "round": 7,
+      "tokens": 12736,
+      "context_length": 144089
+    }
+  ]
+}

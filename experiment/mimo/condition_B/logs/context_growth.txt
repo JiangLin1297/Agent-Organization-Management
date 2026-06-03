@@ -1,0 +1,10 @@
+Step 1 [iterative                ]: ctx=       372
+Step 2 [iterative                ]: ctx=    27,199
+Step 3 [iterative                ]: ctx=    58,835
+Step 4 [iterative                ]: ctx=    91,899
+Step 5 [iterative                ]: ctx=   124,214
+Step 6 [iterative                ]: ctx=   152,369
+Step 7 [iterative                ]: ctx=   180,297
+
+Max: 180,297
+Total: 102,105

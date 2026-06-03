@@ -1,0 +1,61 @@
+{
+  "condition": "D",
+  "provider": "deepseek",
+  "model": "deepseek-chat",
+  "total_tokens": 58718,
+  "api_calls": 7,
+  "total_time": 114.4,
+  "html_length": 26107,
+  "max_context": 34804,
+  "details": [
+    {
+      "step": 1,
+      "agent": "coordinator",
+      "phase": "任务分解",
+      "tokens": 1402,
+      "context_length": 352
+    },
+    {
+      "step": 2,
+      "agent": "product_manager",
+      "phase": "需求定义",
+      "tokens": 2206,
+      "context_length": 2420
+    },
+    {
+      "step": 3,
+      "agent": "architect",
+      "phase": "架构设计",
+      "tokens": 3421,
+      "context_length": 3687
+    },
+    {
+      "step": 4,
+      "agent": "frontend_dev",
+      "phase": "前端实现",
+      "tokens": 7347,
+      "context_length": 6350
+    },
+    {
+      "step": 5,
+      "agent": "image_processing_dev",
+      "phase": "图像处理",
+      "tokens": 11409,
+      "context_length": 19407
+    },
+    {
+      "step": 6,
+      "agent": "tester",
+      "phase": "测试审查",
+      "tokens": 12513,
+      "context_length": 32472
+    },
+    {
+      "step": 7,
+      "agent": "coordinator",
+      "phase": "最终整合",
+      "tokens": 20420,
+      "context_length": 34804
+    }
+  ]
+}

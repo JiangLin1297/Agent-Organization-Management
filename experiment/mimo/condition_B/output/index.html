@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>拼豆图纸生成器</title>
+<style>
+:root{--pri:#6366f1;--pri-d:#4f46e5;--sec:#06b6d4;--acc:#10b981;--bg:#f1f5f9;--card:#fff;--txt:#1e293b;--txt2:#64748b;--bdr:#e2e8f0;--sh:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);--sh2:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);--r:12px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;line-height:1.5}
+.container{max-width:1200px;margin:0 auto;padding:16px}
+header{background:linear-gradient(135deg,var(--pri) 0%,var(--sec) 100%);color:#fff;padding:28px 20px;border-radius:var(--r);margin-bottom:16px;text-align:center;box-shadow:var(--sh2)}
+header h1{font-size:1.8rem;font-weight:700;margin-bottom:6px}
+header p{opacity:.9;font-size:.95rem}
+.controls{background:var(--card);padding:20px;border-radius:var(--r);box-shadow:var(--sh);margin-bottom:16px}
+.controls-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:16px}
+.control-group{display:flex;flex-direction:column}
+label{font-weight:600;margin-bottom:6px;font-size:.9rem;display:flex;align-items:center;gap:6px}
+select{padding:10px 12px;border:1px solid var(--bdr);border-radius:8px;font-size:.95rem;background:var(--bg);color:var(--txt);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+select:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 3px rgba(99,102,241,.2)}
+.file-upload{position:relative;border:2px dashed var(--bdr);border-radius:8px;padding:18px;text-align:center;cursor:pointer;transition:all .3s;background:var(--bg);min-height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.file-upload:hover,.file-upload.drag-over{border-color:var(--pri);background:rgba(99,102,241,.05)}
+.file-upload input{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.upload-icon{font-size:1.6rem;margin-bottom:4px}
+.upload-text{color:var(--txt2);font-size:.85rem}
+.upload-preview{display:flex;align-items:center;gap:12px}
+.upload-preview img{width:46px;height:46px;object-fit:cover;border-radius:8px;border:2px solid var(--bdr)}
+.upload-preview-name{font-weight:600;font-size:.85rem;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.upload-preview-size{font-size:.78rem;color:var(--txt2)}
+.btns{display:flex;flex-direction:column;gap:8px;justify-content:flex-end}
+.btn{padding:10px 16px;background:linear-gradient(135deg,var(--pri) 0%,var(--pri-d) 100%);color:#fff;border:none;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 12px rgba(99,102,241,.4)}
+.btn:active:not(:disabled){transform:translateY(0)}
+.btn:disabled{background:#94a3b8;cursor:not-allowed}
+.btn-sec{background:transparent;border:2px solid var(--pri);color:var(--pri)}
+.btn-sec:hover:not(:disabled){background:rgba(99,102,241,.1);box-shadow:none}
+.results{display:none;gap:16px;margin-top:16px}
+.results.active{display:grid;grid-template-columns:1fr}
+@media(min-width:900px){.results.active{grid-template-columns:1fr 340px}}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:20px}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:8px}
+.card-title{font-size:1.1rem;font-weight:600;display:flex;align-items:center;gap:8px}
+.zoom-controls{display:flex;align-items:center;gap:6px}
+.zoom-btn{width:32px;height:32px;border-radius:6px;background:var(--bg);border:1px solid var(--bdr);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.zoom-btn:hover{background:var(--pri);color:#fff;border-color:var(--pri)}
+.zoom-info{font-size:.8rem;color:var(--txt2);min-width:42px;text-align:center}
+.canvas-wrapper{width:100%;height:450px;border:1px solid var(--bdr);border-radius:8px;background:#f8fafc;overflow:hidden;position:relative;cursor:grab;touch-action:none}
+.canvas-wrapper:active{cursor:grabbing}
+.canvas-container{position:absolute;top:50%;left:50%;transform-origin:center center;will-change:transform}
+#patternCanvas{image-rendering:pixelated;display:block;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.placeholder{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:var(--txt2);pointer-events:none}
+.placeholder .ph-icon{font-size:3rem;margin-bottom:8px;opacity:.5}
+.placeholder p{font-size:.9rem;margin:3px 0}
+.grid-toggle{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--txt2);cursor:pointer}
+.grid-toggle input{cursor:pointer;accent-color:var(--pri)}
+.image-info{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid var(--bdr)}
+@media(min-width:480px){.image-info{grid-template-columns:repeat(4,1fr)}}
+.info-item{text-align:center;padding:10px;background:var(--bg);border-radius:8px}
+.info-label{font-size:.75rem;color:var(--txt2);margin-bottom:2px}
+.info-value{font-weight:600;font-size:.95rem}
+.color-list{max-height:420px;overflow-y:auto;padding-right:4px}
+.color-list::-webkit-scrollbar{width:5px}
+.color-list::-webkit-scrollbar-track{background:var(--bg);border-radius:3px}
+.color-list::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+.color-item{display:flex;align-items:center;padding:10px;margin-bottom:6px;background:var(--bg);border-radius:8px;transition:all .2s}
+.color-item:hover{background:rgba(99,102,241,.05);transform:translateX(2px)}
+.color-swatch{width:28px;height:28px;border-radius:6px;margin-right:10px;flex-shrink:0;border:1px solid rgba(0,0,0,.1);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.color-details{flex:1;min-width:0}
+.color-name{font-weight:600;font-size:.9rem}
+.color-hex{font-family:'Courier New',monospace;font-size:.75rem;color:var(--txt2);background:rgba(0,0,0,.04);padding:1px 5px;border-radius:3px}
+.color-count{font-weight:700;font-size:.95rem;color:var(--pri);min-width:45px;text-align:right}
+.color-percent{font-size:.7rem;color:var(--txt2);text-align:right}
+.summary{margin-top:16px;padding-top:16px;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;font-weight:600;font-size:.9rem}
+.download-section{margin-top:16px;display:none}
+.download-section.active{display:block}
+.download-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.download-card{padding:16px;background:var(--bg);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;transition:all .2s}
+.download-card:hover{border-color:var(--pri);background:rgba(99,102,241,.05);transform:translateY(-2px);box-shadow:var(--sh)}
+.download-icon{font-size:1.8rem;margin-bottom:6px}
+.download-name{font-weight:600;font-size:.85rem;margin-bottom:2px}
+.download-desc{font-size:.7rem;color:var(--txt2)}
+.loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.95);display:none;justify-content:center;align-items:center;flex-direction:column;z-index:1000;backdrop-filter:blur(5px)}
+.loading-overlay.active{display:flex}
+.spinner{width:44px;height:44px;border:3px solid rgba(99,102,241,.2);border-top-color:var(--pri);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:1rem;color:var(--txt);margin-bottom:12px;font-weight:500}
+.progress-bar{width:200px;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.progress{height:100%;background:linear-gradient(90deg,var(--pri),var(--sec));border-radius:3px;width:0%;transition:width .3s}
+.hidden{display:none!important}
+@media(max-width:480px){.container{padding:10px}header{padding:18px 12px}header h1{font-size:1.35rem}.controls{padding:14px}.canvas-wrapper{height:300px}.card{padding:14px}.card-header{flex-direction:column;align-items:flex-start}.zoom-controls{width:100%;justify-content:flex-end}.color-item{padding:8px}.color-swatch{width:24px;height:24px;margin-right:8px}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>🎨 拼豆图纸生成器</h1>
+<p>上传图片，自动生成拼豆网格图纸与颜色采购清单</p>
+</header>
+<div class="controls">
+<div class="controls-grid">
+<div class="control-group">
+<label>📷 上传图片</label>
+<div class="file-upload" id="dropZone">
+<div id="uploadContent"><div class="upload-icon">📁</div><div class="upload-text">点击或拖拽图片到此处</div></div>
+<input type="file" id="imageInput" accept="image/*">
+</div>
+</div>
+<div class="control-group">
+<label for="gridSize">📐 网格大小</label>
+<select id="gridSize">
+<option value="16">16 × 16</option>
+<option value="24">24 × 24</option>
+<option value="32" selected>32 × 32</option>
+<option value="48">48 × 48</option>
+<option value="64">64 × 64</option>
+<option value="96">96 × 96</option>
+</select>
+</div>
+<div class="control-group">
+<label for="colorCount">🎨 颜色数量</label>
+<select id="colorCount">
+<option value="6">6 色</option>
+<option value="8">8 色</option>
+<option value="10">10 色</option>
+<option value="12">12 色</option>
+<option value="15" selected>15 色</option>
+<option value="18">18 色</option>
+<option value="20">20 色</option>
+<option value="25">25 色</option>
+<option value="30">30 色</option>
+</select>
+</div>
+<div class="control-group btns">
+<button class="btn" id="generateBtn" disabled>🚀 生成图纸</button>
+<button class="btn btn-sec hidden" id="resetBtn">🔄 重新开始</button>
+</div>
+</div>
+</div>
+
+<div class="results" id="results">
+<div class="card">
+<div class="card-header">
+<h3 class="card-title">🖼️ 拼豆预览</h3>
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+<label class="grid-toggle"><input type="checkbox" id="showGrid" checked> 网格线</label>
+<div class="zoom-controls">
+<button class="zoom-btn" id="zoomOut" title="缩小">➖</button>
+<span class="zoom-info" id="zoomInfo">100%</span>
+<button class="zoom-btn" id="zoomIn" title="放大">➕</button>
+<button class="zoom-btn" id="resetZoom" title="重置">↺</button>
+<button class="zoom-btn" id="fitView" title="适应">⊞</button>
+</div>
+</div>
+</div>
+<div class="canvas-wrapper" id="canvasWrapper">
+<div class="canvas-container" id="canvasContainer"><canvas id="patternCanvas"></canvas></div>
+<div class="placeholder" id="placeholder">
+<div class="ph-icon">🎨</div>
+<p>上传图片并点击生成</p>
+<p style="font-size:.8rem;margin-top:6px">支持鼠标滚轮缩放 / 双指缩放 / 拖拽平移</p>
+</div>
+</div>
+<div class="image-info hidden" id="imageInfo">
+<div class="info-item"><div class="info-label">原始尺寸</div><div class="info-value" id="infoOriginal">-</div></div>
+<div class="info-item"><div class="info-label">网格尺寸</div><div class="info-value" id="infoGrid">-</div></div>
+<div class="info-item"><div class="info-label">颜色数量</div><div class="info-value" id="infoColors">-</div></div>
+<div class="info-item"><div class="info-label">总拼豆数</div><div class="info-value" id="infoTotal">-</div></div>
+</div>
+</div>
+<div class="card">
+<h3 class="card-title" style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--bdr)">📊 颜色统计（采购清单）</h3>
+<div class="color-list" id="colorStats"><p style="text-align:center;color:var(--txt2);padding:30px">生成图纸后显示统计</p></div>
+<div class="summary hidden" id="colorSummary">
+<span>共 <strong id="totalColors">-</strong> 种颜色</span>
+<span>共 <strong id="totalBeads">-</strong> 粒拼豆</span>
+</div>
+</div>
+</div>
+
+<div class="download-section" id="downloadSection">
+<div class="card">
+<h3 class="card-title" style="margin-bottom:16px">💾 导出图纸</h3>
+<div class="download-grid">
+<div class="download-card" id="dlPNG"><div class="download-icon">🖼️</div><div class="download-name">PNG 图片</div><div class="download-desc">高清网格图纸</div></div>
+<div class="download-card" id="dlJSON"><div class="download-icon">📋</div><div class="download-name">JSON 数据</div><div class="download-desc">颜色与网格数据</div></div>
+<div class="download-card" id="dlCSV"><div class="download-icon">📊</div><div class="download-name">CSV 表格</div><div class="download-desc">颜色采购清单</div></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+<div class="spinner"></div>
+<div class="loading-text" id="loadingText">正在处理...</div>
+<div class="progress-bar"><div class="progress" id="progressBar"></div></div>
+</div>
+
+<script>
+/* ===================== State ===================== */
+let originalImage = null;
+let processedData = null;
+let currentScale = 1, translateX = 0, translateY = 0;
+let isDragging = false, dragStartX, dragStartY, startTX, startTY;
+let initialPinchDist = 0, initialPinchScale = 1;
+let showGridLines = true;
+
+/* ===================== DOM ===================== */
+const $ = id => document.getElementById(id);
+const imageInput = $('imageInput'), gridSizeSel = $('gridSize'), colorCountSel = $('colorCount');
+const generateBtn = $('generateBtn'), resetBtn = $('resetBtn');
+const canvasWrapper = $('canvasWrapper'), canvasContainer = $('canvasContainer');
+const patternCanvas = $('patternCanvas');
+const ctx = patternCanvas.getContext('2d', { willReadFrequently: true });
+const dropZone = $('dropZone'), uploadContent = $('uploadContent'), placeholder = $('placeholder');
+const loadingOverlay = $('loadingOverlay'), loadingText = $('loadingText'), progressBar = $('progressBar');
+const showGridChk = $('showGrid');
+
+/* ===================== Events ===================== */
+imageInput.addEventListener('change', handleUpload);
+generateBtn.addEventListener('click', generatePattern);
+resetBtn.addEventListener('click', resetApp);
+$('zoomIn').addEventListener('click', () => adjustZoom(.15));
+$('zoomOut').addEventListener('click', () => adjustZoom(-.15));
+$('resetZoom').addEventListener('click', resetZoom);
+$('fitView').addEventListener('click', fitToView);
+$('dlPNG').addEventListener('click', downloadPNG);
+$('dlJSON').addEventListener('click', downloadJSON);
+$('dlCSV').addEventListener('click', downloadCSV);
+showGridChk.addEventListener('change', () => {
+    showGridLines = showGridChk.checked;
+    if (processedData) renderPattern();
+});
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.classList.remove('drag-over');
+    if (e.dataTransfer.files.length) {
+        imageInput.files = e.dataTransfer.files;
+        handleUpload({ target: { files: e.dataTransfer.files } });
+    }
+});
+
+canvasWrapper.addEventListener('mousedown', e => startDrag(e.clientX, e.clientY));
+canvasWrapper.addEventListener('touchstart', onTouchStart, { passive: false });
+document.addEventListener('mousemove', e => onDrag(e.clientX, e.clientY));
+document.addEventListener('touchmove', onTouchMove, { passive: false });
+document.addEventListener('mouseup', endDrag);
+document.addEventListener('touchend', onTouchEnd);
+canvasWrapper.addEventListener('wheel', e => { e.preventDefault(); adjustZoom(e.deltaY > 0 ? -.12 : .12); }, { passive: false });
+canvasWrapper.addEventListener('dblclick', fitToView);
+
+/* ===================== Drag / Zoom ===================== */
+function startDrag(cx, cy) {
+    isDragging = true; dragStartX = cx; dragStartY = cy;
+    startTX = translateX; startTY = translateY;
+    canvasWrapper.style.cursor = 'grabbing';
+}
+function onDrag(cx, cy) {
+    if (!isDragging) return;
+    translateX = startTX + (cx - dragStartX);
+    translateY = startTY + (cy - dragStartY);
+    updateTransform();
+}
+function endDrag() { isDragging = false; canvasWrapper.style.cursor = 'grab'; }
+
+function onTouchStart(e) {
+    e.preventDefault();
+    if (e.touches.length === 1) startDrag(e.touches[0].clientX, e.touches[0].clientY);
+    else if (e.touches.length === 2) {
+        isDragging = false;
+        initialPinchDist = pinchDist(e.touches);
+        initialPinchScale = currentScale;
+    }
+}
+function onTouchMove(e) {
+    e.preventDefault();
+    if (e.touches.length === 1 && isDragging) onDrag(e.touches[0].clientX, e.touches[0].clientY);
+    else if (e.touches.length === 2) {
+        currentScale = clamp((pinchDist(e.touches) / initialPinchDist) * initialPinchScale, .15, 8);
+        updateTransform(); updateZoomUI();
+    }
+}
+function onTouchEnd(e) { if (e.touches.length < 2) endDrag(); }
+function pinchDist(t) { return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); }
+
+function adjustZoom(d) { currentScale = clamp(currentScale + d, .15, 8); updateTransform(); updateZoomUI(); }
+function resetZoom() { currentScale = 1; translateX = 0; translateY = 0; updateTransform(); updateZoomUI(); }
+function fitToView() {
+    if (!processedData) return;
+    const cellSize = 12, gap = 1;
+    const cs = processedData.gridSize * (cellSize + gap) + gap;
+    const wr = canvasWrapper.getBoundingClientRect();
+    currentScale = clamp(Math.min((wr.width - 30) / cs, (wr.height - 30) / cs), .15, 8);
+    translateX = 0; translateY = 0;
+    updateTransform(); updateZoomUI();
+}
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function updateTransform() { canvasContainer.style.transform = `translate(-50%,-50%) translate(${translateX}px,${translateY}px) scale(${currentScale})`; }
+function updateZoomUI() { $('zoomInfo').textContent = Math.round(currentScale * 100) + '%'; }
+
+/* ===================== Upload ===================== */
+function handleUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+            originalImage = img;
+            generateBtn.disabled = false;
+            resetBtn.classList.remove('hidden');
+            uploadContent.innerHTML = `<div class="upload-preview"><img src="${ev.target.result}" alt=""><div><div class="upload-preview-name">${file.name}</div><div class="upload-preview-size">${img.width} × ${img.height}px</div></div></div>`;
+        };
+        img.onerror = () => alert('图片加载失败，请选择其他图片');
+        img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function resetApp() {
+    originalImage = null; processedData = null;
+    generateBtn.disabled = true;
+    resetBtn.classList.add('hidden');
+    $('results').classList.remove('active');
+    $('downloadSection').classList.remove('active');
+    $('imageInfo').classList.add('hidden');
+    $('colorSummary').classList.add('hidden');
+    uploadContent.innerHTML = `<div class="upload-icon">📁</div><div class="upload-text">点击或拖拽图片到此处</div>`;
+    $('colorStats').innerHTML = '<p style="text-align:center;color:var(--txt2);padding:30px">生成图纸后显示统计</p>';
+    placeholder.style.display = '';
+    imageInput.value = '';
+    resetZoom();
+}
+
+/* ===================== Loading ===================== */
+function showLoading(txt) { loadingText.textContent = txt; progressBar.style.width = '0%'; loadingOverlay.classList.add('active'); }
+function setLoading(p, txt) { progressBar.style.width = p + '%'; if (txt) loadingText.textContent = txt; }
+function hideLoading() { loadingOverlay.classList.remove('active'); }
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+/* ===================== Generate ===================== */
+async function generatePattern() {
+    if (!originalImage) return;
+    const gridSize = +gridSizeSel.value;
+    const colorCount = +colorCountSel.value;
+    showLoading('正在处理图像...');
+    try {
+        setLoading(8, '调整图像尺寸...'); await delay(20);
+        const tc = document.createElement('canvas');
+        tc.width = tc.height = gridSize;
+        const tctx = tc.getContext('2d', { willReadFrequently: true });
+        tctx.imageSmoothingEnabled = true;
+        tctx.imageSmoothingQuality = 'high';
+        tctx.drawImage(originalImage, 0, 0, gridSize, gridSize);
+
+        setLoading(22, '提取颜色数据...'); await delay(20);
+        const imageData = tctx.getImageData(0, 0, gridSize, gridSize);
+        const pixels = [];
+        for (let i = 0; i < imageData.data.length; i += 4) {
+            pixels.push([imageData.data[i], imageData.data[i + 1], imageData.data[i + 2]]);
+        }
+
+        setLoading(38, '颜色量化中 (中位切分法)...'); await delay(20);
+        const palette = medianCut(pixels, colorCount);
+
+        setLoading(58, '映射像素到调色板...'); await delay(20);
+        const grid = new Array(gridSize * gridSize);
+        const colorCounts = new Map();
+        for (let i = 0; i < grid.length; i++) {
+            const c = findClosest(pixels[i], palette);
+            grid[i] = c;
+            const k = c[0] + ',' + c[1] + ',' + c[2];
+            colorCounts.set(k, (colorCounts.get(k) || 0) + 1);
+        }
+
+        setLoading(78, '生成颜色统计...'); await delay(20);
+        const stats = Array.from(colorCounts.entries())
+            .map(([k, cnt]) => ({ color: k.split(',').map(Number), count: cnt }))
+            .sort((a, b) => b.count - a.count);
+
+        processedData = { gridSize, grid, palette, stats, total: grid.length };
+
+        setLoading(90, '渲染图纸...'); await delay(20);
+        renderPattern();
+        renderStats();
+        updateInfo();
+
+        $('results').classList.add('active');
+        $('downloadSection').classList.add('active');
+
+        setLoading(100, '完成！'); await delay(180);
+        hideLoading();
+
+        requestAnimationFrame(() => fitToView());
+        $('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) {
+        console.error(err); hideLoading();
+        alert('处理失败：' + err.message);
+    }
+}
+
+/* ===================== Median Cut ===================== */
+function medianCut(pixels, target) {
+    let boxes = [{ pixels }];
+    while (boxes.length < target) {
+        let maxRange = -1, maxIdx = -1;
+        for (let i = 0; i < boxes.length; i++) {
+            const b = boxes[i];
+            if (b.pixels.length < 2) continue;
+            const range = Math.max(chRange(b.pixels, 0), chRange(b.pixels, 1), chRange(b.pixels, 2));
+            if (range > maxRange) { maxRange = range; maxIdx = i; }
+        }
+        if (maxIdx < 0 || maxRange <= 0) break;
+        const box = boxes[maxIdx];
+        const r0 = chRange(box.pixels, 0), g0 = chRange(box.pixels, 1), b0 = chRange(box.pixels, 2);
+        let ch = 0;
+        if (g0 >= r0 && g0 >= b0) ch = 1;
+        if (b0 >= r0 && b0 >= g0) ch = 2;
+        box.pixels.sort((a, b) => a[ch] - b[ch]);
+        const mid = box.pixels.length >> 1;
+        boxes.splice(maxIdx, 1, { pixels: box.pixels.slice(0, mid) }, { pixels: box.pixels.slice(mid) });
+    }
+    return boxes.map(b => {
+        let r = 0, g = 0, bl = 0;
+        for (const p of b.pixels) { r += p[0]; g += p[1]; bl += p[2]; }
+        const n = b.pixels.length;
+        return [Math.round(r / n), Math.round(g / n), Math.round(bl / n)];
+    });
+}
+
+function chRange(pixels, ch) {
+    let min = 255, max = 0;
+    for (const p of pixels) { if (p[ch] < min) min = p[ch]; if (p[ch] > max) max = p[ch]; }
+    return max - min;
+}
+
+function findClosest(pixel, palette) {
+    let minD = Infinity, closest = palette[0];
+    for (const c of palette) {
+        const dr = (pixel[0] - c[0]) * 0.299;
+        const dg = (pixel[1] - c[1]) * 0.587;
+        const db = (pixel[2] - c[2]) * 0.114;
+        const d = dr * dr + dg * dg + db * db;
+        if (d < minD) { minD = d; closest = c; }
+    }
+    return closest;
+}
+
+/* ===================== Render ===================== */
+function renderPattern() {
+    const { gridSize, grid } = processedData;
+    const cellSize = 12, gap = 1;
+    const total = gridSize * (cellSize + gap) + gap;
+    patternCanvas.width = total;
+    patternCanvas.height = total;
+
+    ctx.fillStyle = '#d1d5db';
+    ctx.fillRect(0, 0, total, total);
+
+    for (let y = 0; y < gridSize; y++) {
+        for (let x = 0; x < gridSize; x++) {
+            const c = grid[y * gridSize + x];
+            const px = gap + x * (cellSize + gap);
+            const py = gap + y * (cellSize + gap);
+            ctx.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`;
+            ctx.fillRect(px, py, cellSize, cellSize);
+        }
+    }
+
+    if (showGridLines) {
+        ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i <= gridSize; i++) {
+            const pos = gap + i * (cellSize + gap) - gap / 2;
+            ctx.beginPath(); ctx.moveTo(pos, 0); ctx.lineTo(pos, total); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, pos); ctx.lineTo(total, pos); ctx.stroke();
+        }
+    }
+    placeholder.style.display = 'none';
+}
+
+function renderStats() {
+    const { stats, total } = processedData;
+    const container = $('colorStats');
+    container.innerHTML = stats.map((s, idx) => {
+        const hex = '#' + s.color.map(v => v.toString(16).padStart(2, '0')).join('');
+        const pct = (s.count / total * 100).toFixed(1);
+        return `<div class="color-item">
+            <div class="color-swatch" style="background:${hex}"></div>
+            <div class="color-details">
+                <div class="color-name">颜色 ${idx + 1}</div>
+                <div class="color-hex">${hex} · RGB(${s.color.join(', ')})</div>
+            </div>
+            <div style="text-align:right">
+                <div class="color-count">${s.count}</div>
+                <div class="color-percent">${pct}%</div>
+            </div>
+        </div>`;
+    }).join('');
+    $('colorSummary').classList.remove('hidden');
+    $('totalColors').textContent = stats.length;
+    $('totalBeads').textContent = total;
+}
+
+function updateInfo() {
+    $('imageInfo').classList.remove('hidden');
+    $('infoOriginal').textContent = `${originalImage.width}×${originalImage.height}`;
+    $('infoGrid').textContent = `${processedData.gridSize}×${processedData.gridSize}`;
+    $('infoColors').textContent = processedData.stats.length;
+    $('infoTotal').textContent = processedData.total;
+}
+
+/* ===================== Download ===================== */
+function downloadPNG() {
+    if (!processedData) return;
+    const a = document.createElement('a');
+    a.download = `拼豆图纸_${processedData.gridSize}x${processedData.gridSize}.png`;
+    a.href = patternCanvas.toDataURL('image/png');
+    a.click();
+}
+
+function downloadJSON() {
+    if (!processedData) return;
+    const { gridSize, stats, palette } = processedData;
+    const data = {
+        gridSize,
+        palette: palette.map(c => ({ rgb: c, hex: '#' + c.map(v => v.toString(16).padStart(2, '0')).join('') })),
+        colors: stats.map(s => ({
+            rgb: s.color,
+            hex: '#' + s.color.map(v => v.toString(16).padStart(2, '0')).join(''),
+            count

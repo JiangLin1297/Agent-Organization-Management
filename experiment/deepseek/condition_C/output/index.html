@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>拼豆图纸 · 生成器</title>
+  <style>
+    /* ===== 全局重置 & 字体 ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #f5f3f0;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      color: #2c2b28;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+    }
+
+    /* ===== 主卡片 ===== */
+    .app-container {
+      max-width: 1400px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 2.5rem;
+      box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15), 0 8px 24px -6px rgba(0, 0, 0, 0.05);
+      padding: 2rem 2rem 2.5rem;
+      transition: all 0.2s ease;
+    }
+
+    /* ===== 布局：桌面左右，移动上下 ===== */
+    .layout {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+
+    .canvas-area {
+      flex: 2;
+      min-width: 320px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .control-area {
+      flex: 1.2;
+      min-width: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.8rem;
+    }
+
+    /* ===== 画布容器 ===== */
+    .canvas-wrapper {
+      position: relative;
+      background: #f0ede8;
+      border-radius: 1.8rem;
+      overflow: hidden;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.04);
+      aspect-ratio: 1 / 1;
+      width: 100%;
+      max-height: 70vh;
+      touch-action: none;
+    }
+
+    #mainCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      cursor: grab;
+    }
+
+    #mainCanvas:active {
+      cursor: grabbing;
+    }
+
+    .zoom-indicator {
+      position: absolute;
+      bottom: 16px;
+      right: 18px;
+      background: #ffffffcc;
+      backdrop-filter: blur(4px);
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #3a3a3a;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      pointer-events: none;
+      letter-spacing: 0.3px;
+    }
+
+    /* ===== 上传区域 ===== */
+    .upload-zone {
+      background: #f8f6f2;
+      border: 2px dashed #d6d2cb;
+      border-radius: 2rem;
+      padding: 1.8rem 1.2rem;
+      text-align: center;
+      transition: background 0.2s, border-color 0.2s;
+      cursor: pointer;
+    }
+
+    .upload-zone:hover {
+      background: #f3efe9;
+      border-color: #b8b0a6;
+    }
+
+    .upload-zone.drag-over {
+      background: #ece7df;
+      border-color: #9a8f82;
+    }
+
+    .upload-zone p {
+      font-size: 0.95rem;
+      color: #5f5b55;
+      margin-top: 8px;
+    }
+
+    .upload-zone .icon {
+      font-size: 2.2rem;
+      line-height: 1;
+      opacity: 0.7;
+    }
+
+    .upload-zone input[type="file"] {
+      display: none;
+    }
+
+    .preview-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .preview-row img {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 12px;
+      background: #e5e0d8;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+
+    .preview-row .file-name {
+      font-size: 0.85rem;
+      color: #4a4640;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ===== 控制面板 ===== */
+    .control-panel {
+      background: #faf9f7;
+      border-radius: 1.8rem;
+      padding: 1.6rem 1.5rem;
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.02);
+    }
+
+    .control-group {
+      margin-bottom: 1.6rem;
+    }
+
+    .control-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .control-group label {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: #3d3a35;
+      letter-spacing: 0.2px;
+      margin-bottom: 8px;
+    }
+
+    .control-group label span.value {
+      background: #eae7e1;
+      padding: 0 12px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #3d3a35;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .radio-group label {
+      flex: 1;
+      min-width: 60px;
+      background: #eeebe6;
+      padding: 8px 0;
+      text-align: center;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #4a4640;
+      cursor: pointer;
+      transition: background 0.15s, box-shadow 0.15s;
+    }
+
+    .radio-group input[type="radio"] {
+      display: none;
+    }
+
+    .radio-group input[type="radio"]:checked + label {
+      background: #2c2b28;
+      color: white;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    }
+
+    /* 滑块 */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      background: #ddd8d0;
+      border-radius: 10px;
+      outline: none;
+      margin: 8px 0 4px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #2c2b28;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      transition: 0.1s;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: #2c2b28;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #7a756d;
+      padding: 0 4px;
+    }
+
+    /* ===== 操作按钮 ===== */
+    .action-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .btn {
+      background: #eeebe6;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 40px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: #2c2b28;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      flex: 1;
+      min-width: 80px;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .btn-primary {
+      background: #2c2b28;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #1f1e1b;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid #d6d2cb;
+    }
+
+    .btn-outline:hover {
+      background: #f0ece6;
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    /* ===== 统计表格 ===== */
+    .stats-section {
+      background: #faf9f7;
+      border-radius: 1.8rem;
+      padding: 1.2rem 1rem;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    .stats-section h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #3d3a35;
+      margin-bottom: 12px;
+      letter-spacing: 0.3px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    .stats-table th {
+      text-align: left;
+      font-weight: 500;
+      color: #6b655c;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e3ded6;
+    }
+
+    .stats-table td {
+      padding: 6px 4px;
+      border-bottom: 1px solid #efebe5;
+    }
+
+    .stats-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .color-swatch {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.04);
+      vertical-align: middle;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .color-hex {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.75rem;
+      color: #4a4640;
+    }
+
+    .count-badge {
+      font-weight: 500;
+      color: #2c2b28;
+    }
+
+    /* ===== 加载状态 ===== */
+    .loading-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(2px);
+      border-radius: 1.8rem;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      font-weight: 500;
+      color: #3d3a35;
+      font-size: 1rem;
+      letter-spacing: 0.5px;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid #ddd8d0;
+      border-top-color: #2c2b28;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 12px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 780px) {
+      body { padding: 0.8rem; }
+      .app-container { padding: 1.2rem; border-radius: 2rem; }
+      .layout { flex-direction: column; gap: 1.2rem; }
+      .canvas-area { min-width: 0; }
+      .canvas-wrapper { max-height: 55vh; }
+      .control-area { gap: 1rem; }
+      .control-panel { padding: 1.2rem; }
+      .stats-section { max-height: 240px; }
+    }
+
+    /* 滚动条美化 */
+    .stats-section::-webkit-scrollbar { width: 4px; }
+    .stats-section::-webkit-scrollbar-track { background: #efebe5; border-radius: 10px; }
+    .stats-section::-webkit-scrollbar-thumb { background: #cbc5bc; border-radius: 10px; }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <div class="layout">
+    <!-- 左侧：画布 -->
+    <div class="canvas-area">
+      <div class="canvas-wrapper" id="canvasWrapper">
+        <canvas id="mainCanvas"></canvas>
+        <div class="zoom-indicator" id="zoomIndicator">100%</div>
+        <div class="loading-overlay" id="loadingOverlay">
+          <div class="spinner"></div>
+          <span>处理中…</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧：控制 + 统计 -->
+    <div class="control-area">
+      <!-- 上传 -->
+      <div class="upload-zone" id="uploadZone">
+        <div class="icon">🖼️</div>
+        <p>点击或拖拽上传图片<br><span style="font-size:0.75rem; color:#8a847b;">JPG / PNG / WebP</span></p>
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" />
+        <div class="preview-row" id="previewRow" style="display:none;">
+          <img id="previewImg" alt="预览" />
+          <span class="file-name" id="fileName">image.png</span>
+        </div>
+      </div>
+
+      <!-- 控制面板 -->
+      <div class="control-panel">
+        <div class="control-group">
+          <label>网格尺寸 <span class="value" id="gridSizeLabel">48×48</span></label>
+          <div class="radio-group" id="gridSizeGroup">
+            <input type="radio" name="gridSize" value="32" id="gs32"><label for="gs32">32×32</label>
+            <input type="radio" name="gridSize" value="48" id="gs48" checked><label for="gs48">48×48</label>
+            <input type="radio" name="gridSize" value="64" id="gs64"><label for="gs64">64×64</label>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label>颜色数量 <span class="value" id="colorCountLabel">15</span></label>
+          <input type="range" id="colorCountSlider" min="10" max="20" value="15" step="1">
+          <div class="range-labels"><span>10</span><span>20</span></div>
+        </div>
+
+        <div class="action-row">
+          <button class="btn btn-primary" id="processBtn" disabled>生成图纸</button>
+          <button class="btn btn-outline" id="resetBtn">重置</button>
+        </div>
+      </div>
+
+      <!-- 统计 -->
+      <div class="stats-section" id="statsSection">
+        <h3><span>🧩 颜色统计</span><span id="totalCount">0</span></h3>
+        <table class="stats-table" id="statsTable">
+          <thead><tr><th>色块</th><th>颜色</th><th>数量</th></tr></thead>
+          <tbody id="statsBody"></tbody>
+        </table>
+        <div style="text-align:center; padding:1rem 0; color:#9a9288; font-size:0.8rem;" id="statsEmpty">上传图片后生成统计</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    // ============================================================
+    // 图像处理引擎 (中位切分法 + 网格映射)
+    // ============================================================
+
+    class ImagePreprocessor {
+      static processImage(image, gridSize) {
+        const canvas = document.createElement('canvas');
+        canvas.width = gridSize;
+        canvas.height = gridSize;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(image, 0, 0, gridSize, gridSize);
+        return ctx.getImageData(0, 0, gridSize, gridSize);
+      }
+    }
+
+    class ColorQuantizer {
+      static quantize(imageData, targetColorCount) {
+        const pixels = [];
+        for (let i = 0; i < imageData.data.length; i += 4) {
+          pixels.push({ r: imageData.data[i], g: imageData.data[i+1], b: imageData.data[i+2] });
+        }
+        const palette = this._medianCut(pixels, targetColorCount);
+        // 构建 colorMap (像素索引 -> 调色板索引)
+        const colorMap = new Map();
+        for (let i = 0; i < pixels.length; i++) {
+          const nearest = this._findNearestColor(pixels[i], palette);
+          colorMap.set(i, nearest);
+        }
+        return { colors: palette, colorMap };
+      }
+
+      static _medianCut(pixels, maxColors) {
+        if (pixels.length === 0) return [{ r: 0, g: 0, b: 0 }];
+        let cubes = [pixels];
+        while (cubes.length < maxColors) {
+          let maxIdx = 0;
+          for (let i = 1; i < cubes.length; i++) {
+            if (cubes[i].length > cubes[maxIdx].length) maxIdx = i;
+          }
+          if (cubes[maxIdx].length <= 1) break;
+          const split = this._splitCube(cubes[maxIdx]);
+          if (!split) break;
+          cubes.splice(maxIdx, 1, ...split);
+        }
+        return cubes.map(cube => {
+          let sumR = 0, sumG = 0, sumB = 0;
+          for (const p of cube) { sumR += p.r; sumG += p.g; sumB += p.b; }
+          const n = cube.length;
+          return { r: Math.round(sumR/n), g: Math.round(sumG/n), b: Math.round(sumB/n) };
+        });
+      }
+
+      static _splitCube(cube) {
+        if (cube.length < 2) return null;
+        let minR=255, maxR=0, minG=255, maxG=0, minB=255, maxB=0;
+        for (const p of cube) {
+          if (p.r < minR) minR = p.r; if (p.r > maxR) maxR = p.r;
+          if (p.g < minG) minG = p.g; if (p.g > maxG) maxG = p.g;
+          if (p.b < minB) minB = p.b; if (p.b > maxB) maxB = p.b;
+        }
+        const rangeR = maxR - minR, rangeG = maxG - minG, rangeB = maxB - minB;
+        let channel = 'r';
+        if (rangeG >= rangeR && rangeG >= rangeB) channel = 'g';
+        else if (rangeB >= rangeR && rangeB >= rangeG) channel = 'b';
+        cube.sort((a, b) => a[channel] - b[channel]);
+        const mid = Math.floor(cube.length / 2);
+        if (mid === 0 || mid === cube.length) return null;
+        return [cube.slice(0, mid), cube.slice(mid)];
+      }
+
+      static _findNearestColor(pixel, palette) {
+        let minDist = Infinity, idx = 0;
+        for (let i = 0; i < palette.length; i++) {
+          const dr = pixel.r - palette[i].r, dg = pixel.g - palette[i].g, db = pixel.b - palette[i].b;
+          const dist = dr*dr + dg*dg + db*db;
+          if (dist < minDist) { minDist = dist; idx = i; }
+        }
+        return idx;
+      }
+    }
+
+    class GridMapper {
+      static mapToGrid(imageData, palette) {
+        const width = imageData.width, height = imageData.height;
+        const data = new Array(width * height);
+        const colors = palette.colors;
+        for (let y = 0; y < height; y++) {
+          for (let x = 0; x < width; x++) {
+            const idx = (y * width + x) * 4;
+            const pixel = { r: imageData.data[idx], g: imageData.data[idx+1], b: imageData.data[idx+2] };
+            let best = 0, bestDist = Infinity;
+            for (let i = 0; i < colors.length; i++) {
+              const dr = pixel.r - colors[i].r, dg = pixel.g - colors[i].g, db = pixel.b - colors[i].b;
+              const d = dr*dr + dg*dg + db*db;
+              if (d < bestDist) { bestDist = d; best = i; }
+            }
+            data[y * width + x] = best;
+          }
+        }
+        return { width, height, data, palette };
+      }
+    }
+
+    class StatisticsOutput {
+      static calculateStatistics(gridMatrix) {
+        const countMap = new Map();
+        for (const idx of gridMatrix.data) {
+          countMap.set(idx, (countMap.get(idx) || 0) + 1);
+        }
+        const stats = [];
+        for (const [palIdx, count] of countMap) {
+          const c = gridMatrix.palette.colors[palIdx];
+          stats.push({ color: c, count, hex: this._rgbToHex(c.r, c.g, c.b) });
+        }
+        stats.sort((a, b) => b.count - a.count);
+        return stats;
+      }
+      static _rgbToHex(r, g, b) {
+        const hex = v => Math.round(v).toString(16).padStart(2, '0');
+        return `#${hex(r)}${hex(g)}${hex(b)}`;
+      }
+    }
+
+    // ============================================================
+    // UI控制器 (整合所有交互)
+    // ============================================================
+
+    // DOM 引用
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+    const canvasWrapper = document.getElementById('canvasWrapper');
+    const zoomIndicator = document.getElementById('zoomIndicator');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    const fileInput = document.getElementById('fileInput');
+    const uploadZone = document.getElementById('uploadZone');
+    const previewRow = document.getElementById('previewRow');
+    const previewImg = document.getElementById('previewImg');
+    const fileName = document.getElementById('fileName');
+
+    const gridSizeRadios = document.querySelectorAll('input[name="gridSize"]');
+    const gridSizeLabel = document.getElementById('gridSizeLabel');
+    const colorCountSlider = document.getElementById('colorCountSlider');
+    const colorCountLabel = document.getElementById('colorCountLabel');
+
+    const processBtn = document.getElementById('processBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    const statsBody = document.getElementById('statsBody');
+    const totalCount = document.getElementById('totalCount');
+    const statsEmpty = document.getElementById('statsEmpty');
+
+    // 状态
+    let currentImage = null;          // HTMLImageElement
+    let currentGridSize = 48;
+    let currentColorCount = 15;
+    let gridMatrix = null;
+    let zoom = 1.0;
+    let isProcessing = false;
+
+    // 画布尺寸管理
+    function resizeCanvas() {
+      const rect = canvasWrapper.getBoundingClientRect();
+      const size = Math.min(rect.width, rect.height);
+      canvas.width = size * window.devicePixelRatio;
+      canvas.height = size * window.devicePixelRatio;
+      canvas.style.width = size + 'px';
+      canvas.style.height = size + 'px';
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      drawGrid();
+    }
+
+    // 绘制网格 (使用当前 gridMatrix 和 zoom)
+    function drawGrid() {
+      const w = canvas.width / window.devicePixelRatio;
+      const h = canvas.height / window.devicePixelRatio;
+      ctx.clearRect(0, 0, w, h);
+
+      if (!gridMatrix) {
+        // 显示提示文字
+        ctx.fillStyle = '#bbb8b0';
+        ctx.font = '18px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('上传图片并生成图纸', w/2, h/2);
+        return;
+      }
+
+      const matrix = gridMatrix;
+      const cellSize = (Math.min(w, h) * zoom) / matrix.width;
+      const offsetX = (w - cellSize * matrix.width) / 2;
+      const offsetY = (h - cellSize * matrix.height) / 2;
+
+      // 绘制格子
+      for (let y = 0; y < matrix.height; y++) {
+        for (let x = 0; x < matrix.width; x++) {
+          const palIdx = matrix.data[y * matrix.width + x];
+          const color = matrix.palette.colors[palIdx];
+          ctx.fillStyle = `rgb(${color.r},${color.g},${color.b})`;
+          ctx.fillRect(offsetX + x * cellSize, offsetY + y * cellSize, cellSize, cellSize);
+        }
+      }
+
+      // 绘制网格线 (细线)
+      ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i <= matrix.width; i++) {
+        ctx.beginPath();
+        ctx.moveTo(offsetX + i * cellSize, offsetY);
+        ctx.lineTo(offsetX + i * cellSize, offsetY + matrix.height * cellSize);
+        ctx.stroke();
+      }
+      for (let i = 0; i <= matrix.height; i++) {
+        ctx.beginPath();
+        ctx.moveTo(offsetX, offsetY + i * cellSize);
+        ctx.lineTo(offsetX + matrix.width * cellSize, offsetY + i * cellSize);
+        ctx.stroke();
+      }
+
+      // 更新缩放指示
+      zoomIndicator.textContent = Math.round(zoom * 100) + '%';
+    }
+
+    // 更新统计表格
+    function updateStatistics() {
+      if (!gridMatrix) {
+        statsBody.innerHTML = '';
+        totalCount.textContent = '0';
+        statsEmpty.style.display = 'block';
+        return;
+      }
+      statsEmpty.style.display = 'none';
+      const stats = StatisticsOutput.calculateStatistics(gridMatrix);
+      let html = '';
+      let sum = 0;
+      for (const s of stats) {
+        sum += s.count;
+        html += `<tr>
+          <td><span class="color-swatch" style="background:${s.hex}"></span></td>
+          <td><span class="color-hex">${s.hex}</span></td>
+          <td><span class="count-badge">${s.count}</span></td>
+        </tr>`;
+      }
+      statsBody.innerHTML = html;
+      totalCount.textContent = sum;
+    }
+
+    // 核心处理流程 (从当前图片生成图纸)
+    function processImage() {
+      if (!currentImage || isProcessing) return;
+      isProcessing = true;
+      loadingOverlay.classList.add('active');
+      processBtn.disabled = true;
+
+      // 使用 setTimeout 让 UI 更新
+      setTimeout(() => {
+        try {
+          // 1. 预处理
+          const imageData = ImagePreprocessor.processImage(currentImage, currentGridSize);
+          // 2. 量化
+          const palette = ColorQuantizer.quantize(imageData, currentColorCount);
+          // 3. 网格映射 (直接使用量化后的 imageData 和 palette)
+          //    注意：quantize 返回的 palette 包含 colors 和 colorMap，但 GridMapper 需要 {colors}
+          const paletteForGrid = { colors: palette.colors };
+          //    重新从 imageData 映射 (因为 quantize 内部 colorMap 是基于原始像素的，但我们需要基于量化后的像素)
+          //    这里为了简化，直接使用 GridMapper 重新映射 (它内部会再次计算最近颜色，但结果一致)
+          gridMatrix = GridMapper.mapToGrid(imageData, paletteForGrid);
+          // 4. 渲染
+          resizeCanvas();
+          drawGrid();
+          // 5. 统计
+          updateStatistics();
+        } catch (e) {
+          console.error(e);
+          alert('处理图片时出错，请重试');
+        } finally {
+          isProcessing = false;
+          loadingOverlay.classList.remove('active');
+          processBtn.disabled = false;
+        }
+      }, 50);
+    }
+
+    // 重置
+    function resetAll() {
+      currentImage = null;
+      gridMatrix = null;
+      previewRow.style.display = 'none';
+      fileInput.value = '';
+      processBtn.disabled = true;
+      statsBody.innerHTML = '';
+      totalCount.textContent = '0';
+      statsEmpty.style.display = 'block';
+      zoom = 1.0;
+      resizeCanvas();
+      drawGrid();
+    }
+
+    // 加载图片文件
+    function loadImageFile(file) {
+      if (!file || !file.type.match(/image\/(jpeg|png|webp)/)) {
+        alert('请上传 JPG / PNG / WebP 格式的图片');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          currentImage = img;
+          previewImg.src = e.target.result;
+          fileName.textContent = file.name;
+          previewRow.style.display = 'flex';
+          processBtn.disabled = false;
+          // 自动生成图纸
+          processImage();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ===== 事件绑定 =====
+
+    // 上传点击
+    uploadZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) loadImageFile(e.target.files[0]);
+    });
+
+    // 拖拽上传
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('drag-over');
+    });
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('drag-over');
+    });
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('drag-over');
+      if (e.dataTransfer.files.length) loadImageFile(e.dataTransfer.files[0]);
+    });
+
+    // 网格尺寸切换
+    gridSizeRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        if (radio.checked) {
+          currentGridSize = parseInt(radio.value, 10);
+          gridSizeLabel.textContent = `${currentGridSize}×${currentGridSize}`;
+          if (currentImage) processImage();
+        }
+      });
+    });
+
+    // 颜色数量滑块
+    colorCountSlider.addEventListener('input', () => {
+      currentColorCount = parseInt(colorCountSlider.value, 10);
+      colorCountLabel.textContent = currentColorCount;
+    });
+    colorCountSlider.addEventListener('change', () => {
+      if (currentImage) processImage();
+    });
+
+    // 生成按钮 (手动触发)
+    processBtn.addEventListener('click', processImage);
+
+    // 重置按钮
+    resetBtn.addEventListener('click', resetAll);
+
+    // 缩放 (鼠标滚轮)
+    canvasWrapper.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      zoom = Math.min(5, Math.max(0.5, zoom + delta));
+      drawGrid();
+    }, { passive: false });
+
+    // 触摸缩放 (双指)
+    let lastTouchDist = 0;
+    canvasWrapper.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        lastTouchDist = Math.hypot(dx, dy);
+      }
+    });
+    canvasWrapper.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.hypot(dx, dy);
+        const scale = dist / lastTouchDist;
+        zoom = Math.min(5, Math.max(0.5, zoom * scale));
+        lastTouchDist = dist;
+        drawGrid();
+      }
+    }, { passive: false });
+
+    // 窗口大小变化
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+    });
+
+    // 初始化
+    resizeCanvas();
+    drawGrid();
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>拼豆图纸 · 像素网格生成器</title>
+  <style>
+    /* generative S2 风格：干净、圆角、柔和阴影、微渐变 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f7f3f0 0%, #eae5e0 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .app-container {
+      max-width: 1200px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(4px);
+      border-radius: 48px;
+      padding: 28px 32px 36px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.04);
+      transition: all 0.2s ease;
+    }
+
+    h1 {
+      font-weight: 500;
+      font-size: 1.9rem;
+      letter-spacing: -0.02em;
+      color: #2c2b28;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h1 small {
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: #7a7570;
+      margin-left: 8px;
+    }
+
+    .control-panel {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 18px 28px;
+      background: #ffffffd9;
+      padding: 16px 24px;
+      border-radius: 60px;
+      margin: 16px 0 24px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      backdrop-filter: blur(2px);
+      border: 1px solid #ffffffaa;
+    }
+
+    .upload-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .file-label {
+      background: #2c2b28;
+      color: white;
+      padding: 8px 22px;
+      border-radius: 40px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.15s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      letter-spacing: 0.3px;
+    }
+    .file-label:hover {
+      background: #1f1e1b;
+      transform: scale(0.97);
+    }
+    .file-label:active {
+      transform: scale(0.94);
+    }
+    #fileInput {
+      display: none;
+    }
+
+    .config-group {
+      display: flex;
+      align-items: center;
+      gap: 12px 20px;
+      flex-wrap: wrap;
+    }
+
+    .config-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .config-item label {
+      font-size: 0.9rem;
+      font-weight: 450;
+      color: #3a3733;
+    }
+    .config-item select,
+    .config-item input[type="range"] {
+      background: #f3f0ec;
+      border: none;
+      border-radius: 30px;
+      padding: 6px 14px;
+      font-size: 0.9rem;
+      font-weight: 450;
+      color: #1f1e1b;
+      outline: none;
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.02);
+      cursor: pointer;
+    }
+    .config-item select {
+      padding-right: 28px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%233a3733' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+    .config-item input[type="range"] {
+      width: 130px;
+      padding: 0;
+      height: 6px;
+      background: #d6d1cb;
+      border-radius: 10px;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .config-item input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #2c2b28;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      border: 2px solid white;
+    }
+    .color-count-value {
+      min-width: 28px;
+      font-weight: 500;
+      text-align: center;
+      color: #2c2b28;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      background: #ffffffc9;
+      border-radius: 32px;
+      padding: 16px;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.02), 0 12px 24px -8px rgba(0,0,0,0.1);
+      margin: 8px 0 20px 0;
+      backdrop-filter: blur(2px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 320px;
+      touch-action: pan-x pan-y;
+      overflow: hidden;
+    }
+
+    #gridCanvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 600px;
+      aspect-ratio: 1 / 1;
+      border-radius: 20px;
+      background: #f0ece8;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+      image-rendering: pixelated;
+      transition: transform 0.1s ease;
+      cursor: grab;
+      touch-action: none;
+    }
+    #gridCanvas:active {
+      cursor: grabbing;
+    }
+
+    .zoom-controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 6px 0 16px 0;
+    }
+    .zoom-btn {
+      background: #ffffffd9;
+      border: none;
+      border-radius: 40px;
+      padding: 6px 18px;
+      font-size: 1.1rem;
+      font-weight: 450;
+      color: #2c2b28;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      cursor: pointer;
+      transition: 0.1s;
+      backdrop-filter: blur(2px);
+      border: 1px solid #ffffffaa;
+    }
+    .zoom-btn:hover {
+      background: #f3f0ec;
+      transform: scale(0.96);
+    }
+
+    .stats-section {
+      background: #ffffffd9;
+      border-radius: 32px;
+      padding: 20px 24px;
+      backdrop-filter: blur(2px);
+      margin-top: 8px;
+      border: 1px solid #ffffffaa;
+    }
+    .stats-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .stats-header h3 {
+      font-weight: 500;
+      color: #2c2b28;
+      font-size: 1.2rem;
+    }
+    .export-btn {
+      background: transparent;
+      border: 1px solid #b5aea7;
+      border-radius: 30px;
+      padding: 4px 18px;
+      font-size: 0.85rem;
+      color: #3a3733;
+      cursor: pointer;
+      transition: 0.1s;
+    }
+    .export-btn:hover {
+      background: #e5dfd9;
+      border-color: #8a847d;
+    }
+
+    #colorStatsTable {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+    }
+    .stat-card {
+      background: #f8f5f1;
+      border-radius: 20px;
+      padding: 8px 12px 8px 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+      transition: 0.1s;
+    }
+    .stat-color-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 16px;
+      border: 1px solid #e3ddd6;
+      flex-shrink: 0;
+    }
+    .stat-info {
+      flex: 1;
+      font-size: 0.8rem;
+      color: #3a3733;
+      display: flex;
+      flex-direction: column;
+    }
+    .stat-info .rgb {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.7rem;
+      color: #6b6560;
+    }
+    .stat-info .count {
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .placeholder-tip {
+      color: #8a847d;
+      font-size: 1rem;
+      padding: 40px 20px;
+      text-align: center;
+      width: 100%;
+    }
+
+    .error-message {
+      background: #fce8e4;
+      color: #a53e2c;
+      border-radius: 40px;
+      padding: 10px 20px;
+      margin: 8px 0;
+      font-size: 0.9rem;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .error-message.show {
+      display: flex;
+    }
+
+    .loading-indicator {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 0;
+      color: #5f5953;
+      font-size: 0.9rem;
+    }
+    .loading-indicator.active {
+      display: flex;
+    }
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid #d6d1cb;
+      border-top-color: #2c2b28;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* 移动端优化 */
+    @media (max-width: 700px) {
+      .app-container { padding: 16px; }
+      .control-panel { border-radius: 32px; padding: 14px 18px; gap: 12px; }
+      .config-item input[type="range"] { width: 100px; }
+      .canvas-wrapper { padding: 8px; }
+      #gridCanvas { max-width: 100%; }
+      #colorStatsTable { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <h1>🧩 拼豆图纸 <small>像素转网格</small></h1>
+
+  <!-- 控制面板 -->
+  <div class="control-panel">
+    <div class="upload-area">
+      <label for="fileInput" class="file-label">📁 上传图片</label>
+      <input type="file" id="fileInput" accept="image/png,image/jpeg,image/gif,image/bmp,image/webp">
+    </div>
+    <div class="config-group">
+      <div class="config-item">
+        <label>网格</label>
+        <select id="gridSizeSelect">
+          <option value="32">32×32</option>
+          <option value="48" selected>48×48</option>
+          <option value="64">64×64</option>
+        </select>
+      </div>
+      <div class="config-item">
+        <label>颜色</label>
+        <input type="range" id="colorRange" min="10" max="20" value="15" step="1">
+        <span class="color-count-value" id="colorDisplay">15</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 错误提示 & 加载 -->
+  <div class="error-message" id="errorMessage"></div>
+  <div class="loading-indicator" id="loadingIndicator">
+    <div class="spinner"></div>
+    <span>正在生成图纸…</span>
+  </div>
+
+  <!-- Canvas 区域 -->
+  <div class="canvas-wrapper" id="canvasWrapper">
+    <canvas id="gridCanvas" width="480" height="480"></canvas>
+  </div>
+
+  <!-- 缩放控制 -->
+  <div class="zoom-controls">
+    <button class="zoom-btn" id="zoomInBtn">➕ 放大</button>
+    <button class="zoom-btn" id="zoomResetBtn">⟲ 重置</button>
+    <button class="zoom-btn" id="zoomOutBtn">➖ 缩小</button>
+  </div>
+
+  <!-- 统计 & 导出 -->
+  <div class="stats-section">
+    <div class="stats-header">
+      <h3>🎨 颜色统计</h3>
+      <button class="export-btn" id="exportStatsBtn">📋 导出文本</button>
+    </div>
+    <div id="colorStatsTable">
+      <div class="placeholder-tip">上传图片后，这里将显示每种颜色的数量</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    // ---------- DOM 引用 ----------
+    const fileInput = document.getElementById('fileInput');
+    const gridSizeSelect = document.getElementById('gridSizeSelect');
+    const colorRange = document.getElementById('colorRange');
+    const colorDisplay = document.getElementById('colorDisplay');
+    const canvas = document.getElementById('gridCanvas');
+    const ctx = canvas.getContext('2d');
+    const statsContainer = document.getElementById('colorStatsTable');
+    const errorMsg = document.getElementById('errorMessage');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const zoomInBtn = document.getElementById('zoomInBtn');
+    const zoomOutBtn = document.getElementById('zoomOutBtn');
+    const zoomResetBtn = document.getElementById('zoomResetBtn');
+    const exportBtn = document.getElementById('exportStatsBtn');
+
+    // ---------- 状态 ----------
+    let currentImageData = null;          // 原始 ImageData (来自上传)
+    let currentResult = null;            // { processedData, palette }
+    let currentZoom = 1.0;
+    const BASE_CELL_SIZE = 10;           // 基础格子像素 (用于计算)
+    let canvasDisplaySize = 480;
+
+    // ---------- 工具函数 ----------
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.classList.add('show');
+    }
+    function hideError() {
+      errorMsg.classList.remove('show');
+    }
+
+    function setLoading(active) {
+      loadingIndicator.classList.toggle('active', active);
+    }
+
+    // 更新颜色显示
+    colorRange.addEventListener('input', function() {
+      colorDisplay.textContent = this.value;
+    });
+
+    // ---------- 模块B: 图像加载器 ----------
+    function loadImageFromFile(file) {
+      return new Promise((resolve, reject) => {
+        if (!file || !file.type.startsWith('image/')) {
+          reject(new Error('INVALID_FILE'));
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            // 提取原始 ImageData
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = img.width;
+            tempCanvas.height = img.height;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(img, 0, 0);
+            let imageData;
+            try {
+              imageData = tempCtx.getImageData(0, 0, img.width, img.height);
+            } catch (err) {
+              reject(new Error('MEMORY_LIMIT'));
+              return;
+            }
+            resolve(imageData);
+          };
+          img.onerror = () => reject(new Error('INVALID_FILE'));
+          img.src = e.target.result;
+        };
+        reader.onerror = () => reject(new Error('INVALID_FILE'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // ---------- 模块C: 图像处理器 (中位切分法) ----------
+    function processImage(originalData, config) {
+      const { gridSize, maxColors } = config;
+      const w = originalData.width;
+      const h = originalData.height;
+
+      // 1. 缩放至 gridSize x gridSize (最近邻插值)
+      const scaledData = scaleImageData(originalData, gridSize, gridSize);
+
+      // 2. 中位切分降色
+      const { quantizedData, palette } = medianCut(scaledData, maxColors);
+
+      return {
+        processedData: quantizedData,
+        palette: palette
+      };
+    }
+
+    // 最近邻缩放
+    function scaleImageData(src, targetW, targetH) {
+      const srcW = src.width, srcH = src.height;
+      const dst = ctx.createImageData(targetW, targetH);
+      const srcData = src.data;
+      const dstData = dst.data;
+      const xRatio = srcW / targetW;
+      const yRatio = srcH / targetH;
+
+      for (let y = 0; y < targetH; y++) {
+        for (let x = 0; x < targetW; x++) {
+          const srcX = Math.min(Math.floor(x * xRatio), srcW - 1);
+          const srcY = Math.min(Math.floor(y * yRatio), srcH - 1);
+          const srcIdx = (srcY * srcW + srcX) * 4;
+          const dstIdx = (y * targetW + x) * 4;
+          dstData[dstIdx] = srcData[srcIdx];
+          dstData[dstIdx + 1] = srcData[srcIdx + 1];
+          dstData[dstIdx + 2] = srcData[srcIdx + 2];
+          dstData[dstIdx + 3] = 255;
+        }
+      }
+      return dst;
+    }
+
+    // 中位切分降色 (Median Cut)
+    function medianCut(imageData, maxColors) {
+      const w = imageData.width, h = imageData.height;
+      const data = imageData.data;
+      const pixels = [];
+      for (let i = 0; i < data.length; i += 4) {
+        pixels.push({
+          r: data[i],
+          g: data[i + 1],
+          b: data[i + 2]
+        });
+      }
+
+      // 递归切分
+      function cut(box, depth) {
+        if (box.length <= 1 || depth >= 8) return [averageColor(box)];
+
+        // 找到最大范围的颜色通道
+        let minR = 255, maxR = 0, minG = 255, maxG = 0, minB = 255, maxB = 0;
+        for (const p of box) {
+          if (p.r < minR) minR = p.r;
+          if (p.r > maxR) maxR = p.r;
+          if (p.g < minG) minG = p.g;
+          if (p.g > maxG) maxG = p.g;
+          if (p.b < minB) minB = p.b;
+          if (p.b > maxB) maxB = p.b;
+        }
+        const rangeR = maxR - minR;
+        const rangeG = maxG - minG;
+        const rangeB = maxB - minB;
+
+        let channel;
+        if (rangeR >= rangeG && rangeR >= rangeB) channel = 'r';
+        else if (rangeG >= rangeR && rangeG >= rangeB) channel = 'g';
+        else channel = 'b';
+
+        // 按通道排序
+        box.sort((a, b) => a[channel] - b[channel]);
+        const medianIdx = Math.floor(box.length / 2);
+        const left = box.slice(0, medianIdx);
+        const right = box.slice(medianIdx);
+
+        // 如果切分后某一边为空，返回平均色
+        if (left.length === 0 || right.length === 0) {
+          return [averageColor(box)];
+        }
+
+        const leftColors = cut(left, depth + 1);
+        const rightColors = cut(right, depth + 1);
+        return leftColors.concat(rightColors);
+      }
+
+      // 限制颜色数量：切分直到颜色数 <= maxColors
+      function quantize(pixels, maxColors) {
+        // 简单实现：不断切分最大的box
+        let boxes = [pixels];
+        while (boxes.length < maxColors) {
+          // 找到包含像素最多的box
+          let largestIdx = 0;
+          let largestSize = 0;
+          for (let i = 0; i < boxes.length; i++) {
+            if (boxes[i].length > largestSize) {
+              largestSize = boxes[i].length;
+              largestIdx = i;
+            }
+          }
+          const box = boxes[largestIdx];
+          if (box.length <= 1) break;
+
+          // 找到最大范围通道
+          let minR = 255, maxR = 0, minG = 255, maxG = 0, minB = 255, maxB = 0;
+          for (const p of box) {
+            if (p.r < minR) minR = p.r;
+            if (p.r > maxR) maxR = p.r;
+            if (p.g < minG) minG = p.g;
+            if (p.g > maxG) maxG = p.g;
+            if (p.b < minB) minB = p.b;
+            if (p.b > maxB) maxB = p.b;
+          }
+          const rangeR = maxR - minR;
+          const rangeG = maxG - minG;
+          const rangeB = maxB - minB;
+          let channel;
+          if (rangeR >= rangeG && rangeR >= rangeB) channel = 'r';
+          else if (rangeG >= rangeR && rangeG >= rangeB) channel = 'g';
+          else channel = 'b';
+
+          box.sort((a, b) => a[channel] - b[channel]);
+          const medianIdx = Math.floor(box.length / 2);
+          const left = box.slice(0, medianIdx);
+          const right = box.slice(medianIdx);
+          boxes.splice(largestIdx, 1, left, right);
+        }
+
+        // 每个box取平均色
+        const palette = boxes.map(box => averageColor(box));
+        return palette;
+      }
+
+      function averageColor(box) {
+        let sumR = 0, sumG = 0, sumB = 0;
+        for (const p of box) {
+          sumR += p.r;
+          sumG += p.g;
+          sumB += p.b;
+        }
+        const len = box.length || 1;
+        return { r: Math.round(sumR / len), g: Math.round(sumG / len), b: Math.round(sumB / len) };
+      }
+
+      const palette = quantize(pixels, maxColors);
+
+      // 为每个像素分配最近的颜色
+      const quantizedData = ctx.createImageData(w, h);
+      const qData = quantizedData.data;
+      for (let i = 0; i < pixels.length; i++) {
+        const p = pixels[i];
+        let minDist = Infinity;
+        let best = palette[0];
+        for (const c of palette) {
+          const d = (p.r - c.r) ** 2 + (p.g - c.g) ** 2 + (p.b - c.b) ** 2;
+          if (d < minDist) {
+            minDist = d;
+            best = c;
+          }
+        }
+        const idx = i * 4;
+        qData[idx] = best.r;
+        qData[idx + 1] = best.g;
+        qData[idx + 2] = best.b;
+        qData[idx + 3] = 255;
+      }
+
+      // 统计每种颜色数量
+      const colorCount = new Map();
+      for (let i = 0; i < pixels.length; i++) {
+        const idx = i * 4;
+        const key = `${qData[idx]},${qData[idx+1]},${qData[idx+2]}`;
+        colorCount.set(key, (colorCount.get(key) || 0) + 1);
+      }
+
+      const paletteWithCount = [];
+      for (const c of palette) {
+        const key = `${c.r},${c.g},${c.b}`;
+        const count = colorCount.get(key) || 0;
+        paletteWithCount.push({ r: c.r, g: c.g, b: c.b, count });
+      }
+      // 按数量降序
+      paletteWithCount.sort((a, b) => b.count - a.count);
+
+      return { quantizedData, palette: paletteWithCount };
+    }
+
+    // ---------- 模块D: 图纸渲染器 ----------
+    function renderGrid(canvas, result, cellSize) {
+      const { processedData, palette } = result;
+      const gridSize = processedData.width;
+      const displaySize = gridSize * cellSize;
+      canvas.width = displaySize;
+      canvas.height = displaySize;
+
+      const data = processedData.data;
+      for (let y = 0; y < gridSize; y++) {
+        for (let x = 0; x < gridSize; x++) {
+          const idx = (y * gridSize + x) * 4;
+          const r = data[idx];
+          const g = data[idx + 1];
+          const b = data[idx + 2];
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+          ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+        }
+      }
+
+      // 绘制网格线 (浅灰色)
+      ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i <= gridSize; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * cellSize, 0);
+        ctx.lineTo(i * cellSize, displaySize);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, i * cellSize);
+        ctx.lineTo(displaySize, i * cellSize);
+        ctx.stroke();
+      }
+    }
+
+    // ---------- 模块E: 统计生成器 ----------
+    function generateStatistics(result) {
+      const { palette } = result;
+      if (!palette || palette.length === 0) {
+        return '<div class="placeholder-tip">暂无颜色数据</div>';
+      }
+      let html = '';
+      for (const c of palette) {
+        const rgb = `rgb(${c.r},${c.g},${c.b})`;
+        html += `
+          <div class="stat-card">
+            <div class="stat-color-swatch" style="background:${rgb};"></div>
+            <div class="stat-info">
+              <span class="count">${c.count} 颗</span>
+              <span class="rgb">#${c.r.toString(16).padStart(2,'0')}${c.g.toString(16).padStart(2,'0')}${c.b.toString(16).padStart(2,'0')}</span>
+            </div>
+          </div>
+        `;
+      }
+      return html;
+    }
+
+    // ---------- 模块A: UI控制器 ----------
+    function handleImageUpload(file) {
+      hideError();
+      setLoading(true);
+      loadImageFromFile(file)
+        .then(imageData => {
+          currentImageData = imageData;
+          const config = {
+            gridSize: parseInt(gridSizeSelect.value),
+            maxColors: parseInt(colorRange.value)
+          };
+          const result = processImage(imageData, config);
+          currentResult = result;
+          renderResults(result);
+          setLoading(false);
+        })
+        .catch(err => {
+          setLoading(false);
+          if (err.message === 'INVALID_FILE') {
+            showError('请上传有效的图片文件 (JPG/PNG/GIF/BMP/WebP)');
+          } else if (err.message === 'MEMORY_LIMIT') {
+            showError('图片过大，请选择较小的图片 (建议 < 5MB)');
+          } else {
+            showError('处理失败，请重试');
+          }
+        });
+    }
+
+    function handleConfigChange() {
+      if (!currentImageData) return;
+      hideError();
+      setLoading(true);
+      // 使用 setTimeout 让 UI 更新
+      setTimeout(() => {
+        try {
+          const config = {
+            gridSize: parseInt(gridSizeSelect.value),
+            maxColors: parseInt(colorRange.value)
+          };
+          const result = processImage(currentImageData, config);
+          currentResult = result;
+          renderResults(result);
+        } catch (e) {
+          showError('处理配置时出错，请重试');
+        }
+        setLoading(false);
+      }, 50);
+    }
+
+    function renderResults(result) {
+      // 计算 cellSize 使图纸适配 canvas 显示区域
+      const gridSize = result.processedData.width;
+      const maxDisplay = Math.min(canvas.parentElement.clientWidth - 32, 600);
+      const cellSize = Math.floor(maxDisplay / gridSize);
+      const finalCellSize = Math.max(cellSize, 4); // 最小 4px
+      renderGrid(canvas, result, finalCellSize);
+      // 更新统计
+      statsContainer.innerHTML = generateStatistics(result);
+      // 重置缩放
+      currentZoom = 1.0;
+      canvas.style.transform = 'scale(1)';
+    }
+
+    // ---------- 事件绑定 ----------
+    fileInput.addEventListener('change', function(e) {
+      if (this.files && this.files[0]) {
+        handleImageUpload(this.files[0]);
+      }
+    });
+
+    gridSizeSelect.addEventListener('change', handleConfigChange);
+    colorRange.addEventListener('change', handleConfigChange);
+    // 滑块实时拖动也触发更新 (防抖)
+    let debounceTimer = null;
+    colorRange.addEventListener('input', function() {
+      colorDisplay.textContent = this.value;
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        handleConfigChange();
+      }, 200);
+    });
+
+    // 缩放控制
+    function applyZoom() {
+      canvas.style.transform = `scale(${currentZoom})`;
+    }
+    zoomInBtn.addEventListener('click', function() {
+      currentZoom = Math.min(currentZoom + 0.2, 3.0);
+      applyZoom();
+    });
+    zoomOutBtn.addEventListener('click', function() {
+      currentZoom = Math.max(currentZoom - 0.2, 0.3);
+      applyZoom();
+    });
+    zoomResetBtn.addEventListener('click', function() {
+      currentZoom = 1.0;
+      applyZoom();
+    });
+
+    // 鼠标滚轮缩放 (在 canvas 上)
+    canvas.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      if (e.deltaY < 0) {
+        currentZoom = Math.min(currentZoom + 0.1, 3.0);
+      } else {
+        currentZoom = Math.max(currentZoom - 0.1, 0.3);
+      }
+      applyZoom();
+    }, { passive: false });
+
+    // 导出统计文本
+    exportBtn.addEventListener('click', function() {
+      if (!currentResult || !currentResult.palette) return;
+      let text = '拼豆图纸 - 颜色统计\n';
+      text += '====================\n';
+      for (const c of currentResult.palette) {
+        text += `RGB(${c.r}, ${c.g}, ${c.b})  #${c.r.toString(16).padStart(2,'0')}${c.g.toString(16).padStart(2,'0')}${c.b.toString(16).padStart(2,'0')}  ➜  ${c.count} 颗\n`;
+      }
+      text += '====================\n';
+      const blob = new Blob([text], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = '拼豆颜色统计.txt';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    // 拖拽上传 (简单实现)
+    const uploadArea = document.querySelector('.upload-area');
+    uploadArea.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      this.style.opacity = '0.7';
+    });
+    uploadArea.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      this.style.opacity = '1';
+    });
+    uploadArea.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.style.opacity = '1';
+      const files = e.dataTransfer.files;
+      if (files && files[0]) {
+        handleImageUpload(files[0]);
+        // 同步 fileInput
+        const dt = new DataTransfer();
+        dt.items.add(files[0]);
+        fileInput.files = dt.files;
+      }
+    });
+
+    // 初始化占位
+    console.log('🧩 拼豆图纸生成器已加载');
+  })();
+</script>
+</body>
+</html>

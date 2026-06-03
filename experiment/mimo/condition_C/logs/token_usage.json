@@ -1,0 +1,61 @@
+{
+  "condition": "C",
+  "provider": "mimo",
+  "model": "mimo-v2.5-pro",
+  "total_tokens": 49285,
+  "api_calls": 7,
+  "total_time": 550.6,
+  "html_length": 31305,
+  "max_context": 31560,
+  "details": [
+    {
+      "step": 1,
+      "agent": "coordinator",
+      "phase": "任务分解",
+      "tokens": 2359,
+      "context_length": 346
+    },
+    {
+      "step": 2,
+      "agent": "product_manager",
+      "phase": "需求定义",
+      "tokens": 3277,
+      "context_length": 3340
+    },
+    {
+      "step": 3,
+      "agent": "architect",
+      "phase": "架构设计",
+      "tokens": 3450,
+      "context_length": 2077
+    },
+    {
+      "step": 4,
+      "agent": "frontend_dev",
+      "phase": "前端实现",
+      "tokens": 6484,
+      "context_length": 4504
+    },
+    {
+      "step": 5,
+      "agent": "image_processing_dev",
+      "phase": "图像处理",
+      "tokens": 6547,
+      "context_length": 4506
+    },
+    {
+      "step": 6,
+      "agent": "tester",
+      "phase": "测试审查",
+      "tokens": 8539,
+      "context_length": 23997
+    },
+    {
+      "step": 7,
+      "agent": "coordinator",
+      "phase": "最终整合",
+      "tokens": 18629,
+      "context_length": 31560
+    }
+  ]
+}

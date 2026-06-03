@@ -1,0 +1,14 @@
+{
+  "condition": "A",
+  "provider": "mimo",
+  "model": "mimo-v2.5-pro",
+  "total_tokens": 8251,
+  "api_calls": 1,
+  "total_time": 163.6,
+  "html_length": 28534,
+  "details": [
+    {
+      "tokens": 8251
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+Step 1 [coordinator              ]: ctx=       346
+Step 2 [product_manager          ]: ctx=     3,340
+Step 3 [architect                ]: ctx=     2,077
+Step 4 [frontend_dev             ]: ctx=     4,504
+Step 5 [image_processing_dev     ]: ctx=     4,506
+Step 6 [tester                   ]: ctx=    23,997
+Step 7 [coordinator              ]: ctx=    31,560
+
+Max: 31,560
+Total: 49,285
