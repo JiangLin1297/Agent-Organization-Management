@@ -1,21 +1,23 @@
-"""实验配置"""
+"""Experiment configuration — API keys loaded from environment variables"""
 import os
 
-# API配置（通过环境变量或直接修改）
 CONFIGS = {
     "deepseek": {
-        "base_url": "https://api.deepseek.com/anthropic",
-        "api_key": "REDACTED",
-        "model": "deepseek-chat",
+        "base_url": os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com/anthropic"),
+        "api_key": os.environ.get("DEEPSEEK_API_KEY", ""),
+        "model": os.environ.get("DEEPSEEK_MODEL", "deepseek-chat"),
     },
     "mimo": {
-        "base_url": "https://token-plan-cn.xiaomimimo.com/anthropic",
-        "api_key": "REDACTED",
-        "model": "mimo-v2.5-pro",
+        "base_url": os.environ.get("MIMO_BASE_URL", "https://token-plan-cn.xiaomimimo.com/anthropic"),
+        "api_key": os.environ.get("MIMO_API_KEY", ""),
+        "model": os.environ.get("MIMO_MODEL", "mimo-v2.5-pro"),
     },
 }
 
 def get_config(provider=None):
     if provider is None:
         provider = os.environ.get("LLM_PROVIDER", "deepseek")
-    return CONFIGS[provider]
+    cfg = CONFIGS[provider]
+    if not cfg["api_key"]:
+        raise ValueError(f"Please set {provider.upper()}_API_KEY environment variable")
+    return cfg
