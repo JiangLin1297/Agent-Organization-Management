@@ -1,0 +1,8 @@
+{
+  "condition": "E",
+  "run": 4,
+  "tokens": 63014,
+  "time": 154.0,
+  "html_length": 28315,
+  "max_context_chars": 30360
+}

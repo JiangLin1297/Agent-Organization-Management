@@ -24,7 +24,7 @@ except ImportError:
 
 sys.stdout.reconfigure(line_buffering=True)
 
-NUM_RUNS = 2  # Quick validation
+NUM_RUNS = 5  # Full statistical validation (matching V5.3)
 PROVIDER = sys.argv[1] if len(sys.argv) > 1 else "all"
 
 TASK_PROMPT = """请实现一个网页应用：拼豆图纸生成器。

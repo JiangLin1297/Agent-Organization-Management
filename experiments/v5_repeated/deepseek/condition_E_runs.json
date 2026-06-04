@@ -3,18 +3,42 @@
     {
       "condition": "E",
       "run": 1,
-      "tokens": 67211,
-      "time": 147.9,
-      "html_length": 30621,
-      "max_context_chars": 32346
+      "tokens": 61531,
+      "time": 148.3,
+      "html_length": 28695,
+      "max_context_chars": 30795
     },
     {
       "condition": "E",
       "run": 2,
-      "tokens": 62057,
-      "time": 145.0,
-      "html_length": 28734,
-      "max_context_chars": 29203
+      "tokens": 63731,
+      "time": 154.0,
+      "html_length": 31294,
+      "max_context_chars": 31898
+    },
+    {
+      "condition": "E",
+      "run": 3,
+      "tokens": 59889,
+      "time": 145.9,
+      "html_length": 28697,
+      "max_context_chars": 30151
+    },
+    {
+      "condition": "E",
+      "run": 4,
+      "tokens": 63014,
+      "time": 154.0,
+      "html_length": 28315,
+      "max_context_chars": 30360
+    },
+    {
+      "condition": "E",
+      "run": 5,
+      "tokens": 64129,
+      "time": 156.7,
+      "html_length": 28702,
+      "max_context_chars": 29350
     }
   ]
 }

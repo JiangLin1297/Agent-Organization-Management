@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>拼豆图纸生成器 · 像素艺术</title>
+    <style>
+        /* === 样式 (保留 frontend_dev 的完整样式) === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f5f3f0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            padding: 24px 16px;
+            color: #2c2b28;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 40px;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15), 0 4px 18px rgba(0, 0, 0, 0.05);
+            padding: 28px 24px 36px;
+            transition: all 0.2s ease;
+        }
+
+        h1 {
+            font-weight: 500;
+            font-size: 1.9rem;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            color: #1f1e1b;
+            border-bottom: 2px solid #eae7e2;
+            padding-bottom: 16px;
+        }
+        h1 small {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: #7a7a77;
+            margin-left: 8px;
+        }
+
+        .control-panel {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px 24px;
+            background: #faf9f7;
+            padding: 16px 20px;
+            border-radius: 60px;
+            margin-bottom: 28px;
+            box-shadow: inset 0 1px 4px rgba(0,0,0,0.02);
+        }
+
+        .upload-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+        }
+
+        .btn {
+            background: #ffffff;
+            border: 1px solid #d6d2cb;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #2c2b28;
+            transition: all 0.15s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            background: #fff;
+        }
+        .btn:hover {
+            background: #f3f1ed;
+            border-color: #b8b2a9;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.04);
+            transform: translateY(-1px);
+        }
+        .btn:active {
+            transform: scale(0.97);
+        }
+        .btn-primary {
+            background: #2c2b28;
+            border-color: #2c2b28;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #3f3d39;
+            border-color: #3f3d39;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #d6d2cb;
+        }
+
+        .select-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .select-group label {
+            font-size: 0.9rem;
+            font-weight: 450;
+            color: #4a4844;
+        }
+        .select-group select {
+            background: white;
+            border: 1px solid #d6d2cb;
+            border-radius: 40px;
+            padding: 6px 16px 6px 14px;
+            font-size: 0.95rem;
+            font-weight: 450;
+            color: #1f1e1b;
+            outline: none;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .select-group select:focus {
+            border-color: #8a857c;
+            box-shadow: 0 0 0 2px rgba(44,43,40,0.08);
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: auto;
+        }
+        .zoom-controls span {
+            font-size: 0.85rem;
+            color: #5e5b56;
+            min-width: 48px;
+            text-align: center;
+            font-weight: 450;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            background: #f0ede8;
+            border-radius: 28px;
+            padding: 12px;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.02);
+            margin-bottom: 28px;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 320px;
+            border: 1px solid #e3dfd8;
+        }
+
+        #mainCanvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+            border-radius: 20px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            transition: opacity 0.2s;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 6px;
+            background: #f0ede8;
+            padding: 4px;
+            border-radius: 40px;
+        }
+        .view-toggle .btn {
+            border-radius: 40px;
+            border: none;
+            background: transparent;
+            padding: 6px 16px;
+            font-size: 0.85rem;
+            font-weight: 450;
+        }
+        .view-toggle .btn.active {
+            background: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            border: 1px solid #d6d2cb;
+        }
+
+        .stats-section {
+            margin-top: 8px;
+        }
+        .stats-section h2 {
+            font-weight: 450;
+            font-size: 1.3rem;
+            letter-spacing: -0.01em;
+            margin-bottom: 12px;
+            color: #2c2b28;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .stats-section h2 small {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: #7a7a77;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 20px;
+            border: 1px solid #eae7e2;
+            background: #fcfcfa;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+        th {
+            background: #f3f1ed;
+            font-weight: 500;
+            padding: 12px 16px;
+            text-align: left;
+            color: #2c2b28;
+            border-bottom: 1px solid #ddd8d0;
+        }
+        td {
+            padding: 10px 16px;
+            border-bottom: 1px solid #efebe6;
+            vertical-align: middle;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .color-swatch {
+            width: 28px;
+            height: 28px;
+            border-radius: 12px;
+            border: 1px solid rgba(0,0,0,0.06);
+            display: inline-block;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .color-rgb {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #3a3834;
+        }
+        .badge-count {
+            font-weight: 450;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(245, 243, 240, 0.7);
+            backdrop-filter: blur(4px);
+            border-radius: 28px;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            font-size: 1.2rem;
+            color: #2c2b28;
+            font-weight: 450;
+            gap: 12px;
+            flex-direction: column;
+        }
+        .loading-overlay.show {
+            display: flex;
+        }
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid #ddd8d0;
+            border-top-color: #2c2b28;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .export-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 700px) {
+            .app-container { padding: 16px; }
+            .control-panel { border-radius: 32px; padding: 14px 16px; gap: 12px; }
+            .zoom-controls { margin-left: 0; width: 100%; justify-content: flex-end; }
+            h1 { font-size: 1.5rem; }
+            .btn { padding: 6px 16px; font-size: 0.85rem; }
+        }
+        @media (max-width: 480px) {
+            .control-panel { flex-direction: column; align-items: stretch; }
+            .upload-area { flex-wrap: wrap; }
+            .select-group { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container" id="app">
+    <h1>
+        🧩 拼豆图纸
+        <small>像素 · 色彩 · 手作</small>
+    </h1>
+
+    <!-- 控制面板 -->
+    <div class="control-panel">
+        <div class="upload-area">
+            <div class="file-input-wrapper">
+                <span class="btn btn-primary">📁 上传图片</span>
+                <input type="file" id="imageUpload" accept="image/png,image/jpeg,image/gif,image/webp" />
+            </div>
+            <span style="color:#8a857c; font-size:0.85rem;" id="fileName">未选择文件</span>
+        </div>
+
+        <div class="select-group">
+            <label for="gridSize">网格</label>
+            <select id="gridSize">
+                <option value="32">32×32</option>
+                <option value="48" selected>48×48</option>
+                <option value="64">64×64</option>
+            </select>
+        </div>
+
+        <div class="select-group">
+            <label for="maxColors">颜色</label>
+            <select id="maxColors">
+                <option value="10">10 色</option>
+                <option value="12">12 色</option>
+                <option value="14" selected>14 色</option>
+                <option value="16">16 色</option>
+                <option value="18">18 色</option>
+                <option value="20">20 色</option>
+            </select>
+        </div>
+
+        <div class="view-toggle" id="viewToggle">
+            <button class="btn active" data-mode="quantized">🎨 图纸</button>
+            <button class="btn" data-mode="original">🖼️ 原图</button>
+        </div>
+
+        <div class="zoom-controls">
+            <button class="btn btn-outline" id="zoomOut">−</button>
+            <span id="zoomLevel">1.0×</span>
+            <button class="btn btn-outline" id="zoomIn">+</button>
+        </div>
+    </div>
+
+    <!-- Canvas 区域 -->
+    <div class="canvas-wrapper" id="canvasWrapper">
+        <canvas id="mainCanvas" width="480" height="480"></canvas>
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="spinner"></div>
+            <span>处理中…</span>
+        </div>
+    </div>
+
+    <!-- 颜色统计 + 导出 -->
+    <div class="stats-section">
+        <h2>
+            📊 颜色统计
+            <small id="colorCountLabel">0 色</small>
+        </h2>
+        <div class="table-container" id="statsTableContainer">
+            <table>
+                <thead>
+                    <tr><th>色块</th><th>颜色 (RGB)</th><th>数量</th><th>建议采购 (包)</th></tr>
+                </thead>
+                <tbody id="statsBody">
+                    <tr><td colspan="4" style="text-align:center; color:#8a857c;">请上传图片生成统计</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="export-actions">
+            <button class="btn btn-outline" id="exportPngBtn">⬇ 导出 PNG</button>
+            <button class="btn btn-outline" id="exportCsvBtn">⬇ 导出 CSV</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // 模块A：图像处理引擎 (由 image_processing_dev 提供，完整集成)
+    // ============================================================
+    (function() {
+        'use strict';
+
+        const PERLER_COLORS = [
+            { name: '白色', r: 255, g: 255, b: 255 },
+            { name: '奶油色', r: 255, g: 253, b: 208 },
+            { name: '浅黄色', r: 255, g: 236, b: 139 },
+            { name: '黄色', r: 255, g: 235, b: 59 },
+            { name: '橙色', r: 255, g: 152, b: 0 },
+            { name: '深橙色', r: 230, g: 81, b: 0 },
+            { name: '红色', r: 244, g: 67, b: 54 },
+            { name: '深红色', r: 183, g: 28, b: 28 },
+            { name: '粉色', r: 255, g: 138, b: 128 },
+            { name: '浅粉色', r: 255, g: 204, b: 188 },
+            { name: '紫色', r: 156, g: 39, b: 176 },
+            { name: '深紫色', r: 106, g: 27, b: 154 },
+            { name: '蓝色', r: 33, g: 150, b: 243 },
+            { name: '深蓝色', r: 13, g: 71, b: 161 },
+            { name: '浅蓝色', r: 100, g: 181, b: 246 },
+            { name: '天蓝色', r: 0, g: 188, b: 212 },
+            { name: '青色', r: 0, g: 150, b: 136 },
+            { name: '绿色', r: 76, g: 175, b: 80 },
+            { name: '深绿色', r: 27, g: 94, b: 32 },
+            { name: '浅绿色', r: 139, g: 195, b: 74 },
+            { name: '黄绿色', r: 205, g: 220, b: 57 },
+            { name: '棕色', r: 121, g: 85, b: 72 },
+            { name: '深棕色', r: 62, g: 39, b: 35 },
+            { name: '灰色', r: 158, g: 158, b: 158 },
+            { name: '深灰色', r: 66, g: 66, b: 66 },
+            { name: '浅灰色', r: 224, g: 224, b: 224 },
+            { name: '黑色', r: 33, g: 33, b: 33 },
+            { name: '肤色', r: 255, g: 224, b: 178 },
+            { name: '深肤色', r: 188, g: 143, b: 97 },
+            { name: '金色', r: 255, g: 215, b: 0 }
+        ];
+
+        async function processImage(file, gridSize, maxColors) {
+            const imageData = await decodeImage(file, gridSize);
+            const quantizedData = medianCutQuantization(imageData, maxColors);
+            const mappedData = mapToPerlerColors(quantizedData);
+            const colorStats = calculateColorStats(mappedData);
+            return {
+                quantizedData: mappedData,
+                colorStats: colorStats
+            };
+        }
+
+        function decodeImage(file, gridSize) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = gridSize;
+                    canvas.height = gridSize;
+                    const ctx = canvas.getContext('2d');
+                    ctx.imageSmoothingEnabled = false;
+                    ctx.drawImage(img, 0, 0, gridSize, gridSize);
+                    const imageData = ctx.getImageData(0, 0, gridSize, gridSize);
+                    resolve(imageData);
+                };
+                img.onerror = () => reject(new Error('图片解码失败'));
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        function medianCutQuantization(imageData, maxColors) {
+            const width = imageData.width;
+            const height = imageData.height;
+            const pixels = [];
+            const data = imageData.data;
+
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                const a = data[i + 3];
+                if (a > 128) {
+                    pixels.push({ r, g, b, index: i / 4 });
+                }
+            }
+
+            if (pixels.length === 0) {
+                return imageData;
+            }
+
+            const colorBoxes = splitColorBoxes(pixels, maxColors);
+            const colorMap = new Map();
+            colorBoxes.forEach((box) => {
+                const avgColor = calculateAverageColor(box);
+                box.forEach(pixel => {
+                    colorMap.set(pixel.index, avgColor);
+                });
+            });
+
+            const outputData = new Uint8ClampedArray(data.length);
+            for (let i = 0; i < data.length; i += 4) {
+                const pixelIndex = i / 4;
+                if (colorMap.has(pixelIndex)) {
+                    const color = colorMap.get(pixelIndex);
+                    outputData[i] = color.r;
+                    outputData[i + 1] = color.g;
+                    outputData[i + 2] = color.b;
+                    outputData[i + 3] = 255;
+                } else {
+                    outputData[i] = data[i];
+                    outputData[i + 1] = data[i + 1];
+                    outputData[i + 2] = data[i + 2];
+                    outputData[i + 3] = data[i + 3];
+                }
+            }
+
+            return new ImageData(outputData, width, height);
+        }
+
+        function splitColorBoxes(pixels, maxBoxes) {
+            let boxes = [pixels];
+
+            while (boxes.length < maxBoxes) {
+                let maxSize = 0;
+                let splitIndex = -1;
+
+                for (let i = 0; i < boxes.length; i++) {
+                    if (boxes[i].length > maxSize) {
+                        maxSize = boxes[i].length;
+                        splitIndex = i;
+                    }
+                }
+
+                if (splitIndex === -1 || maxSize < 2) {
+                    break;
+                }
+
+                const boxToSplit = boxes[splitIndex];
+                const splitResult = splitBox(boxToSplit);
+
+                if (splitResult) {
+                    boxes.splice(splitIndex, 1, splitResult.box1, splitResult.box2);
+                } else {
+                    break;
+                }
+            }
+
+            return boxes;
+        }
+
+        function splitBox(box) {
+            if (box.length < 2) return null;
+
+            let minR = 255, maxR = 0;
+            let minG = 255, maxG = 0;
+            let minB = 255, maxB = 0;
+
+            for (const pixel of box) {
+                minR = Math.min(minR, pixel.r);
+                maxR = Math.max(maxR, pixel.r);
+                minG = Math.min(minG, pixel.g);
+                maxG = Math.max(maxG, pixel.g);
+                minB = Math.min(minB, pixel.b);
+                maxB = Math.max(maxB, pixel.b);
+            }
+
+            const rangeR = maxR - minR;
+            const rangeG = maxG - minG;
+            const rangeB = maxB - minB;
+
+            let channel;
+            if (rangeR >= rangeG && rangeR >= rangeB) {
+                channel = 'r';
+            } else if (rangeG >= rangeR && rangeG >= rangeB) {
+                channel = 'g';
+            } else {
+                channel = 'b';
+            }
+
+            box.sort((a, b) => a[channel] - b[channel]);
+            const medianIndex = Math.floor(box.length / 2);
+
+            let splitPoint = medianIndex;
+            while (splitPoint < box.length && box[splitPoint][channel] === box[medianIndex][channel]) {
+                splitPoint++;
+            }
+
+            if (splitPoint === box.length || splitPoint === 0) {
+                return null;
+            }
+
+            return {
+                box1: box.slice(0, splitPoint),
+                box2: box.slice(splitPoint)
+            };
+        }
+
+        function calculateAverageColor(box) {
+            let sumR = 0, sumG = 0, sumB = 0;
+            for (const pixel of box) {
+                sumR += pixel.r;
+                sumG += pixel.g;
+                sumB += pixel.b;
+            }
+            const count = box.length;
+            return {
+                r: Math.round(sumR / count),
+                g: Math.round(sumG / count),
+                b: Math.round(sumB / count)
+            };
+        }
+
+        function mapToPerlerColors(imageData) {
+            const width = imageData.width;
+            const height = imageData.height;
+            const data = imageData.data;
+            const outputData = new Uint8ClampedArray(data.length);
+
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                const a = data[i + 3];
+
+                if (a > 128) {
+                    const nearestColor = findNearestPerlerColor(r, g, b);
+                    outputData[i] = nearestColor.r;
+                    outputData[i + 1] = nearestColor.g;
+                    outputData[i + 2] = nearestColor.b;
+                    outputData[i + 3] = 255;
+                } else {
+                    outputData[i] = r;
+                    outputData[i + 1] = g;
+                    outputData[i + 2] = b;
+                    outputData[i + 3] = a;
+                }
+            }
+
+            return new ImageData(outputData, width, height);
+        }
+
+        function findNearestPerlerColor(r, g, b) {
+            let minDistance = Infinity;
+            let nearestColor = PERLER_COLORS[0];
+
+            for (const color of PERLER_COLORS) {
+                const dr = r - color.r;
+                const dg = g - color.g;
+                const db = b - color.b;
+                const distance = Math.sqrt(0.299 * dr * dr + 0.587 * dg * dg + 0.114 * db * db);
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestColor = color;
+                }
+            }
+
+            return nearestColor;
+        }
+
+        function calculateColorStats(imageData) {
+            const data = imageData.data;
+            const colorCount = new Map();
+
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                const a = data[i + 3];
+
+                if (a > 128) {
+                    const key = `rgb(${r},${g},${b})`;
+                    colorCount.set(key, (colorCount.get(key) || 0) + 1);
+                }
+            }
+
+            const sortedStats = new Map(
+                [...colorCount.entries()].sort((a, b) => b[1] - a[1])
+            );
+
+            return sortedStats;
+        }
+
+        // 导出接口
+        window.ImageProcessing = {
+            processImage: processImage,
+            PERLER_COLORS: PERLER_COLORS
+        };
+    })();
+
+    // ============================================================
+    // 模块B：UI控制器 + 可视化渲染器 (由 coordinator 整合)
+    // ============================================================
+    (function() {
+        'use strict';
+
+        // --- DOM 引用 ---
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        const fileInput = document.getElementById('imageUpload');
+        const fileNameSpan = document.getElementById('fileName');
+        const gridSizeSelect = document.getElementById('gridSize');
+        const maxColorsSelect = document.getElementById('maxColors');
+        const zoomLevelSpan = document.getElementById('zoomLevel');
+        const zoomInBtn = document.getElementById('zoomIn');
+        const zoomOutBtn = document.getElementById('zoomOut');
+        const viewToggle = document.getElementById('viewToggle');
+        const statsBody = document.getElementById('statsBody');
+        const colorCountLabel = document.getElementById('colorCountLabel');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const exportPngBtn = document.getElementById('exportPngBtn');
+        const exportCsvBtn = document.getElementById('exportCsvBtn');
+
+        // --- 状态 ---
+        let currentFile = null;
+        let currentGridSize = 48;
+        let currentMaxColors = 14;
+        let currentScale = 1.0;
+        let currentViewMode = 'quantized'; // 'quantized' or 'original'
+        let processedResult = null; // 存储 processImage 的结果
+        let originalImageData = null; // 存储原始缩放后的 ImageData
+
+        // --- 核心渲染函数 (renderGrid) ---
+        function renderGrid(canvasElement, imageData, scale) {
+            const gridSize = imageData.width; // 假设是正方形
+            const cellSize = scale; // 每个网格像素的实际大小
+            const canvasSize = gridSize * cellSize;
+
+            canvasElement.width = canvasSize;
+            canvasElement.height = canvasSize;
+            const context = canvasElement.getContext('2d');
+
+            // 清空画布
+            context.clearRect(0, 0, canvasSize, canvasSize);
+
+            // 绘制色块
+            const data = imageData.data;
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    const index = (y * gridSize + x) * 4;
+                    const r = data[index];
+                    const g = data[index + 1];
+                    const b = data[index + 2];
+                    const a = data[index + 3];
+
+                    context.fillStyle = `rgba(${r},${g},${b},${a/255})`;
+                    context.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                }
+            }
+
+            // 绘制网格线
+            context.strokeStyle = 'rgba(0,0,0,0.15)';
+            context.lineWidth = 0.5;
+            for (let i = 0; i <= gridSize; i++) {
+                context.beginPath();
+                context.moveTo(i * cellSize, 0);
+                context.lineTo(i * cellSize, canvasSize);
+                context.stroke();
+
+                context.beginPath();
+                context.moveTo(0, i * cellSize);
+                context.lineTo(canvasSize, i * cellSize);
+                context.stroke();
+            }
+        }
+
+        // --- 核心表格生成函数 (generateColorTable) ---
+        function generateColorTable(colorStats) {
+            let html = '';
+            let colorCount = 0;
+            for (const [rgbString, count] of colorStats) {
+                colorCount++;
+                const match = rgbString.match(/rgb\((\d+),(\d+),(\d+)\)/);
+                const r = match[1];
+                const g = match[2];
+                const b = match[3];
+                const suggestedBags = Math.ceil(count / 100);
+                html += `
+                    <tr>
+                        <td><div class="color-swatch" style="background-color: ${rgbString};"></div></td>
+                        <td class="color-rgb">${rgbString}</td>
+                        <td class="badge-count">${count}</td>
+                        <td>${suggestedBags} 包</td>
+                    </tr>
+                `;
+            }
+            return { html, colorCount };
+        }
+
+        // --- 更新UI ---
+        function updateCanvas() {
+            if (!processedResult && !originalImageData) return;
+
+            if (currentViewMode === 'quantized' && processedResult) {
+                renderGrid(canvas, processedResult.quantizedData, currentScale);
+            } else if (currentViewMode === 'original' && originalImageData) {
+                renderGrid(canvas, originalImageData, currentScale);
+            }
+        }
+
+        function updateStatsTable(colorStats) {
+            if (!colorStats || colorStats.size === 0) {
+                statsBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#8a857c;">请上传图片生成统计</td></tr>';
+                colorCountLabel.textContent = '0 色';
+                return;
+            }
+            const { html, colorCount } = generateColorTable(colorStats);
+            statsBody.innerHTML = html;
+            colorCountLabel.textContent = `${colorCount} 色`;
+        }
+
+        function showLoading() {
+            loadingOverlay.classList.add('show');
+        }
+
+        function hideLoading() {
+            loadingOverlay.classList.remove('show');
+        }
+
+        // --- 核心处理流程 ---
+        async function handleImageProcessing(file) {
+            if (!file) return;
+            showLoading();
+            try {
+                const gridSize = parseInt(gridSizeSelect.value);
+                const maxColors = parseInt(maxColorsSelect.value);
+                currentGridSize = gridSize;
+                currentMaxColors = maxColors;
+
+                // 1. 获取原始缩放数据 (用于原图显示)
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = gridSize;
+                tempCanvas.height = gridSize;
+                const tempCtx = tempCanvas.getContext('2d');
+                const img = new Image();
+                await new Promise((resolve, reject) => {
+                    img.onload = resolve;
+                    img.onerror = reject;
+                    img.src = URL.createObjectURL(file);
+                });
+                tempCtx.imageSmoothingEnabled = false;
+                tempCtx.drawImage(img, 0, 0, grid

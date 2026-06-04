@@ -4,49 +4,47 @@
 
 *Not using AI to manage people — using management theory to manage AI.*
 
-Preprint | Foundational Preprint | Version 5.4 | 2026-06-04
+Preprint | Foundational Preprint | Version 5.5 | 2026-06-04
 
 > 📖 [阅读中文版](README.md)
 
 ---
 
-## V5.4 Released (2026-06-04)
+## V5.5 Released (2026-06-04)
 
-**V5.4: Problem-Driven Theory Edition — Real-World Baseline — Theoretical Propositions**
+**V5.5: Submission-Ready Edition — Complete Real-World Baseline — Failure Cases — Theory Refinement**
 
-Core upgrade: Paper reframed from "system + experiment" narrative to "problem-driven theoretical paper" with real-world baseline and formal propositions.
+Core upgrade: From V5.4 "problem-driven" to "submission-ready" with softened theoretical claims and failure case analysis.
 
 ### Key Changes
 
-1. **Problem-driven narrative**: Abstract and Introduction restructured around CAE problem → insight → method → results
-2. **Theoretical propositions**: 3 formal propositions (CAE quadratic growth, CDE linearization, real-world baseline gap)
-3. **Real-world baseline (Condition E)**: Experiments simulating AutoGen/CrewAI-style systems
-4. **Unified numbers**: All documents use "≈2.0x reduction" and "≈25-30% additional savings"
-5. **Strengthened conclusion**: "Organizational structure is a first-class computational primitive"
+1. **Complete real-world baseline**: Condition E runs 5x per model (10 total), C/E ≈ 1.3x (p < 0.001)
+2. **Failure case analysis**: 3 real failure modes documented (color mapping, Canvas regression, over-decomposition)
+3. **Theory refinement**: Changed Ω(n²) to "quadratic-like growth (empirical pattern)" to avoid reviewer attacks
+4. **Human evaluation template**: Generated for manual scoring (results pending)
+5. **Language polish**: Academic expressions throughout, informal language removed
 
-### Experiment Results (V5.4 Complete Comparison)
+### Experiment Results (V5.5 Complete Comparison)
 
-| Condition | DeepSeek Mean±Std | MiMo Mean±Std | Description |
-|-----------|-------------------|---------------|-------------|
-| A (Single Agent) | 6,000±254 | 8,251±0 | Single-pass baseline |
-| B (Iterative 7r) | 90,437±9,653 | 102,417±1,547 | CAE manifest |
-| C (OIMAC+CC) | 45,581±3,082 | 48,468±1,445 | Structured + bounded context |
-| D (OIMAC-CC) | 60,894±2,319 | 61,805±1,691 | Structured, no context limits |
-| **E (Real-world)** | **64,634±3,644** | **~67,200*** | AutoGen/CrewAI-style |
+| Condition | DeepSeek Mean±Std | MiMo Mean±Std | N |
+|-----------|-------------------|---------------|---|
+| A (Single Agent) | 6,000±254 | 8,251±0 | 5 |
+| B (Iterative 7r) | 90,437±9,653 | 102,417±1,547 | 5 |
+| C (OIMAC+CC) | 45,581±3,082 | 48,468±1,445 | 5 |
+| D (OIMAC-CC) | 60,894±2,319 | 61,805±1,691 | 5 |
+| **E (Real-world)** | **62,459±1,745** | **62,539±1,150** | **5** |
 
-*MiMo Condition E estimated from cross-model ratios
+### Core Efficiency Comparison (with statistical tests)
 
-### Core Efficiency Comparison
-
-- **C/B ≈ 2.0x**: OIMAC vs iterative refinement (p<0.001, d>5.6)
-- **C/E ≈ 1.4x**: OIMAC vs real-world multi-agent baseline
-- **D/C ≈ 1.3x**: Context Controller additional (~25-30%)
-- **CDE contribution**: ~70% (primary driver)
-- **CC contribution**: ~30% (secondary mechanism)
+| Comparison | DeepSeek | MiMo | p-value |
+|------------|----------|------|---------|
+| C/B (OIMAC vs Iterative) | 1.98x | 2.11x | <0.001 |
+| **C/E (OIMAC vs Real-world)** | **1.37x** | **1.29x** | **<0.001** |
+| D/C (CC additional) | 1.34x | 1.28x | <0.001 |
 
 ### Core Assertion
 
-**Efficiency gains come from restructuring computation, not reducing context. Organizational structure is a first-class computational primitive.**
+**OIMAC outperforms not only naive iteration but also widely-used shared-context architectures. Efficiency gains come from restructuring computation, not reducing context. Organizational structure is a first-class computational primitive.**
 
 > 📊 Full report: [REPORT_V5.3.md](REPORT_V5.3.md)
 

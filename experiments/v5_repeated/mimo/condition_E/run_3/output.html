@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拼豆图纸生成器</title>
+    <style>
+        /* CSS样式 - Generative风格 */
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --secondary-color: #f472b6;
+            --background: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                grid-template-columns: 1fr 300px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr 350px;
+            }
+        }
+
+        /* 头部样式 */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 卡片通用样式 */
+        .card {
+            background: var(--card-bg);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        /* 上传区域样式 */
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, #f0f7ff, #e6f0ff);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--success);
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .upload-text {
+            margin-bottom: 1rem;
+        }
+
+        .upload-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: inline-block;
+        }
+
+        .upload-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        /* 图片预览 */
+        .image-preview {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 控制面板样式 */
+        .controls {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .control-group select,
+        .control-group input[type="range"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background: white;
+            font-size: 1rem;
+        }
+
+        .control-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1rem;
+        }
+
+        .control-group select:focus,
+        .control-group input[type="range"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        .range-slider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .range-slider input[type="range"] {
+            flex: 1;
+        }
+
+        .range-value {
+            min-width: 2.5rem;
+            text-align: center;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        /* 生成按钮 */
+        .generate-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .generate-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Canvas容器样式 */
+        .canvas-container {
+            position: relative;
+            background: #f1f5f9;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .canvas-controls {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem;
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .zoom-btn {
+            background: white;
+            border: 1px solid var(--border-color);
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.375rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .zoom-btn:hover {
+            background: #f8fafc;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .zoom-level {
+            font-weight: 500;
+            min-width: 3rem;
+            text-align: center;
+        }
+
+        .view-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .view-btn {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .view-btn:hover {
+            background: #f8fafc;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .canvas-wrapper {
+            flex: 1;
+            overflow: auto;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #canvas {
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: grab;
+            transition: transform 0.1s ease;
+        }
+
+        #canvas:active {
+            cursor: grabbing;
+        }
+
+        /* 颜色统计表格样式 */
+        .stats-container {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .stats-table thead {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
+        }
+
+        .stats-table th {
+            background: #f8fafc;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .stats-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .stats-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .color-preview {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 0.25rem;
+            display: inline-block;
+            margin-right: 0.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            vertical-align: middle;
+        }
+
+        .color-name {
+            font-weight: 500;
+        }
+
+        .color-hex {
+            font-family: monospace;
+            color: var(--text-secondary);
+        }
+
+        .color-count {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* 加载指示器 */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border-radius: 0.75rem;
+        }
+
+        .spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        /* 导出功能 */
+        .export-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .export-btn {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .export-btn:hover {
+            background: #e11d48;
+        }
+
+        /* 工具提示 */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #1e293b;
+            color: #fff;
+            text-align: center;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.875rem;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 640px) {
+            body {
+                padding: 0.5rem;
+            }
+            
+            header {
+                padding: 1rem;
+            }
+            
+            header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .card {
+                padding: 1rem;
+            }
+            
+            .upload-area {
+                padding: 1.5rem;
+            }
+            
+            .canvas-controls {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .export-controls {
+                flex-direction: column;
+            }
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>拼豆图纸生成器</h1>
+            <p>上传任意图片，自动生成拼豆设计图纸和颜色统计</p>
+        </header>
+        
+        <main class="main-content">
+            <!-- 图像处理引擎脚本（由image_processing_dev提供） -->
+            <script>
+                // =====================================================
+                // 图像处理引擎 - 拼豆图纸生成器
+                // 负责核心算法实现：图像缩放、颜色量化、拼豆映射、颜色统计
+                // =====================================================
+
+                /**
+                 * 中位切分法实现 - 颜色量化算法
+                 * @param {Array} pixels - 像素数组，每个元素为[r,g,b]格式
+                 * @param {number} colorCount - 需要的颜色数量
+                 * @returns {Array} 量化后的颜色调色板，每个元素为{r, g, b, hex}
+                 */
+                function medianCut(pixels, colorCount) {
+                    // 初始状态：所有像素在一个盒子中
+                    let boxes = [{
+                        pixels: pixels,
+                        rMin: 0, rMax: 255,
+                        gMin: 0, gMax: 255,
+                        bMin: 0, bMax: 255
+                    }];
+                    
+                    // 循环切割，直到盒子数量达到所需颜色数量
+                    while (boxes.length < colorCount) {
+                        // 找到像素数量最多且需要切割的盒子
+                        let maxBoxIndex = 0;
+                        let maxPixels = 0;
+                        
+                        for (let i = 0; i < boxes.length; i++) {
+                            const box = boxes[i];
+                            if (box.pixels.length > maxPixels) {
+                                maxPixels = box.pixels.length;
+                                maxBoxIndex = i;
+                            }
+                        }
+                        
+                        const boxToSplit = boxes[maxBoxIndex];
+                        
+                        // 如果盒子只有一个像素，无法继续分割
+                        if (boxToSplit.pixels.length <= 1) {
+                            break;
+                        }
+                        
+                        // 计算盒子中各通道的范围
+                        const ranges = {
+                            r: boxToSplit.rMax - boxToSplit.rMin,
+                            g: boxToSplit.gMax - boxToSplit.gMin,
+                            b: boxToSplit.bMax - boxToSplit.bMin
+                        };
+                        
+                        // 选择范围最大的通道进行分割
+                        let splitChannel = 'r';
+                        if (ranges.g > ranges.r && ranges.g > ranges.b) {
+                            splitChannel = 'g';
+                        } else if (ranges.b > ranges.r && ranges.b > ranges.g) {
+                            splitChannel = 'b';
+                        }
+                        
+                        // 按照选定通道对像素进行排序
+                        boxToSplit.pixels.sort((a, b) => {
+                            return a[splitChannel] - b[splitChannel];
+                        });
+                        
+                        // 找到中位数位置
+                        const medianIndex = Math.floor(boxToSplit.pixels.length / 2);
+                        
+                        // 创建两个新盒子
+                        const lowerBox = {
+                            pixels: boxToSplit.pixels.slice(0, medianIndex),
+                            rMin: boxToSplit.rMin, rMax: boxToSplit.rMax,
+                            gMin: boxToSplit.gMin, gMax: boxToSplit.gMax,
+                            bMin: boxToSplit.bMin, bMax: boxToSplit.bMax
+                        };
+                        
+                        const upperBox = {
+                            pixels: boxToSplit.pixels.slice(medianIndex),
+                            rMin: boxToSplit.rMin, rMax: boxToSplit.rMax,
+                            gMin: boxToSplit.gMin, gMax: boxToSplit.gMax,
+                            bMin: boxToSplit.bMin, bMax: boxToSplit.bMax
+                        };
+                        
+                        // 更新两个盒子的范围
+                        lowerBox[`${splitChannel}Max`] = boxToSplit.pixels[medianIndex][splitChannel];
+                        upperBox[`${splitChannel}Min`] = boxToSplit.pixels[medianIndex][splitChannel];
+                        
+                        // 替换原盒子为两个新盒子
+                        boxes.splice(maxBoxIndex, 1, lowerBox, upperBox);
+                    }
+                    
+                    // 为每个盒子计算平均颜色，作为调色板颜色
+                    const palette = boxes.map(box => {
+                        if (box.pixels.length === 0) {
+                            return { r: 128, g: 128, b: 128, hex: '#808080' };
+                        }
+                        
+                        let totalR = 0, totalG = 0, totalB = 0;
+                        for (const pixel of box.pixels) {
+                            totalR += pixel[0];
+                            totalG += pixel[1];
+                            totalB += pixel[2];
+                        }
+                        
+                        const r = Math.round(totalR / box.pixels.length);
+                        const g = Math.round(totalG / box.pixels.length);
+                        const b = Math.round(totalB / box.pixels.length);
+                        
+                        // 转换为十六进制颜色值
+                        const hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+                        
+                        return { r, g, b, hex };
+                    });
+                    
+                    return palette;
+                }
+
+                /**
+                 * 计算两个颜色之间的欧几里得距离
+                 * @param {Array} color1 - [r, g, b]格式的颜色
+                 * @param {Object} color2 - {r, g, b}格式的颜色对象
+                 * @returns {number} 颜色之间的距离
+                 */
+                function colorDistance(color1, color2) {
+                    const dr = color1[0] - color2.r;
+                    const dg = color1[1] - color2.g;
+                    const db = color1[2] - color2.b;
+                    return Math.sqrt(dr * dr + dg * dg + db * db);
+                }
+
+                /**
+                 * 将图像缩放到指定的网格尺寸
+                 * @param {ImageData} imageData - 原始图像数据
+                 * @param {number} gridSize - 目标网格尺寸
+                 * @returns {Object} 缩放后的图像数据
+                 */
+                function resizeImageToGrid(imageData, gridSize) {
+                    // 创建离屏Canvas进行图像处理
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // 设置Canvas尺寸为目标网格大小
+                    canvas.width = gridSize;
+                    canvas.height = gridSize;
+                    
+                    // 创建临时Canvas存储原始图像
+                    const tempCanvas = document.createElement('canvas');
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCanvas.width = imageData.width;
+                    tempCanvas.height = imageData.height;
+                    tempCtx.putImageData(imageData, 0, 0);
+                    
+                    // 使用双线性插值缩放图像
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    ctx.drawImage(tempCanvas, 0, 0, imageData.width, imageData.height, 
+                                  0, 0, gridSize, gridSize);
+                    
+                    // 获取缩放后的图像数据
+                    return ctx.getImageData(0, 0, gridSize, gridSize);
+                }
+
+                /**
+                 * 颜色量化函数 - 中位切分法
+                 * @param {ImageData} imageData - 图像数据
+                 * @param {number} colorCount - 需要的颜色数量
+                 * @returns {Promise<Array>} 量化后的颜色调色板
+                 */
+                function quantizeColors(imageData, colorCount) {
+                    return new Promise((resolve) => {
+                        // 从图像数据中提取所有像素
+                        const pixels = [];
+                        const data = imageData.data;
+                        
+                        for (let i = 0; i < data.length; i += 4) {
+                            // 跳过透明像素（alpha < 128）
+                            if (data[i + 3] < 128) {
+                                continue;
+                            }
+                            
+                            pixels.push([
+                                data[i],     // R
+                                data[i + 1], // G
+                                data[i + 2]  // B
+                            ]);
+                        }
+                        
+                        // 使用中位切分法进行颜色量化
+                        const palette = medianCut(pixels, colorCount);
+                        
+                        // 为调色板中的每个颜色生成唯一的ID
+                        palette.forEach((color, index) => {
+                            color.id = index;
+                            color.name = `Color_${index + 1}`;
+                        });
+                        
+                        resolve(palette);
+                    });
+                }
+
+                /**
+                 * 将像素颜色映射到调色板中最接近的颜色
+                 * @param {ImageData} gridImageData - 网格图像数据
+                 * @param {Array} palette - 调色板
+                 * @returns {Object} 包含网格数据和颜色统计
+                 */
+                function mapPixelsToPalette(gridImageData, palette) {
+                    const width = gridImageData.width;
+                    const height = gridImageData.height;
+                    const data = gridImageData.data;
+                    
+                    // 初始化网格数据结构
+                    const gridData = [];
+                    const colorStats = {};
+                    
+                    // 初始化颜色统计
+                    palette.forEach(color => {
+                        colorStats[color.id] = {
+                            hex: color.hex,
+                            name: color.name,
+                            count: 0
+                        };
+                    });
+                    
+                    // 遍历每个像素，映射到最近的调色板颜色
+                    for (let y = 0; y < height; y++) {
+                        const row = [];
+                        for (let x = 0; x < width; x++) {
+                            const pixelIndex = (y * width + x) * 4;
+                            
+                            // 获取当前像素的RGB值
+                            const pixel = [
+                                data[pixelIndex],     // R
+                                data[pixelIndex + 1], // G
+                                data[pixelIndex + 2]  // B
+                            ];
+                            
+                            // 找到最接近的调色板颜色
+                            let minDistance = Infinity;
+                            let bestColorId = 0;
+                            
+                            for (let i = 0; i < palette.length; i++) {
+                                const distance = colorDistance(pixel, palette[i]);
+                                if (distance < minDistance) {
+                                    minDistance = distance;
+                                    bestColorId = i;
+                                }
+                            }
+                            
+                            // 更新网格数据
+                            row.push({
+                                x: x,
+                                y: y,
+                                colorIndex: bestColorId
+                            });
+                            
+                            // 更新颜色统计
+                            colorStats[bestColorId].count++;
+                        }
+                        gridData.push(row);
+                    }
+                    
+                    return {
+                        gridData,
+                        colorStats
+                    };
+                }
+
+                /**
+                 * 计算颜色统计信息
+                 * @param {Object} gridData - 网格数据
+                 * @param {Array} palette - 调色板
+                 * @returns {Array} 颜色统计数组
+                 */
+                function computeColorStatistics(gridData, palette) {
+                    // 初始化统计数组
+                    const stats = palette.map(color => ({
+                        hex: color.hex,
+                        name: color.name,
+                        count: 0
+                    }));
+                    
+                    // 遍历网格数据，统计每种颜色的使用次数
+                    gridData.forEach(row => {
+                        row.forEach(cell => {
+                            stats[cell.colorIndex].count++;
+                        });
+                    });
+                    
+                    // 按数量降序排序
+                    stats.sort((a, b) => b.count - a.count);
+                    
+                    return stats;
+                }
+
+                /**
+                 * 主处理函数 - 整合所有图像处理步骤
+                 * @param {ImageData} imageData - 原始图像数据
+                 * @param {Object} config - 配置对象
+                 * @returns {Promise<Object>} 处理结果
+                 */
+                function processImage(imageData, config) {
+                    return new Promise(async (resolve) => {
+                        try {
+                            // 第一步：将图像缩放到目标网格尺寸
+                            const gridImageData = resizeImageToGrid(imageData, config.gridSize);
+                            
+                            // 第二步：进行颜色量化
+                            const palette = await quantizeColors(gridImageData, config.colorCount);
+                            
+                            // 第三步：将像素映射到调色板
+                            const { gridData, colorStats } = mapPixelsToPalette(gridImageData, palette);
+                            
+                            // 第四步：计算颜色统计
+                            const colorStatistics = computeColorStatistics(gridData, palette);
+                            
+                            resolve({
+                                gridData,
+                                palette,
+                                colorStats,
+                                colorStatistics
+                            });
+                        } catch (error) {
+                            console.error('图像处理错误:', error);
+                            resolve({
+                                gridData: [],
+                                palette: [],
+                                colorStats: {},
+                                colorStatistics: []
+                            });
+                        }
+                    });
+                }
+
+                // =====================================================
+                // 接口导出 - 与frontend_dev兼容
+                // =====================================================
+
+                // 将处理函数暴露给全局作用域，供前端调用
+                window.ImageProcessingEngine = {
+                    /**
+                     * 主处理函数 - 完整的图像处理流程
+                     * @param {ImageData} imageData - 原始图像数据
+                     * @param {Object} config - 配置对象
+                     * @returns {Promise<Object>} 处理结果
+                     */
+                    process: processImage,
+                    
+                    /**
+                     * 单独的颜色量化函数
+                     * @param {ImageData} imageData - 图像数据
+                     * @param {number} colorCount - 需要的颜色数量
+                     * @returns {Promise<Array>} 调色板
+                     */
+                    quantizeColors: quantizeColors,
+                    
+                    /**
+                     * 单独的网格映射函数
+                     * @param {ImageData} gridImageData - 网格图像数据
+                     * @param {Array} palette - 调色板
+                     * @returns {Object} 网格数据和颜色统计
+                     */
+                    mapToPalette: mapPixelsToPalette,
+                    
+                    /**
+                     * 单独的颜色统计函数
+                     * @param {Object} gridData - 网格数据
+                     * @param {Array} palette - 调色板
+                     * @returns {Array} 颜色统计数组
+                     */
+                    computeStats: computeColorStatistics
+                };
+
+                console.log('图像处理引擎已加载，包含以下功能:');
+                console.log('- ImageProcessingEngine.process(imageData, config): 完整处理流程');
+                console.log('- ImageProcessingEngine.quantizeColors(imageData, colorCount): 颜色量化');
+                console.log('- ImageProcessingEngine.mapToPalette(gridImageData, palette): 网格映射');
+                console.log('- ImageProcessingEngine.computeStats(gridData, palette): 颜色统计');
+            </script>
+            
+            <!-- 前端HTML结构 -->
+            <div class="card upload-section">
+                <h2>图片上传</h2>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📷</div>
+                    <div class="upload-text">点击或拖拽上传图片</div>
+                    <button class="upload-btn" id="uploadBtn">选择图片</button>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+                <div class="image-preview" id="imagePreview">
+                    <!-- 图片预览将在这里显示 -->
+                </div>
+            </div>
+            
+            <div class="card controls-section">
+                <h2>参数设置</h2>
+                <div class="controls">
+                    <div class="control-group">
+                        <label for="gridSize">网格尺寸</label>
+                        <select id="gridSize">
+                            <option value="32">32 x 32</option>
+                            <option value="48">48 x 48</option>
+                            <option value="64">64 x 64</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="colorCount">颜色数量: <span id="colorCountValue">12</span></label>
+                        <div class="range-slider">
+                            <input type="range" id="colorCount" min="10" max="20" value="12">
+                            <span class="range-value" id="colorCountDisplay">12</span>
+                        </div>
+                    </div>
+                    
+                    <button class="generate-btn" id="generateBtn">生成拼豆图纸</button>
+                </div>
+            </div>
+        </main>
+        
+        <aside

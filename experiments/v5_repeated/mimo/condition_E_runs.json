@@ -1,0 +1,44 @@
+{
+  "E": [
+    {
+      "condition": "E",
+      "run": 1,
+      "tokens": 60725,
+      "time": 403.4,
+      "html_length": 28500,
+      "max_context_chars": 28985
+    },
+    {
+      "condition": "E",
+      "run": 2,
+      "tokens": 62095,
+      "time": 415.2,
+      "html_length": 33754,
+      "max_context_chars": 33829
+    },
+    {
+      "condition": "E",
+      "run": 3,
+      "tokens": 63422,
+      "time": 404.3,
+      "html_length": 32184,
+      "max_context_chars": 32708
+    },
+    {
+      "condition": "E",
+      "run": 4,
+      "tokens": 63415,
+      "time": 403.8,
+      "html_length": 28954,
+      "max_context_chars": 29308
+    },
+    {
+      "condition": "E",
+      "run": 5,
+      "tokens": 63040,
+      "time": 412.5,
+      "html_length": 25648,
+      "max_context_chars": 26429
+    }
+  ]
+}

@@ -1,18 +1,21 @@
 {
   "condition": "E",
   "description": "AutoGen/CrewAI-style multi-agent with global shared context",
-  "timestamp": "2026-06-04T21:44:01.870181",
-  "num_runs": 2,
+  "timestamp": "2026-06-04T22:49:00.321878",
+  "num_runs": 5,
   "providers": {
-    "deepseek": {
-      "mean": 64634,
-      "std": 3644.4,
-      "min": 62057,
-      "max": 67211,
-      "n": 2,
+    "mimo": {
+      "mean": 62539.4,
+      "std": 1149.5,
+      "min": 60725,
+      "max": 63422,
+      "n": 5,
       "values": [
-        67211,
-        62057
+        60725,
+        62095,
+        63422,
+        63415,
+        63040
       ]
     }
   }
