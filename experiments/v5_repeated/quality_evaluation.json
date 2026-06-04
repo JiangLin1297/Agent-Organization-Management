@@ -1,0 +1,1012 @@
+{
+  "mimo": {
+    "A": {
+      "run_1": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": true,
+          "has_grid_css": false,
+          "has_drawImage": true,
+          "has_pixel_rendering": true,
+          "passed": true,
+          "score": 3
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": true,
+          "has_blob_url": true,
+          "has_save_function": true,
+          "has_file_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 24,
+        "max_score": 25,
+        "percentage": 96.0,
+        "all_passed": true
+      },
+      "run_2": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": false,
+          "has_grid_css": true,
+          "has_drawImage": true,
+          "has_pixel_rendering": true,
+          "passed": true,
+          "score": 3
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": true,
+          "has_blob_url": false,
+          "has_save_function": true,
+          "has_file_input": true,
+          "passed": true,
+          "score": 4
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 23,
+        "max_score": 25,
+        "percentage": 92.0,
+        "all_passed": true
+      },
+      "run_3": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": true,
+          "has_grid_css": true,
+          "has_drawImage": true,
+          "has_pixel_rendering": true,
+          "passed": true,
+          "score": 3
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": true,
+          "has_blob_url": false,
+          "has_save_function": false,
+          "has_file_input": true,
+          "passed": true,
+          "score": 3
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 22,
+        "max_score": 25,
+        "percentage": 88.0,
+        "all_passed": true
+      },
+      "run_4": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": true,
+          "has_grid_css": false,
+          "has_drawImage": true,
+          "has_pixel_rendering": true,
+          "passed": true,
+          "score": 3
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": true,
+          "has_blob_url": false,
+          "has_save_function": false,
+          "has_file_input": true,
+          "passed": true,
+          "score": 3
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 22,
+        "max_score": 25,
+        "percentage": 88.0,
+        "all_passed": true
+      },
+      "run_5": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": true,
+          "has_grid_css": true,
+          "has_drawImage": true,
+          "has_pixel_rendering": true,
+          "passed": true,
+          "score": 3
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": true,
+          "has_blob_url": true,
+          "has_save_function": true,
+          "has_file_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 24,
+        "max_score": 25,
+        "percentage": 96.0,
+        "all_passed": true
+      }
+    },
+    "B": {
+      "run_1": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": true,
+          "has_grid_css": false,
+          "has_drawImage": true,
+          "has_pixel_rendering": true,
+          "passed": true,
+          "score": 3
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": true,
+          "has_blob_url": false,
+          "has_save_function": false,
+          "has_file_input": true,
+          "passed": true,
+          "score": 3
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 22,
+        "max_score": 25,
+        "percentage": 88.0,
+        "all_passed": true
+      },
+      "run_2": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": true,
+          "has_grid_css": true,
+          "has_drawImage": true,
+          "has_pixel_rendering": true,
+          "passed": true,
+          "score": 3
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": true,
+          "has_blob_url": false,
+          "has_save_function": false,
+          "has_file_input": true,
+          "passed": true,
+          "score": 3
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 22,
+        "max_score": 25,
+        "percentage": 88.0,
+        "all_passed": true
+      },
+      "run_3": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": true,
+          "has_grid_css": true,
+          "has_drawImage": true,
+          "has_pixel_rendering": true,
+          "passed": true,
+          "score": 3
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": true,
+          "has_blob_url": false,
+          "has_save_function": false,
+          "has_file_input": true,
+          "passed": true,
+          "score": 3
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 22,
+        "max_score": 25,
+        "percentage": 88.0,
+        "all_passed": true
+      },
+      "run_4": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": true,
+          "has_grid_css": true,
+          "has_drawImage": false,
+          "has_pixel_rendering": false,
+          "passed": true,
+          "score": 1
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": true,
+          "has_blob_url": false,
+          "has_save_function": false,
+          "has_file_input": true,
+          "passed": true,
+          "score": 3
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 20,
+        "max_score": 25,
+        "percentage": 80.0,
+        "all_passed": true
+      },
+      "run_5": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": true,
+          "has_grid_css": true,
+          "has_drawImage": true,
+          "has_pixel_rendering": true,
+          "passed": true,
+          "score": 3
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": true,
+          "has_blob_url": false,
+          "has_save_function": true,
+          "has_file_input": true,
+          "passed": true,
+          "score": 4
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 23,
+        "max_score": 25,
+        "percentage": 92.0,
+        "all_passed": true
+      }
+    },
+    "C": {
+      "run_1": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": true,
+          "has_grid_css": true,
+          "has_drawImage": true,
+          "has_pixel_rendering": true,
+          "passed": true,
+          "score": 3
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": true,
+          "has_blob_url": false,
+          "has_save_function": false,
+          "has_file_input": true,
+          "passed": true,
+          "score": 3
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 22,
+        "max_score": 25,
+        "percentage": 88.0,
+        "all_passed": true
+      },
+      "run_2": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": true,
+          "has_grid_css": false,
+          "has_drawImage": true,
+          "has_pixel_rendering": true,
+          "passed": true,
+          "score": 3
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": true,
+          "has_blob_url": false,
+          "has_save_function": false,
+          "has_file_input": true,
+          "passed": true,
+          "score": 3
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 22,
+        "max_score": 25,
+        "percentage": 88.0,
+        "all_passed": true
+      },
+      "run_3": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": true,
+          "has_grid_css": true,
+          "has_drawImage": true,
+          "has_pixel_rendering": true,
+          "passed": true,
+          "score": 3
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": true,
+          "has_blob_url": false,
+          "has_save_function": false,
+          "has_file_input": true,
+          "passed": true,
+          "score": 3
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 22,
+        "max_score": 25,
+        "percentage": 88.0,
+        "all_passed": true
+      },
+      "run_4": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": true,
+          "has_grid_css": true,
+          "has_drawImage": true,
+          "has_pixel_rendering": true,
+          "passed": true,
+          "score": 3
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": true,
+          "has_blob_url": false,
+          "has_save_function": false,
+          "has_file_input": true,
+          "passed": true,
+          "score": 3
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 22,
+        "max_score": 25,
+        "percentage": 88.0,
+        "all_passed": true
+      },
+      "run_5": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": false,
+          "has_grid_css": true,
+          "has_drawImage": false,
+          "has_pixel_rendering": false,
+          "passed": true,
+          "score": 1
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": true,
+          "has_blob_url": false,
+          "has_save_function": false,
+          "has_file_input": true,
+          "passed": true,
+          "score": 3
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 20,
+        "max_score": 25,
+        "percentage": 80.0,
+        "all_passed": true
+      }
+    },
+    "D": {
+      "run_1": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": true,
+          "has_grid_css": true,
+          "has_drawImage": true,
+          "has_pixel_rendering": true,
+          "passed": true,
+          "score": 3
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": false,
+          "has_blob_url": false,
+          "has_save_function": false,
+          "has_file_input": true,
+          "passed": true,
+          "score": 2
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 21,
+        "max_score": 25,
+        "percentage": 84.0,
+        "all_passed": true
+      },
+      "run_2": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": false,
+          "has_grid_css": false,
+          "has_drawImage": true,
+          "has_pixel_rendering": true,
+          "passed": true,
+          "score": 3
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": true,
+          "has_blob_url": false,
+          "has_save_function": true,
+          "has_file_input": true,
+          "passed": true,
+          "score": 4
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 23,
+        "max_score": 25,
+        "percentage": 92.0,
+        "all_passed": true
+      },
+      "run_3": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": false,
+          "has_grid_css": false,
+          "has_drawImage": true,
+          "has_pixel_rendering": true,
+          "passed": true,
+          "score": 3
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": true,
+          "has_blob_url": true,
+          "has_save_function": false,
+          "has_file_input": true,
+          "passed": true,
+          "score": 4
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 23,
+        "max_score": 25,
+        "percentage": 92.0,
+        "all_passed": true
+      },
+      "run_4": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": false,
+          "has_grid_css": true,
+          "has_drawImage": true,
+          "has_pixel_rendering": true,
+          "passed": true,
+          "score": 3
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": false,
+          "has_blob_url": false,
+          "has_save_function": false,
+          "has_file_input": true,
+          "passed": true,
+          "score": 2
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 21,
+        "max_score": 25,
+        "percentage": 84.0,
+        "all_passed": true
+      },
+      "run_5": {
+        "grid_validity": {
+          "has_canvas": true,
+          "has_table": true,
+          "has_grid_css": true,
+          "has_drawImage": true,
+          "has_pixel_rendering": true,
+          "passed": true,
+          "score": 3
+        },
+        "palette_validity": {
+          "has_color_mapping": true,
+          "has_rgb_hex": true,
+          "has_kmeans_or_quantize": true,
+          "has_color_count": true,
+          "passed": true,
+          "score": 5
+        },
+        "export_validity": {
+          "has_download_button": false,
+          "has_blob_url": false,
+          "has_save_function": false,
+          "has_file_input": true,
+          "passed": true,
+          "score": 2
+        },
+        "size_accuracy": {
+          "has_32x32": true,
+          "has_48x48": true,
+          "has_64x64": true,
+          "has_size_selector": true,
+          "has_slider_or_input": true,
+          "passed": true,
+          "score": 5
+        },
+        "functional_completeness": {
+          "has_image_upload": true,
+          "has_canvas_api": true,
+          "has_color_stats": true,
+          "has_zoom": true,
+          "has_responsive": true,
+          "is_html5": true,
+          "score": 6,
+          "passed": true
+        },
+        "total_score": 21,
+        "max_score": 25,
+        "percentage": 84.0,
+        "all_passed": true
+      }
+    }
+  }
+}

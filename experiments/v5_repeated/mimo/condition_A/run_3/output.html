@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拼豆图纸生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #16213e, #0f3460);
+            padding: 20px 30px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .app-header h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, #e94560, #f5a623, #e94560);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+        }
+
+        .app-header p {
+            color: #8892b0;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .panel h3 {
+            font-size: 16px;
+            color: #e94560;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #233554;
+        }
+
+        .upload-area {
+            border: 2px dashed #233554;
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #0f3460;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: #e94560;
+            background: #1a1a40;
+        }
+
+        .upload-area.dragover {
+            border-color: #e94560;
+            background: rgba(233, 69, 96, 0.1);
+        }
+
+        .upload-area input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .upload-area p {
+            color: #8892b0;
+            font-size: 14px;
+        }
+
+        .upload-area .highlight {
+            color: #e94560;
+            font-weight: 600;
+        }
+
+        .preview-thumb {
+            width: 100%;
+            max-height: 180px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            color: #8892b0;
+            margin-bottom: 6px;
+        }
+
+        .form-group select,
+        .form-group input[type="range"] {
+            width: 100%;
+            padding: 8px 12px;
+            background: #0f3460;
+            border: 1px solid #233554;
+            border-radius: 8px;
+            color: #eee;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-group select:focus {
+            border-color: #e94560;
+        }
+
+        .range-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .range-wrapper input[type="range"] {
+            flex: 1;
+            padding: 0;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: #233554;
+            outline: none;
+        }
+
+        .range-wrapper input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #e94560;
+            cursor: pointer;
+        }
+
+        .range-value {
+            min-width: 30px;
+            text-align: center;
+            font-weight: 600;
+            color: #e94560;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #e94560, #c23152);
+            color: white;
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(233, 69, 96, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: #233554;
+            color: #8892b0;
+        }
+
+        .btn-secondary:hover {
+            background: #2a4060;
+            color: #eee;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+        }
+
+        .main-area {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .canvas-wrapper {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .canvas-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .canvas-toolbar .left-tools,
+        .canvas-toolbar .right-tools {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tool-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #233554;
+            background: #0f3460;
+            color: #8892b0;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .tool-btn:hover {
+            border-color: #e94560;
+            color: #e94560;
+        }
+
+        .zoom-info {
+            font-size: 13px;
+            color: #8892b0;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .canvas-container {
+            overflow: auto;
+            max-height: 65vh;
+            border-radius: 8px;
+            background: #2a2a3e;
+            cursor: grab;
+            position: relative;
+        }
+
+        .canvas-container:active {
+            cursor: grabbing;
+        }
+
+        .canvas-container canvas {
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        .canvas-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            color: #8892b0;
+        }
+
+        .canvas-placeholder .placeholder-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .canvas-placeholder p {
+            font-size: 16px;
+        }
+
+        .color-table-wrapper {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .color-table-wrapper h3 {
+            font-size: 16px;
+            color: #e94560;
+            margin-bottom: 12px;
+            position: sticky;
+            top: 0;
+            background: #16213e;
+            padding-bottom: 8px;
+            z-index: 1;
+        }
+
+        .color-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .color-table th {
+            text-align: left;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: #8892b0;
+            border-bottom: 1px solid #233554;
+            position: sticky;
+            top: 40px;
+            background: #16213e;
+            z-index: 1;
+        }
+
+        .color-table td {
+            padding: 8px 12px;
+            font-size: 13px;
+            border-bottom: 1px solid #1a2a45;
+        }
+
+        .color-swatch {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: 2px solid #333;
+            vertical-align: middle;
+            margin-right: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .color-hex {
+            font-family: monospace;
+            color: #a0a0b0;
+            font-size: 12px;
+        }
+
+        .color-count {
+            font-weight: 600;
+            color: #f5a623;
+        }
+
+        .progress-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .progress-box {
+            background: #16213e;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #233554;
+            border-top-color: #e94560;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-text {
+            color: #8892b0;
+            font-size: 14px;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #8892b0;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: #233554;
+            border-radius: 12px;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: #8892b0;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: all 0.3s;
+        }
+
+        .toggle-input {
+            display: none;
+        }
+
+        .toggle-input:checked + .toggle-switch {
+            background: #e94560;
+        }
+
+        .toggle-input:checked + .toggle-switch::after {
+            left: 23px;
+            background: white;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            font-size: 13px;
+            color: #8892b0;
+        }
+
+        .stat-item strong {
+            color: #eee;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #233554;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2a4060;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .canvas-container {
+                max-height: 50vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <h1>🧩 拼豆图纸生成器</h1>
+        <p>上传图片，自动生成拼豆网格图纸与颜色统计</p>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <!-- 上传面板 -->
+            <div class="panel">
+                <h3>📷 上传图片</h3>
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="fileInput" accept="image/*">
+                    <div class="upload-icon">🖼️</div>
+                    <p>拖拽图片到此处或 <span class="highlight">点击选择</span></p>
+                    <p style="margin-top:8px; font-size:12px;">支持 JPG / PNG / GIF / WebP</p>
+                </div>
+                <img id="previewThumb" class="preview-thumb" style="display:none;">
+            </div>
+
+            <!-- 参数设置 -->
+            <div class="panel">
+                <h3>⚙️ 参数设置</h3>
+
+                <div class="form-group">
+                    <label>网格大小</label>
+                    <select id="gridSize">
+                        <option value="32">32 × 32 （1024颗）</option>
+                        <option value="48" selected>48 × 48 （2304颗）</option>
+                        <option value="64">64 × 64 （4096颗）</option>
+                        <option value="96">96 × 96 （9216颗）</option>
+                        <option value="128">128 × 128 （16384颗）</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>颜色数量</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="colorCount" min="5" max="40" value="20">
+                        <span class="range-value" id="colorCountValue">20</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>亮度调整</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="brightness" min="-50" max="50" value="0">
+                        <span class="range-value" id="brightnessValue">0</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>对比度调整</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="contrast" min="-50" max="50" value="0">
+                        <span class="range-value" id="contrastValue">0</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="toggle-label" for="showGrid">
+                        <input type="checkbox" class="toggle-input" id="showGrid" checked>
+                        <span class="toggle-switch"></span>
+                        显示网格线
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label class="toggle-label" for="showNumbers">
+                        <input type="checkbox" class="toggle-input" id="showNumbers">
+                        <span class="toggle-switch"></span>
+                        显示颜色编号
+                    </label>
+                </div>
+
+                <button class="btn btn-primary" id="generateBtn" disabled>
+                    ✨ 生成拼豆图纸
+                </button>
+
+                <div class="btn-group" style="margin-top:8px;">
+                    <button class="btn btn-secondary" id="downloadPngBtn" disabled>📥 导出PNG</button>
+                    <button class="btn btn-secondary" id="downloadCsvBtn" disabled>📊 导出CSV</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主显示区域 -->
+        <main class="main-area">
+            <div class="canvas-wrapper">
+                <div class="canvas-toolbar">
+                    <div class="left-tools">
+                        <button class="tool-btn" id="zoomOutBtn" title="缩小">➖</button>
+                        <span class="zoom-info" id="zoomInfo">100%</span>
+                        <button class="tool-btn" id="zoomInBtn" title="放大">➕</button>
+                        <button class="tool-btn" id="zoomFitBtn" title="适应窗口">📐</button>
+                    </div>
+                    <div class="right-tools">
+                        <div class="stats-bar" id="statsBar">
+                            <span class="stat-item">就绪</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="canvas-container" id="canvasContainer">
+                    <div class="canvas-placeholder" id="placeholder">
+                        <div class="placeholder-icon">🎨</div>
+                        <p>请先上传图片并点击"生成拼豆图纸"</p>
+                    </div>
+                    <canvas id="mainCanvas" style="display:none;"></canvas>
+                </div>
+            </div>
+
+            <!-- 颜色统计 -->
+            <div class="color-table-wrapper" id="colorTableWrapper" style="display:none;">
+                <h3>🎨 颜色统计（共 <span id="totalBeads">0</span> 颗拼豆）</h3>
+                <table class="color-table">
+                    <thead>
+                        <tr>
+                            <th>编号</th>
+                            <th>颜色</th>
+                            <th>HEX</th>
+                            <th>RGB</th>
+                            <th>数量</th>
+                            <th>占比</th>
+                        </tr>
+                    </thead>
+                    <tbody id="colorTableBody"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- 加载遮罩 -->
+    <div class="progress-overlay" id="progressOverlay" style="display:none;">
+        <div class="progress-box">
+            <div class="spinner"></div>
+            <p class="progress-text" id="progressText">正在处理...</p>
+        </div>
+    </div>
+
+    <script>
+    (() => {
+        // === State ===
+        let sourceImage = null;
+        let quantizedColors = [];   // [{r,g,b}]
+        let quantizedGrid = [];     // 2D array of color indices
+        let currentZoom = 1;
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+        let scrollStart = { x: 0, y: 0 };
+
+        // === DOM refs ===
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const previewThumb = document.getElementById('previewThumb');
+        const gridSizeSelect = document.getElementById('gridSize');
+        const colorCountRange = document.getElementById('colorCount');
+        const colorCountValue = document.getElementById('colorCountValue');
+        const brightnessRange = document.getElementById('brightness');
+        const brightnessValue = document.getElementById('brightnessValue');
+        const contrastRange = document.getElementById('contrast');
+        const contrastValue = document.getElementById('contrastValue');
+        const showGridCheck = document.getElementById('showGrid');
+        const showNumbersCheck = document.getElementById('showNumbers');
+        const generateBtn = document.getElementById('generateBtn');
+        const downloadPngBtn = document.getElementById('downloadPngBtn');
+        const downloadCsvBtn = document.getElementById('downloadCsvBtn');
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+        const zoomFitBtn = document.getElementById('zoomFitBtn');
+        const zoomInfo = document.getElementById('zoomInfo');
+        const canvasContainer = document.getElementById('canvasContainer');
+        const mainCanvas = document.getElementById('mainCanvas');
+        const placeholder = document.getElementById('placeholder');
+        const colorTableWrapper = document.getElementById('colorTableWrapper');
+        const colorTableBody = document.getElementById('colorTableBody');
+        const totalBeadsSpan = document.getElementById('totalBeads');
+        const statsBar = document.getElementById('statsBar');
+        const progressOverlay = document.getElementById('progressOverlay');
+        const progressText = document.getElementById('progressText');
+
+        // === Event Listeners ===
+        colorCountRange.addEventListener('input', () => colorCountValue.textContent = colorCountRange.value);
+        brightnessRange.addEventListener('input', () => brightnessValue.textContent = brightnessRange.value);
+        contrastRange.addEventListener('input', () => contrastValue.textContent = contrastRange.value);
+
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) handleFile(fileInput.files[0]);
+        });
+
+        generateBtn.addEventListener('click', generate);
+        downloadPngBtn.addEventListener('click', downloadPNG);
+        downloadCsvBtn.addEventListener('click', downloadCSV);
+
+        zoomInBtn.addEventListener('click', () => setZoom(currentZoom * 1.25));
+        zoomOutBtn.addEventListener('click', () => setZoom(currentZoom / 1.25));
+        zoomFitBtn.addEventListener('click', fitZoom);
+
+        showGridCheck.addEventListener('change', () => { if (quantizedGrid.length) renderCanvas(); });
+        showNumbersCheck.addEventListener('change', () => { if (quantizedGrid.length) renderCanvas(); });
+
+        // Pan with mouse drag
+        canvasContainer.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            dragStart = { x: e.clientX, y: e.clientY };
+            scrollStart = { x: canvasContainer.scrollLeft, y: canvasContainer.scrollTop };
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            canvasContainer.scrollLeft = scrollStart.x - (e.clientX - dragStart.x);
+            canvasContainer.scrollTop = scrollStart.y - (e.clientY - dragStart.y);
+        });
+        window.addEventListener('mouseup', () => isDragging = false);
+
+        // Pinch / wheel zoom
+        canvasContainer.addEventListener('wheel', (e) => {
+            if (e.ctrlKey) {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                setZoom(currentZoom * delta);
+            }
+        }, { passive: false });
+
+        // === File Handling ===
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    sourceImage = img;
+                    previewThumb.src = e.target.result;
+                    previewThumb.style.display = 'block';
+                    generateBtn.disabled = false;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // === Core: Generate Bead Pattern ===
+        async function generate() {
+            if (!sourceImage) return;
+
+            showProgress('正在分析图片...');
+            await sleep(50);
+
+            const gridW = parseInt(gridSizeSelect.value);
+            const gridH = gridW; // square grid
+            const numColors = parseInt(colorCountRange.value);
+            const brightnessAdj = parseInt(brightnessRange.value);
+            const contrastAdj = parseInt(contrastRange.value);
+
+            try {
+                // Step 1: Sample image into grid size
+                showProgress('正在缩放采样...');
+                await sleep(20);
+                const sampled = sampleImage(sourceImage, gridW, gridH, brightnessAdj, contrastAdj);
+
+                // Step 2: Color quantization (Median Cut)
+                showProgress('正在计算颜色方案 (中位切分法)...');
+                await sleep(20);
+                const flatPixels = [];
+                for (let y = 0; y < gridH; y++) {
+                    for (let x = 0; x < gridW; x++) {
+                        const idx = (y * gridW + x) * 4;
+                        flatPixels.push({ r: sampled[idx], g: sampled[idx+1], b: sampled[idx+2] });
+                    }
+                }
+                const palette = medianCut(flatPixels, numColors);
+
+                // Step 3: Map each pixel to nearest palette color
+                showProgress('正在映射颜色...');
+                await sleep(20);
+                quantizedColors = palette;
+                quantizedGrid = [];
+                let gridIndex = 0;
+                for (let y = 0; y < gridH; y++) {
+                    const row = [];
+                    for (let x = 0; x < gridW; x++) {
+                        const pixel = flatPixels[gridIndex++];
+                        row.push(findNearestColor(pixel, palette));
+                    }
+                    quantizedGrid.push(row);
+                }
+
+                // Step 4: Render
+                showProgress('正在渲染网格...');
+                await sleep(20);
+                renderCanvas();
+                renderColorTable();
+
+                // Enable buttons
+                downloadPngBtn.disabled = false;
+                downloadCsvBtn.disabled = false;
+
+                // Update stats
+                statsBar.innerHTML = `
+                    <span class="stat-item">尺寸: <strong>${gridW}×${gridH}</strong></span>
+                    <span class="stat-item">颜色: <strong>${palette.length}</strong></span>
+                    <span class="stat-item">总数: <strong>${gridW * gridH}</strong>颗</span>
+                `;
+
+                // Auto fit zoom
+                setTimeout(fitZoom, 100);
+
+            } catch (err) {
+                console.error(err);
+                alert('处理出错: ' + err.message);
+            }
+
+            hideProgress();
+        }
+
+        // === Image Sampling ===
+        function sampleImage(img, targetW, targetH, brightness, contrast) {
+            const offscreen = document.createElement('canvas');
+            offscreen.width = targetW;
+            offscreen.height = targetH;
+            const ctx = offscreen.getContext('2d');
+
+            // Draw image scaled to target, maintaining aspect ratio with cover crop
+            const imgAspect = img.width / img.height;
+            const targetAspect = targetW / targetH;
+            let sx, sy, sw, sh;
+            if (imgAspect > targetAspect) {
+                sh = img.height;
+                sw = sh * targetAspect;
+                sx = (img.width - sw) / 2;
+                sy = 0;
+            } else {
+                sw = img.width;
+                sh = sw / targetAspect;
+                sx = 0;
+                sy = (img.height - sh) / 2;
+            }
+            ctx.drawImage(img, sx, sy, sw, sh, 0, 0, targetW, targetH);
+
+            const imageData = ctx.getImageData(0, 0, targetW, targetH);
+            const data = imageData.data;
+
+            // Apply brightness and contrast
+            const bFactor = brightness * 2.55;
+            const cFactor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+
+            for (let i = 0; i < data.length; i += 4) {
+                let r = data[i], g = data[i+1], b = data[i+2];
+
+                // Brightness
+                r = clamp(r + bFactor);
+                g = clamp(g + bFactor);
+                b = clamp(b + bFactor);
+
+                // Contrast
+                r = clamp(cFactor * (r - 128) + 128);
+                g = clamp(cFactor * (g - 128) + 128);
+                b = clamp(cFactor * (b - 128) + 128);
+
+                data[i] = r;
+                data[i+1] = g;
+                data[i+2] = b;
+            }
+
+            return data;
+        }
+
+        function clamp(v) {
+            return Math.max(0, Math.min(255, Math.round(v)));
+        }
+
+        // === Median Cut Color Quantization ===
+        function medianCut(pixels, maxColors) {
+            if (pixels.length === 0) return [];
+
+            // Initial bucket
+            let buckets = [pixels];
+
+            while (buckets.length < maxColors) {
+                // Find bucket with largest range in any channel
+                let maxRange = -1;
+                let maxIdx = 0;
+
+                for (let i = 0; i < buckets.length; i++) {
+                    const range = getBucketRange(buckets[i]);
+                    const maxR = Math.max(range.r, range.g, range.b);
+                    if (maxR > maxRange && buckets[i].length > 1) {
+                        maxRange = maxR;
+                        maxIdx = i;
+                    }
+                }
+
+                if (maxRange <= 0) break; // Can't split further
+
+                const bucket = buckets[maxIdx];
+                const range = getBucketRange(bucket);
+
+                // Find channel with largest range
+                let channel = 'r';
+                if (range.g >= range.r && range.g >= range.b) channel = 'g';
+                if (range.b >= range.r && range.b >= range.g) channel = 'b';
+
+                // Sort by that channel
+                bucket.sort((a, b) => a[channel] - b[channel]);
+
+                // Split at median
+                const mid = Math.floor(bucket.length / 2);
+                buckets.splice(maxIdx, 1, bucket.slice(0, mid), bucket.slice(mid));
+            }
+
+            // Average each bucket to get palette colors
+            return buckets.map(bucket => {
+                let r = 0, g = 0, b = 0;
+                for (const p of bucket) {
+                    r += p.r; g += p.g; b += p.b;
+                }
+                const n = bucket.length;
+                return { r: Math.round(r/n), g: Math.round(g/n), b: Math.round(b/n) };
+            });
+        }
+
+        function getBucketRange(bucket) {
+            let rMin=255, rMax=0, gMin=255, gMax=0, bMin=255, bMax=0;
+            for (const p of bucket) {
+                if (p.r < rMin) rMin = p.r; if (p.r > rMax) rMax = p.r;
+                if (p.g < gMin) gMin = p.g; if (p.g > gMax) gMax = p.g;
+                if (p.b < bMin) bMin = p.b; if (p.b > bMax) bMax = p.b;
+            }
+            return { r: rMax-rMin, g: gMax-gMin, b: bMax-bMin };
+        }
+
+        function findNearestColor(pixel, palette) {
+            let minDist = Infinity;
+            let minIdx = 0;
+            for (let i = 0; i < palette.length; i++) {
+                const c = palette[i];
+                // Weighted Euclidean distance (perceptual)
+                const dr = pixel.r - c.r;
+                const dg = pixel.g - c.g;
+                const db = pixel.b - c.b;
+                const dist = dr*dr*0.3 + dg*dg*0.59 + db*db*0.11;
+                if (dist < minDist) {
+                    minDist = dist;
+                    minIdx = i;
+                }
+            }
+            return minIdx;
+        }
+
+        // === Canvas Rendering ===
+        function renderCanvas() {
+            const gridH = quantizedGrid.length;
+            const gridW = quantizedGrid[0].length;
+            const cellSize = 20;
+            const gridLineWidth =

@@ -1,0 +1,150 @@
+{
+  "A": [
+    {
+      "condition": "A",
+      "run": 1,
+      "tokens": 8251,
+      "time": 123.6,
+      "html_length": 32631
+    },
+    {
+      "condition": "A",
+      "run": 2,
+      "tokens": 8251,
+      "time": 137.1,
+      "html_length": 34844
+    },
+    {
+      "condition": "A",
+      "run": 3,
+      "tokens": 8251,
+      "time": 133.2,
+      "html_length": 31563
+    },
+    {
+      "condition": "A",
+      "run": 4,
+      "tokens": 8251,
+      "time": 156.9,
+      "html_length": 25975
+    },
+    {
+      "condition": "A",
+      "run": 5,
+      "tokens": 8251,
+      "time": 136.6,
+      "html_length": 33249
+    }
+  ],
+  "B": [
+    {
+      "condition": "B",
+      "run": 1,
+      "tokens": 100608,
+      "time": 841.9,
+      "html_length": 32186
+    },
+    {
+      "condition": "B",
+      "run": 2,
+      "tokens": 104332,
+      "time": 927.4,
+      "html_length": 27886
+    },
+    {
+      "condition": "B",
+      "run": 3,
+      "tokens": 102186,
+      "time": 954.8,
+      "html_length": 28040
+    },
+    {
+      "condition": "B",
+      "run": 4,
+      "tokens": 103613,
+      "time": 1066.3,
+      "html_length": 30757
+    },
+    {
+      "condition": "B",
+      "run": 5,
+      "tokens": 101347,
+      "time": 1002.9,
+      "html_length": 25596
+    }
+  ],
+  "C": [
+    {
+      "condition": "C",
+      "run": 1,
+      "tokens": 49932,
+      "time": 409.1,
+      "html_length": 32409
+    },
+    {
+      "condition": "C",
+      "run": 2,
+      "tokens": 49558,
+      "time": 472.5,
+      "html_length": 29153
+    },
+    {
+      "condition": "C",
+      "run": 3,
+      "tokens": 48980,
+      "time": 514.0,
+      "html_length": 32964
+    },
+    {
+      "condition": "C",
+      "run": 4,
+      "tokens": 46763,
+      "time": 517.3,
+      "html_length": 31645
+    },
+    {
+      "condition": "C",
+      "run": 5,
+      "tokens": 47109,
+      "time": 508.3,
+      "html_length": 33486
+    }
+  ],
+  "D": [
+    {
+      "condition": "D",
+      "run": 1,
+      "tokens": 63088,
+      "time": 460.0,
+      "html_length": 32002
+    },
+    {
+      "condition": "D",
+      "run": 2,
+      "tokens": 63491,
+      "time": 484.5,
+      "html_length": 30422
+    },
+    {
+      "condition": "D",
+      "run": 3,
+      "tokens": 60167,
+      "time": 531.9,
+      "html_length": 30703
+    },
+    {
+      "condition": "D",
+      "run": 4,
+      "tokens": 59839,
+      "time": 485.7,
+      "html_length": 31691
+    },
+    {
+      "condition": "D",
+      "run": 5,
+      "tokens": 62441,
+      "time": 516.0,
+      "html_length": 33868
+    }
+  ]
+}

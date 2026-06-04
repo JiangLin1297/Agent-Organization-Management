@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>销售数据分析报告 · 区域洞察</title>
+    <!-- Chart.js CDN (纯前端，无后端依赖) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+        body {
+            background: #f6f9fc;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .report-container {
+            max-width: 1400px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px -12px rgba(0, 20, 30, 0.15);
+            padding: 2rem 2rem 2.5rem;
+            transition: all 0.2s ease;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: #0b2b3c;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .subhead {
+            color: #4a6572;
+            font-weight: 400;
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #2d7a9b;
+            padding-left: 1rem;
+            background: #f0f6fa;
+            border-radius: 0 12px 12px 0;
+            line-height: 1.4;
+        }
+        .grid-2col {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 2rem 0 1.5rem;
+        }
+        .chart-card {
+            flex: 1 1 300px;
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 1.5rem 1.2rem 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            border: 1px solid #eaf0f4;
+            transition: 0.15s;
+        }
+        .chart-card h3 {
+            font-weight: 500;
+            font-size: 1.2rem;
+            color: #1e4a5f;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            max-height: 260px;
+        }
+        .chart-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .table-wrap {
+            overflow-x: auto;
+            margin: 2rem 0 1.8rem;
+            border-radius: 20px;
+            border: 1px solid #e2edf3;
+            background: white;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            min-width: 680px;
+        }
+        th {
+            background: #eef5f9;
+            color: #0f3b4b;
+            font-weight: 600;
+            padding: 1rem 0.8rem;
+            text-align: right;
+            border-bottom: 2px solid #cbdae3;
+        }
+        th:first-child {
+            text-align: left;
+            padding-left: 1.5rem;
+        }
+        td {
+            padding: 0.9rem 0.8rem;
+            text-align: right;
+            border-bottom: 1px solid #e6edf2;
+            color: #1a3d4c;
+        }
+        td:first-child {
+            text-align: left;
+            font-weight: 500;
+            padding-left: 1.5rem;
+            background: #fafcfd;
+        }
+        tr.total-row td {
+            background: #eef5f9;
+            font-weight: 600;
+            border-top: 2px solid #b8cedb;
+            border-bottom: none;
+        }
+        .profit-positive {
+            color: #1a7f5a;
+        }
+        .insight-section {
+            background: #f2f8fc;
+            border-radius: 24px;
+            padding: 1.8rem 2rem;
+            margin: 2rem 0 1.2rem;
+            border-left: 6px solid #2d7a9b;
+        }
+        .insight-section h4 {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: #0b2b3c;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .insight-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem 2rem;
+        }
+        .insight-item {
+            flex: 1 1 200px;
+            background: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 40px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            border: 1px solid #dde9f0;
+            font-size: 0.95rem;
+            color: #1d4b5e;
+        }
+        .insight-item strong {
+            color: #0b3b4e;
+        }
+        .summary-box {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 1.5rem 2rem;
+            border: 1px solid #dce8ef;
+            margin: 1.8rem 0 0.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .summary-stat {
+            font-size: 1rem;
+            padding: 0.3rem 0.8rem;
+        }
+        .summary-stat span {
+            font-weight: 300;
+            color: #4f6f7e;
+        }
+        .summary-stat strong {
+            font-weight: 600;
+            color: #0b2b3c;
+            margin-left: 0.3rem;
+        }
+        .badge {
+            background: #e1eff6;
+            border-radius: 40px;
+            padding: 0.2rem 0.8rem;
+            font-size: 0.8rem;
+            color: #1a5b72;
+        }
+        footer {
+            margin-top: 2rem;
+            text-align: center;
+            color: #6b8a99;
+            font-size: 0.85rem;
+            border-top: 1px solid #e2edf3;
+            padding-top: 1.5rem;
+        }
+        @media (max-width: 640px) {
+            body { padding: 1rem 0.5rem; }
+            .report-container { padding: 1.2rem; }
+            h1 { font-size: 1.8rem; }
+            .chart-card { padding: 1rem; }
+            .insight-section { padding: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="report-container" id="appContainer">
+    <header>
+        <h1>📊 区域销售分析</h1>
+        <div class="subhead">5大区域 · 12个月 · 数据驱动决策</div>
+    </header>
+
+    <!-- 数据总览表格 -->
+    <div class="table-wrap" id="tableContainer"></div>
+
+    <!-- 图表区域 (flex 自适应) -->
+    <div class="grid-2col" id="chartGrid">
+        <div class="chart-card">
+            <h3>📈 月度收入趋势 <span class="badge">按区域</span></h3>
+            <div class="chart-wrapper">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+        <div class="chart-card">
+            <h3>💰 收入 vs 成本 <span class="badge">月度对比</span></h3>
+            <div class="chart-wrapper">
+                <canvas id="comparisonChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 关键发现与建议 -->
+    <div class="insight-section" id="insightContainer">
+        <h4>🔍 关键发现 & 建议</h4>
+        <div class="insight-grid" id="insightList"></div>
+    </div>
+
+    <!-- 文字摘要 -->
+    <div class="summary-box" id="summaryContainer">
+        <!-- 动态渲染 -->
+    </div>
+
+    <footer>销售分析报告 · 自动生成 · 数据更新于 2025</footer>
+</div>
+
+<script>
+    (function() {
+        // --------------------------------------------------------------
+        // 模块A1：原始数据存储 (硬编码 5区域×12月 模拟CSV)
+        // --------------------------------------------------------------
+        const regions = ['North', 'South', 'East', 'West', 'Central'];
+        const months = [
+            '2025-01', '2025-02', '2025-03', '2025-04', '2025-05', '2025-06',
+            '2025-07', '2025-08', '2025-09', '2025-10', '2025-11', '2025-12'
+        ];
+        // 生成模拟数据 (保证合理差异)
+        function generateRawData() {
+            const data = [];
+            const baseRevenue = { North: 185, South: 140, East: 165, West: 120, Central: 155 };
+            const baseCost = { North: 110, South: 85, East: 100, West: 75, Central: 95 };
+            regions.forEach(region => {
+                months.forEach((month, idx) => {
+                    const seasonal = 1 + 0.25 * Math.sin((idx + 1) * Math.PI / 6); // 季节性波动
+                    const revenue = Math.round((baseRevenue[region] + (idx * 2.5)) * seasonal * (0.9 + 0.2 * Math.random()));
+                    const cost = Math.round((baseCost[region] + (idx * 1.2)) * seasonal * (0.85 + 0.3 * Math.random()));
+                    const units = Math.round(80 + 20 * Math.sin(idx * 0.8) + 10 * Math.random());
+                    data.push({
+                        region,
+                        month,
+                        revenue: revenue,
+                        cost: cost,
+                        units_sold: units,
+                        category: '综合'
+                    });
+                });
+            });
+            return data;
+        }
+        const rawData = generateRawData();
+
+        // --------------------------------------------------------------
+        // 模块A2：数据聚合器
+        // --------------------------------------------------------------
+        function aggregate(raw) {
+            const regionMap = {};
+            const monthSet = new Set();
+            raw.forEach(d => { monthSet.add(d.month); });
+            const allMonths = Array.from(monthSet).sort();
+
+            regions.forEach(r => {
+                regionMap[r] = { region: r, monthlyData: [], totalRevenue: 0, totalCost: 0, totalProfit: 0, totalUnits: 0, profitMargin: 0 };
+            });
+
+            raw.forEach(d => {
+                const entry = regionMap[d.region];
+                if (!entry) return;
+                entry.totalRevenue += d.revenue;
+                entry.totalCost += d.cost;
+                entry.totalUnits += d.units_sold;
+            });
+
+            // 构建 monthlyData (12个月)
+            regions.forEach(r => {
+                const regionRaw = raw.filter(d => d.region === r);
+                const monthly = allMonths.map(m => {
+                    const found = regionRaw.filter(d => d.month === m);
+                    const revenue = found.reduce((sum, d) => sum + d.revenue, 0);
+                    const cost = found.reduce((sum, d) => sum + d.cost, 0);
+                    const units = found.reduce((sum, d) => sum + d.units_sold, 0);
+                    return { month: m, revenue, cost, units_sold: units };
+                });
+                regionMap[r].monthlyData = monthly;
+                regionMap[r].totalProfit = regionMap[r].totalRevenue - regionMap[r].totalCost;
+                regionMap[r].profitMargin = regionMap[r].totalRevenue > 0 ? 
+                    (regionMap[r].totalProfit / regionMap[r].totalRevenue) * 100 : 0;
+            });
+
+            return { regions: Object.values(regionMap), allMonths };
+        }
+
+        const aggregated = aggregate(rawData);
+
+        // --------------------------------------------------------------
+        // 模块B1：汇总统计计算器
+        // --------------------------------------------------------------
+        function calculateSummary(agg) {
+            let totalRevenue = 0, totalCost = 0, totalProfit = 0, totalUnits = 0;
+            let bestRegion = { name: '', totalRevenue: -1 };
+            let worstRegion = { name: '', totalRevenue: Infinity };
+            agg.regions.forEach(r => {
+                totalRevenue += r.totalRevenue;
+                totalCost += r.totalCost;
+                totalProfit += r.totalProfit;
+                totalUnits += r.totalUnits;
+                if (r.totalRevenue > bestRegion.totalRevenue) bestRegion = { name: r.region, totalRevenue: r.totalRevenue };
+                if (r.totalRevenue < worstRegion.totalRevenue) worstRegion = { name: r.region, totalRevenue: r.totalRevenue };
+            });
+            const overallProfitMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
+            return { totalRevenue, totalCost, totalProfit, overallProfitMargin, bestRegion, worstRegion, totalUnits };
+        }
+
+        const summary = calculateSummary(aggregated);
+
+        // --------------------------------------------------------------
+        // 模块B2：洞察生成器
+        // --------------------------------------------------------------
+        function generateInsights(summary, agg) {
+            const findings = [];
+            const recommendations = [];
+            // 最佳/最差区域
+            findings.push(`🏆 最佳区域：${summary.bestRegion.name}（收入 ¥${summary.bestRegion.totalRevenue.toLocaleString()}）`);
+            findings.push(`📉 待提升区域：${summary.worstRegion.name}（收入 ¥${summary.worstRegion.totalRevenue.toLocaleString()}）`);
+            // 季节性峰值 (从聚合数据找最高月)
+            let maxRevenueMonth = '', maxRev = 0;
+            agg.allMonths.forEach(m => {
+                let monthTotal = 0;
+                agg.regions.forEach(r => { const d = r.monthlyData.find(x => x.month === m); if(d) monthTotal += d.revenue; });
+                if (monthTotal > maxRev) { maxRev = monthTotal; maxRevenueMonth = m; }
+            });
+            findings.push(`📅 销售旺季：${maxRevenueMonth}（总收入 ¥${maxRev.toLocaleString()}）`);
+            // 增长率 (1月 vs 12月)
+            const getMonthTotal = (month) => {
+                let total = 0;
+                agg.regions.forEach(r => { const d = r.monthlyData.find(x => x.month === month); if(d) total += d.revenue; });
+                return total;
+            };
+            const janTotal = getMonthTotal('2025-01');
+            const decTotal = getMonthTotal('2025-12');
+            const growth = janTotal > 0 ? ((decTotal - janTotal) / janTotal * 100) : 0;
+            findings.push(`📈 年度增长率：${growth.toFixed(1)}%（1月→12月）`);
+            // 建议
+            recommendations.push(`✅ 加大对 ${summary.bestRegion.name} 区域的资源倾斜，复制成功经验。`);
+            recommendations.push(`✅ 针对 ${summary.worstRegion.name} 区域制定专项提升计划，分析成本结构。`);
+            recommendations.push(`✅ 旺季 ${maxRevenueMonth} 前增加库存与营销投入，最大化营收。`);
+
+            return {
+                findings: findings.slice(0, 5),
+                recommendations: recommendations.slice(0, 3),
+                seasonalTrend: `12月为销售高峰，夏季（6-8月）收入平稳，Q4增长显著。`,
+                growthAnalysis: `年度收入增长 ${growth.toFixed(1)}%，${growth > 0 ? '正向增长' : '需关注下滑'}。`
+            };
+        }
+
+        const insights = generateInsights(summary, aggregated);
+
+        // --------------------------------------------------------------
+        // 模块C：展示层 (渲染)
+        // --------------------------------------------------------------
+        // C1: 表格渲染器
+        function renderTable(containerId, regions, summary) {
+            const container = document.getElementById(containerId);
+            let html = `<table>
+                <thead><tr><th>区域</th><th>收入 (¥)</th><th>成本 (¥)</th><th>利润 (¥)</th><th>销量</th><th>利润率</th></tr></thead><tbody>`;
+            regions.forEach(r => {
+                const profit = r.totalRevenue - r.totalCost;
+                const margin = r.totalRevenue > 0 ? ((profit / r.totalRevenue)*100).toFixed(1) : '0.0';
+                html += `<tr>
+                    <td>${r.region}</td>
+                    <td>¥${r.totalRevenue.toLocaleString()}</td>
+                    <td>¥${r.totalCost.toLocaleString()}</td>
+                    <td class="profit-positive">¥${profit.toLocaleString()}</td>
+                    <td>${r.totalUnits.toLocaleString()}</td>
+                    <td>${margin}%</td>
+                </tr>`;
+            });
+            // 总计行
+            const totalProfit = summary.totalRevenue - summary.totalCost;
+            const totalMargin = summary.totalRevenue > 0 ? ((totalProfit / summary.totalRevenue)*100).toFixed(1) : '0.0';
+            html += `<tr class="total-row">
+                <td>总计</td>
+                <td>¥${summary.totalRevenue.toLocaleString()}</td>
+                <td>¥${summary.totalCost.toLocaleString()}</td>
+                <td class="profit-positive">¥${totalProfit.toLocaleString()}</td>
+                <td>${summary.totalUnits.toLocaleString()}</td>
+                <td>${totalMargin}%</td>
+            </tr>`;
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        // C2: 图表渲染器
+        function renderTrendChart(canvasId, aggregated) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            const colors = ['#2d7a9b', '#e88d5a', '#5fa87f', '#b581b5', '#d9b48f'];
+            const datasets = aggregated.regions.map((r, idx) => ({
+                label: r.region,
+                data: r.monthlyData.map(d => d.revenue),
+                borderColor: colors[idx % colors.length],
+                backgroundColor: colors[idx % colors.length] + '22',
+                tension: 0.2,
+                pointRadius: 3,
+                fill: false,
+                borderWidth: 2.5
+            }));
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: aggregated.allMonths.map(m => m.slice(5)),
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { boxWidth: 12, padding: 12 } } },
+                    scales: {
+                        y: { beginAtZero: false, ticks: { callback: v => '¥' + v.toLocaleString() } }
+                    }
+                }
+            });
+        }
+
+        function renderComparisonChart(canvasId, aggregated) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            const months = aggregated.allMonths.map(m => m.slice(5));
+            // 计算每月总收入和总成本
+            const revenueData = months.map((_, idx) => {
+                return aggregated.regions.reduce((sum, r) => sum + (r.monthlyData[idx]?.revenue || 0), 0);
+            });
+            const costData = months.map((_, idx) => {
+                return aggregated.regions.reduce((sum, r) => sum + (r.monthlyData[idx]?.cost || 0), 0);
+            });
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [
+                        { label: '收入', data: revenueData, backgroundColor: '#2d7a9b', borderRadius: 4 },
+                        { label: '成本', data: costData, backgroundColor: '#d96c6c', borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { boxWidth: 12 } } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { callback: v => '¥' + v.toLocaleString() } }
+                    }
+                }
+            });
+        }
+
+        // C3: 摘要与洞察渲染器
+        function renderSummaryAndInsights(containerId, summary, insights) {
+            const container = document.getElementById(containerId);
+            const totalProfit = summary.totalRevenue - summary.totalCost;
+            container.innerHTML = `
+                <div class="summary-stat"><span>总收入</span><strong>¥${summary.totalRevenue.toLocaleString()}</strong></div>
+                <div class="summary-stat"><span>总成本</span><strong>¥${summary.totalCost.toLocaleString()}</strong></div>
+                <div class="summary-stat"><span>总利润</span><strong>¥${totalProfit.toLocaleString()}</strong></div>
+                <div class="summary-stat"><span>最佳区域</span><strong>${summary.bestRegion.name}</strong></div>
+                <div class="summary-stat"><span>待提升</span><strong>${summary.worstRegion.name}</strong></div>
+                <div class="summary-stat"><span>季节性趋势</span><strong>${insights.seasonalTrend}</strong></div>
+                <div class="summary-stat"><span>增长率</span><strong>${insights.growthAnalysis}</strong></div>
+            `;
+        }
+
+        function renderInsightsList(containerId, insights) {
+            const list = document.getElementById(containerId);
+            let html = '';
+            insights.findings.forEach(f => {
+                html += `<div class="insight-item">${f}</div>`;
+            });
+            insights.recommendations.forEach(r => {
+                html += `<div class="insight-item">${r}</div>`;
+            });
+            list.innerHTML = html;
+        }
+
+        // --------------------------------------------------------------
+        // 模块D：应用控制器 (初始化)
+        // --------------------------------------------------------------
+        function init() {
+            renderTable('tableContainer', aggregated.regions, summary);
+            renderTrendChart('trendChart', aggregated);
+            renderComparisonChart('comparisonChart', aggregated);
+            renderSummaryAndInsights('summaryContainer', summary, insights);
+            renderInsightsList('insightList', insights);
+        }
+
+        // 启动
+        init();
+    })();
+</script>
+</body>
+</html>

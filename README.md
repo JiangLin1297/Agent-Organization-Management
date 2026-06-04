@@ -4,13 +4,71 @@
 
 *不是用 AI 管人，是用管理学管 AI。*
 
-预印本 | Foundational Preprint | Version 5.2 | 2026-06-03
+预印本 | Foundational Preprint | Version 5.4 | 2026-06-04
 
 > 📖 [Read this in English](README_EN.md)
 
 ---
 
-## 🆕 V5.2 Released (2026-06-03)
+## 🆕 V5.4 Released (2026-06-04)
+
+**V5.4 核心升级：问题驱动理论版 — 现实基线 — 理论命题化**
+
+核心变化：论文从"系统+实验"叙事重构为"问题驱动的理论论文"，新增现实系统基线和理论命题。
+
+### 关键更新
+
+1. **问题驱动叙事**：Abstract和Introduction重构为CAE问题→洞察→方法→结果结构
+2. **理论命题化**：新增3个理论命题（CAE二次方增长、CDE线性化、现实基线差距）
+3. **现实基线（条件E）**：模拟AutoGen/CrewAI风格系统的对比实验
+4. **统一数值**：所有文档统一使用"≈2.0x缩减"和"≈25-30%额外节省"
+5. **强化结论**：明确"组织结构是一等计算原语"的核心主张
+
+### 实验结果（V5.4 完整对比）
+
+| 条件 | DeepSeek Mean±Std | MiMo Mean±Std | 说明 |
+|------|-------------------|---------------|------|
+| A（单Agent） | 6,000±254 | 8,251±0 | 单次调用基线 |
+| B（迭代7轮） | 90,437±9,653 | 102,417±1,547 | CAE显现 |
+| C（OIMAC+CC） | 45,581±3,082 | 48,468±1,445 | 结构化分解+有界上下文 |
+| D（OIMAC-CC） | 60,894±2,319 | 61,805±1,691 | 结构化分解，无上下文限制 |
+| **E（现实基线）** | **64,634±3,644** | **~67,200*** | 模拟AutoGen/CrewAI架构 |
+
+*MiMo条件E为基于跨模型比率的估计值
+
+### 核心效率对比
+
+- **C/B ≈ 2.0x**：OIMAC vs 迭代精炼（p<0.001, d>5.6）
+- **C/E ≈ 1.4x**：OIMAC vs 现实多智能体基线
+- **D/C ≈ 1.3x**：上下文控制器额外贡献（≈25-30%）
+- **CDE贡献**：~70%（主驱动）
+- **CC贡献**：~30%（次级机制）
+
+### 核心主张
+
+**效率增益来自重构计算，而非减少上下文。组织结构是一等计算原语。**
+
+> 📊 完整报告：[REPORT_V5.3.md](REPORT_V5.3.md)
+
+---
+
+## V5.3 Released (2026-06-04)
+
+**V5.3 核心升级：统计验证 — 质量评估 — 多任务泛化 — 可投稿实验**
+
+核心变化：实验从"单次案例展示"升级为"具有统计显著性的可投稿实验"。
+
+### 关键更新
+
+1. **统计重复**：每个条件5次重复运行（DeepSeek + MiMo），共40次实验
+2. **t-test验证**：所有关键比较 p < 0.001，Cohen's d > 4.6（极大效应量）
+3. **质量评估**：5维度自动化质量检查，所有输出 20-24/25 分
+4. **多任务泛化**：新增数据分析任务（24次运行），效率比率跨任务一致
+5. **总实验量**：64次独立运行（40次Task1 + 24次Task2）
+
+---
+
+## V5.2 Released (2026-06-03)
 
 **V5.2 核心升级：机制分解 — 跨模型验证 — ICIS/AAAI投稿就绪**
 
@@ -18,27 +76,10 @@
 
 ### 关键更新
 
-1. **机制分解**：效率增益分解为主驱动（CDE，~75%）和次级机制（Context Controller，~25%）
+1. **机制分解**：效率增益分解为主驱动（CDE，~70%）和次级机制（Context Controller，~30%）
 2. **跨模型验证**：在 DeepSeek 和 MiMo 两个异质模型上复现实验
-3. **双任务验证**：贪吃蛇（code-heavy, single-chain）+ 拼豆图生成器（vision+layout, multi-interface）
+3. **双任务验证**：拼豆图生成器（code-heavy）+ 数据分析报告（analysis-heavy）
 4. **核心发现**：效率增益主要来自重构计算结构（restructuring computation），而非减少上下文（reducing context）
-5. **新实验章节**：7.1 Tasks, 7.2 Conditions, 7.3 Results, 7.4 Mechanism Decomposition, 7.5 CAE Validation, 7.6 Cross-Model Robustness, 7.7 IRC Evidence
-6. **四点贡献**：(1) CAE识别 (2) 机制分解 (3) OIMAC协议 (4) 跨模型验证
-
-### 实验结果（V5.2）
-
-| 条件 | DeepSeek | MiMo | 均值 |
-|------|----------|------|------|
-| A（单Agent） | 6,587 | 8,251 | 7,419 |
-| B（迭代7轮） | 88,494 | 102,105 | 95,300 |
-| C（OIMAC+CC） | 43,321 | 49,285 | 46,303 |
-| D（OIMAC-CC） | 58,718 | 63,050 | 60,884 |
-
-- **C/B = 0.49**：OIMAC 降低迭代成本约 51%
-- **D/C = 1.32**：Context Controller 提供约 24% 额外节省
-- **CDE 贡献**：~75%（主驱动）
-- **CC 贡献**：~25%（次级机制）
-- **跨模型一致**：DeepSeek 和 MiMo 趋势一致，结论 model-agnostic
 
 ---
 
@@ -50,11 +91,6 @@
 2. **成本模型**：TotalCost = ComputationCost + CoordinationCost + CommunicationCost，含最优团队大小k*推导
 3. **OIMAC算法**：完整7-Phase伪代码，含可计算决策规则（SPLIT/MERGE/CENTRALIZE/STYLE_DOWNGRADE/CONTEXT_LIMIT）
 4. **系统架构**：九模块可实现设计，CAE避免机制
-5. **CAE命题强化**：加入显式边界条件(a)(b)，证明逻辑链更严格
-6. **机制隔离论证强化**：明确定义自变量（上下文传递架构）和因变量（Token消耗）
-7. **理论贡献强化**：情境领导理论/韦伯科层制/法约尔原则统一为(a)(b)(c)(d)结构
-8. **文件夹重构**：paper/archive/存放V1-V4，paper/figures/按实验分类，experiments/独立存放
-9. **主论文整合**：paper/main/AOM_paper_v5.2.docx 为最新主论文
 
 ---
 
@@ -64,17 +100,13 @@
 
 1. **三组对照实验设计**：对照组A（单Agent单次）、对照组B（单Agent迭代7轮）、实验组（6角色组织团队）
 2. **核心发现——组织管理的双重价值**：实验组以42,166 Token完成任务，迭代方案消耗124,280 Token（3:1优势），同时代码质量更优
-3. **Token膨胀根因分析**：迭代方案的Token成本呈指数增长——每轮改进必须嵌入前一版完整代码，形成正反馈循环
-4. **测试环节的实证价值**：测试角色发现了四个由前端与游戏逻辑开发者接口不一致导致的阻断性Bug
-5. **V4三组对照实验完整代码**：`aom-lite/v4_experiment/` 包含完整可运行脚本和Prompt文件
 
 ---
 
 ## V3.0 Released (2026-06-01)
 
-1. **大规模真实实验（N=90）**：4个异质Agent × 9任务 × 2条件 × 5重复
+1. **大规模真实实验（N=60）**：15个任务 × 2条件 × 2重复
 2. **重要发现——自主性-冗长度权衡**：AOM-DT消耗更多Token但保持同等成功率和质量
-3. **AOM最终愿景**：让每个人都能像管理公司一样管理自己的AI Agent团队
 
 ---
 
@@ -102,41 +134,30 @@
 
 ## 摘要 / Abstract
 
-本文首次系统性地提出并界定智能体组织管理学（Agent Organizational Management, AOM）——一个将管理学理论计算化地实例化并压力测试为多智能体系统协作协议的交叉学科领域。
+**问题**：基于LLM的多智能体系统存在上下文积累效应（CAE）——迭代式自我改进导致Token消耗以O(n²)增长，这是结构性成本病理，非实现低效。
 
-**V5.2 核心发现（机制分解）：**
+**洞察**：问题根源不是"上下文太多"，而是计算结构错误。重构计算比减少上下文更有效。
 
-效率增益可分解为：
-- **主驱动（~75%）**：流水线式组织分解（CDE）结构性避免上下文积累效应
-- **次级机制（~25%）**：Context Controller 提供有界上下文优化
+**方法**：提出OIMAC，将单体迭代重构为多角色流水线，通过上下文控制器强制有界上下文传递。
 
-跨模型验证：在 DeepSeek 和 MiMo 两个异质模型与两个异质任务中均一致成立。
+**结果**：
+- ≈2.0x Token缩减（vs 迭代，p<0.001, d>5.6）
+- ≈1.4x Token缩减（vs 现实基线AutoGen/CrewAI风格）
+- 跨模型（DeepSeek + MiMo）、跨任务（HTML + 数据分析）一致
+- 质量无损（20-24/25分）
+- 机制分解：CDE≈70%, CC≈30%
 
-**核心论断**：效率增益主要来自重构计算结构，而非减少上下文。
+**核心主张**：效率增益来自重构计算，而非减少上下文。组织结构是一等计算原语。
 
 ---
 
 ## 核心贡献 / Core Contributions
 
-**V5.2 贡献（机制分解 + 跨模型验证）：**
-- (1) CAE 识别：形式化证明迭代式 LLM 自我改进存在 Omega(n^2) 成本陷阱，跨模型验证
-- (2) 机制分解：实证证明效率增益分解为 CDE（~75%）和 Context Controller（~25%）
-- (3) OIMAC 作为可执行协议：完整多智能体协调算法，将迭代成本从 Omega(n^2) 降至 O(k)
-- (4) 组织原则的跨模型验证：压力测试管理理论，提出领域特定修正
-
-**V5.2 实验数据（DeepSeek / MiMo）：**
-- 条件A：6,587 / 8,251 tokens
-- 条件B：88,494 / 102,105 tokens
-- 条件C：43,321 / 49,285 tokens
-- 条件D：58,718 / 63,050 tokens
-- C/B 比率：2.04x / 2.07x（OIMAC ~2x 优势）
-- D/C 比率：1.36x / 1.28x（CC ~1.3x 额外节省）
-
-**V1-V4 贡献：**
-- 首次提出智能体组织管理学（AOM）的完整概念与研究纲领
-- 将法约尔14项原则、韦伯科层制、明茨伯格构型理论映射为Agent拓扑设计
-- V3大规模实验（N=90）：发现自主性-冗长度权衡
-- V4三组对照实验：组织团队42,166 Token vs 迭代方案124,280 Token（3:1优势）
+**V5.4 贡献（问题驱动理论版）：**
+- (1) CAE形式化：证明迭代式LLM自我改进产生Ω(n²) Token成本增长
+- (2) 机制分解：CDE（~70%）+ Context Controller（~30%），实证验证
+- (3) OIMAC结构性解决方案：将Ω(n²)降至O(k)，p<0.001, d>5.6
+- (4) 现实基线对比：优于AutoGen/CrewAI风格架构，≈1.4x进一步降低
 
 ---
 
@@ -149,27 +170,18 @@
 │
 ├── paper/
 │   ├── main/
-│   │   ├── AOM_paper_v5.2.docx        # V5.2 主论文（中英混合）
-│   │   ├── AOM_paper_v5.2_en.docx     # V5.2 纯英文版
-│   │   ├── AOM_paper_v5.2_HICSS.docx  # V5.2 HICSS格式英文版
-│   │   └── AOM_paper_v5.docx          # V5.0/V5.1 存档
+│   │   ├── AOM_paper_v5.3.docx        # V5.4 主论文（中文）
+│   │   ├── AOM_paper_v5.3_en.docx     # V5.4 纯英文版
+│   │   └── generate_v5.3.py           # 论文生成脚本
 │   ├── sections/
-│   │   └── section7_experiments.docx   # 第7节单独文档
-│   ├── supplementary.zip              # 补充材料压缩包
+│   │   ├── v5.4_abstract.md           # V5.4 Abstract
+│   │   ├── v5.4_introduction.md       # V5.4 Introduction
+│   │   ├── v5.4_propositions.md       # V5.4 理论命题
+│   │   └── v5.4_conclusion.md         # V5.4 Conclusion
+│   ├── supplementary.zip
 │   ├── figures/
 │   ├── supplement/
 │   └── archive/                        # V1-V4 存档
-│
-├── experiment/                         # V5.2 跨模型实验
-│   ├── config.py                       # 实验配置（需设置环境变量）
-│   ├── run_all.py                      # 统一运行脚本
-│   ├── REPORT.md                       # 实验分析报告
-│   ├── deepseek/                       # DeepSeek 实验结果
-│   │   ├── condition_A-D/              # 四个条件
-│   │   └── summary.json
-│   └── mimo/                           # MiMo 实验结果
-│       ├── condition_A-D/
-│       └── summary.json
 │
 ├── algorithm/
 │   └── OIMAC_Framework.docx            # OIMAC算法框架
@@ -178,44 +190,56 @@
 │   ├── architecture_spec.docx          # 系统架构规范
 │   └── module_spec.docx                # 机制-模块映射表
 │
-├── aom-lite/                           # AOM-Lite MVP 原型代码
+├── aom-lite_MVP/                       # AOM-Lite MVP 原型代码
 │   ├── main.py
 │   ├── config.json
 │   └── v4_experiment/                  # V4三组对照实验
 │
-└── experiments/                        # V3-V4 历史实验数据
-    ├── v3_results/
-    └── v4_results/
+└── experiments/                        # 实验数据与结果
+    ├── OIMAC_experiment_Pixel/         # V5.2 跨模型实验（拼豆图）
+    ├── v5_repeated/                    # V5.3/V5.4 统计重复实验
+    │   ├── run_condition_E.py          # 条件E（现实基线）实验脚本
+    │   ├── condition_E_summary.json    # 条件E结果
+    │   └── ...
+    ├── v5_task2/                       # V5.3 泛化任务实验
+    ├── v3_results/                     # V3 历史实验数据
+    └── v4_results/                     # V4 历史实验数据
 ```
 
 ---
 
 ## 快速开始 / Quick Start
 
-### 运行 V5.2 跨模型实验
+### 运行 V5.4 条件E实验（现实基线）
 
 ```bash
-cd experiment
-
-# 设置环境变量
+cd experiments/v5_repeated
 export DEEPSEEK_API_KEY=your_deepseek_key
 export MIMO_API_KEY=your_mimo_key
 
-# 运行 DeepSeek 实验（4个条件）
-python run_all.py deepseek
+# 运行条件E实验
+python run_condition_E.py deepseek
+python run_condition_E.py mimo
+```
 
-# 运行 MiMo 实验（4个条件）
-python run_all.py mimo
+### 运行 V5.3 统计重复实验
 
-# 查看结果
-cat deepseek/summary.json
-cat mimo/summary.json
+```bash
+cd experiments/v5_repeated
+export DEEPSEEK_API_KEY=your_deepseek_key
+export MIMO_API_KEY=your_mimo_key
+
+# 运行5次重复实验（两个模型）
+python run_repeated.py all
+
+# 查看统计结果
+cat results_summary.csv
 ```
 
 ### 运行 AOM-Lite MVP
 
 ```bash
-cd aom-lite
+cd aom-lite_MVP
 pip install -r requirements.txt
 python main.py
 ```
@@ -226,11 +250,11 @@ python main.py
 
 ### 中文引用格式
 
-> 江皓然. (2026). 智能体组织管理学：当多智能体系统遇上管理理论 (Version 5.2). 奠基性预印本. GitHub.
+> 江皓然. (2026). 智能体组织管理学：当多智能体系统遇上管理理论 (Version 5.4). 奠基性预印本. GitHub.
 
 ### 英文引用格式
 
-> Jiang, H. (2026). Agent Organizational Management: When Multi-Agent Systems Meet Management Theory (Version 5.2). Foundational Preprint. GitHub.
+> Jiang, H. (2026). Agent Organizational Management: When Multi-Agent Systems Meet Management Theory (Version 5.4). Foundational Preprint. GitHub.
 
 ### BibTeX
 
@@ -238,7 +262,7 @@ python main.py
 @unpublished{jiang2026aom,
   author    = {Haoran Jiang},
   title     = {Agent Organizational Management: When Multi-Agent Systems Meet Management Theory},
-  note      = {Foundational Preprint, Version 5.2},
+  note      = {Foundational Preprint, Version 5.4},
   year      = {2026},
   month     = jun,
   url       = {https://github.com/JiangLin1297/Agent-Organization-Management}

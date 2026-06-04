@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025年销售数据分析报告</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --secondary: #10b981;
+            --accent: #8b5cf6;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --white: #ffffff;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .report-header {
+            background: linear-gradient(135deg, var(--dark) 0%, #334155 40%, var(--primary) 100%);
+            color: var(--white);
+            padding: 40px 36px;
+            border-radius: var(--radius);
+            margin-bottom: 28px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .report-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .report-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .report-header .subtitle {
+            font-size: 1.05rem;
+            opacity: 0.9;
+            position: relative;
+        }
+
+        .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .meta-tag {
+            background: rgba(255,255,255,0.15);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--gray-200);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid var(--gray-100);
+        }
+
+        .card-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .card-icon.blue { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+        .card-icon.green { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
+        .card-icon.purple { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
+        .card-icon.orange { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+        .card-icon.cyan { background: linear-gradient(135deg, #cffafe, #a5f3fc); }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .kpi-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--gray-200);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+        }
+
+        .kpi-card.blue::before { background: linear-gradient(90deg, var(--primary), var(--primary-light)); }
+        .kpi-card.green::before { background: linear-gradient(90deg, #059669, var(--secondary)); }
+        .kpi-card.purple::before { background: linear-gradient(90deg, #7c3aed, var(--accent)); }
+        .kpi-card.orange::before { background: linear-gradient(90deg, #d97706, var(--warning)); }
+        .kpi-card.red::before { background: linear-gradient(90deg, #dc2626, var(--danger)); }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 6px;
+            line-height: 1.2;
+        }
+
+        .kpi-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 16px;
+        }
+
+        .kpi-change.positive {
+            color: var(--secondary);
+            background: #d1fae5;
+        }
+
+        .kpi-change.negative {
+            color: var(--danger);
+            background: #fee2e2;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        .charts-grid .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+
+        .filter-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--gray-200);
+            border-radius: 20px;
+            background: var(--white);
+            color: var(--gray-600);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .filter-btn.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .filter-btn .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot.north { background: #2563eb; }
+        .dot.south { background: #ef4444; }
+        .dot.east { background: #10b981; }
+        .dot.west { background: #f59e0b; }
+        .dot.central { background: #8b5cf6; }
+
+        .filter-btn.active .dot {
+            background: var(--white);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        thead {
+            background: linear-gradient(135deg, var(--gray-50), var(--gray-100));
+        }
+
+        th {
+            padding: 14px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--gray-600);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--gray-200);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--gray-100);
+            color: var(--dark);
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .region-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .region-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+        }
+
+        .trend-up { color: var(--secondary); font-weight: 600; }
+        .trend-down { color: var(--danger); font-weight: 600; }
+
+        .quarter-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+
+        .quarter-card {
+            text-align: center;
+            padding: 20px;
+            background: var(--white);
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+
+        .quarter-card:hover {
+            border-color: var(--primary-light);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .quarter-card.best {
+            border-color: var(--secondary);
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        }
+
+        .quarter-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .quarter-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
+
+        .quarter-change {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .quarter-percent {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: 4px;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .insight-card {
+            background: var(--white);
+            border-radius: var(--radius-sm);
+            padding: 22px;
+            border: 1px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+
+        .insight-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-light);
+        }
+
+        .insight-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 14px;
+        }
+
+        .insight-icon.blue { background: #dbeafe; }
+        .insight-icon.green { background: #d1fae5; }
+        .insight-icon.yellow { background: #fef3c7; }
+        .insight-icon.purple { background: #ede9fe; }
+        .insight-icon.red { background: #fee2e2; }
+
+        .insight-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .insight-text {
+            font-size: 0.88rem;
+            color: var(--gray-600);
+            line-height: 1.7;
+        }
+
+        .highlight {
+            background: linear-gradient(to bottom, transparent 60%, #fef08a 60%);
+            padding: 0 2px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .highlight.success {
+            background: linear-gradient(to bottom, transparent 60%, #a7f3d0 60%);
+        }
+
+        .highlight.danger {
+            background: linear-gradient(to bottom, transparent 60%, #fecaca 60%);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .summary-item {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--gray-50), var(--white));
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+
+        .summary-item:hover {
+            border-color: var(--primary-light);
+        }
+
+        .summary-item h4 {
+            font-size: 0.8rem;
+            color: var(--gray-500);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-item p {
+            font-size: 0.9rem;
+            color: var(--dark);
+            line-height: 1.7;
+        }
+
+        .report-footer {
+            text-align: center;
+            padding: 32px;
+            background: linear-gradient(135deg, var(--dark) 0%, #334155 100%);
+            color: var(--white);
+            border-radius: var(--radius);
+            margin-top: 32px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .report-footer p {
+            opacity: 0.8;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+        }
+
+        .scroll-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 1000;
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-top:hover {
+            background: #1d4ed8;
+            transform: translateY(-3px);
+        }
+
+        @media (max-width: 1024px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            .quarter-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .chart-container {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+            .report-header {
+                padding: 24px 20px;
+            }
+            .report-header h1 {
+                font-size: 1.5rem;
+            }
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .kpi-value {
+                font-size: 1.3rem;
+            }
+            .card {
+                padding: 16px;
+            }
+            .chart-container {
+                height: 250px;
+            }
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+            .quarter-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+            .filter-controls {
+                flex-direction: column;
+            }
+            .filter-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="report-header">
+            <h1>📊 2025年度销售数据分析报告</h1>
+            <p class="subtitle">5个区域 · 12个月 · 3个品类 · 全面业务洞察</p>
+            <div class="header-meta">
+                <span class="meta-tag">📅 分析周期: 2025年1月-12月</span>
+                <span class="meta-tag">🌍 覆盖区域: North, South, East, West, Central</span>
+                <span class="meta-tag">📦 产品品类: Electronics, Home, Fashion</span>
+                <span class="meta-tag">⏱️ 生成时间: 2025年12月</span>
+            </div>
+        </header>
+
+        <!-- KPI Overview -->
+        <section class="kpi-grid" id="kpiGrid"></section>
+
+        <!-- Quarterly Analysis -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon blue">📅</div>
+                <div class="card-title">季度对比分析</div>
+            </div>
+            <div class="quarter-grid" id="quarterGrid"></div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-grid">
+            <!-- Revenue Trend -->
+            <div class="card full-width">
+                <div class="card-header">
+                    <div class="card-icon blue">📈</div>
+                    <div class="card-title">各区域月度收入趋势</div>
+                </div>
+                <div class="filter-controls" id="regionFilters">
+                    <button class="filter-btn active" data-region="all">全部区域</button>
+                    <button class="filter-btn" data-region="North"><span class="dot north"></span>North</button>
+                    <button class="filter-btn" data-region="South"><span class="dot south"></span>South</button>
+                    <button class="filter-btn" data-region="East"><span class="dot east"></span>East</button>
+                    <button class="filter-btn" data-region="West"><span class="dot west"></span>West</button>
+                    <button class="filter-btn" data-region="Central"><span class="dot central"></span>Central</button>
+                </div>
+                <div class="chart-container">
+                    <canvas id="revenueTrendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Revenue vs Cost -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon green">💰</div>
+                    <div class="card-title">收入 vs 成本对比</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="revenueVsCostChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Profit Margin -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon purple">📊</div>
+                    <div class="card-title">各区域利润率对比</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="profitMarginChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Units Sold -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon orange">📦</div>
+                    <div class="card-title">销售单位趋势</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="unitsSoldChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Category Analysis -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon cyan">🏷️</div>
+                    <div class="card-title">品类分析对比</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon blue">📋</div>
+                <div class="card-title">各区域数据总览</div>
+            </div>
+            <div class="table-wrapper">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>区域</th>
+                            <th>品类</th>
+                            <th>总收入</th>
+                            <th>总成本</th>
+                            <th>总利润</th>
+                            <th>利润率</th>
+                            <th>销售单位</th>
+                            <th>平均单价</th>
+                            <th>增长趋势</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Insights -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon purple">🔍</div>
+                <div class="card-title">关键发现与建议</div>
+            </div>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-icon blue">🏆</div>
+                    <div class="insight-title">表现最佳区域</div>
+                    <div class="insight-text">
+                        <strong>North区域</strong>表现最优，全年收入<span class="highlight">$1,810,000</span>，利润<span class="highlight success">$688,000</span>。电子产品销售在12月达到峰值$198,000，季节性需求强劲。
+                        <br><br>
+                        <strong>建议：</strong>加大North区域市场投入，考虑增加高端产品线，并复制成功经验到其他区域。
+                    </div>
+                </div>
+                
+                <div class="insight-card">
+                    <div class="insight-icon red">⚠️</div>
+                    <div class="insight-title">需关注区域</div>
+                    <div class="insight-text">
+                        <strong>Central区域</strong>收入最低<span class="highlight danger">$940,000</span>，利润率仅<span class="highlight">34.04%</span>。时尚品类销售波动较大，7-8月出现明显下滑。
+                        <br><br>
+                        <strong>建议：</strong>分析Central区域竞争环境，调整时尚品类季节性策略，考虑加强线上营销渠道。
+                    </div>
+                </div>
+                
+                <div class="insight-card">
+                    <div class="insight-icon green">📈</div>
+                    <div class="insight-title">季节性趋势</div>
+                    <div class="insight-text">
+                        所有区域在<strong>11-12月</strong>均有显著增长，Q4收入占全年<span class="highlight">28.5%</span>。年初<span class="highlight">1-3月</span>为销售低谷期，Q1收入仅占全年的<span class="highlight">23.2%</span>。
+                        <br><br>
+                        <strong>建议：</strong>在Q4加大促销力度，年初注重库存管理和新品研发。
+                    </div>
+                </div>
+                
+                <div class="insight-card">
+                    <div class="insight-icon yellow">🚀</div>
+                    <div class="insight-title">增长机会</div>
+                    <div class="insight-text">
+                        <strong>West区域</strong>增长最快，年增长率<span class="highlight success">59.7%</span>，且利润率最高<span class="highlight">36.52%</span>，显示巨大潜力。该区域家居品类表现尤为突出。
+                        <br><br>
+                        <strong>建议：</strong>深入研究West区域成功因素，将其经验复制到East区域。
+                    </div>
+                </div>
+                
+                <div class="insight-card">
+                    <div class="insight-icon purple">🏷️</div>
+                    <div class="insight-title">品类策略优化</div

@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>拼豆图纸 · 像素计划</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      background: #f2efe9;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+    .app {
+      max-width: 1000px;
+      width: 100%;
+      background: white;
+      border-radius: 40px;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.10);
+      padding: 28px 24px 36px;
+      transition: all 0.2s;
+    }
+    h1 {
+      font-weight: 620;
+      font-size: 2.0rem;
+      letter-spacing: -0.02em;
+      color: #1e1e1e;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    h1 small {
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: #6f6a64;
+      margin-left: auto;
+      background: #f0ece6;
+      padding: 4px 14px;
+      border-radius: 40px;
+    }
+    .upload-area {
+      background: #faf8f5;
+      border: 2px dashed #ccc5bc;
+      border-radius: 28px;
+      padding: 36px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      margin-bottom: 18px;
+    }
+    .upload-area:hover {
+      background: #f4f0ea;
+      border-color: #a89f94;
+    }
+    .upload-area input {
+      display: none;
+    }
+    .upload-area .icon {
+      font-size: 2.8rem;
+      margin-bottom: 6px;
+    }
+    .upload-area p {
+      color: #3d3d3d;
+      font-weight: 460;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px 18px;
+      align-items: center;
+      margin-bottom: 18px;
+      background: #f6f3ef;
+      padding: 12px 20px;
+      border-radius: 60px;
+    }
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .control-group label {
+      font-size: 0.9rem;
+      font-weight: 520;
+      color: #2e2e2e;
+    }
+    select, button {
+      background: white;
+      border: 1px solid #d5cfc7;
+      border-radius: 60px;
+      padding: 8px 18px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #1a1a1a;
+      cursor: pointer;
+      transition: all 0.15s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    select:focus, button:focus-visible {
+      outline: 2px solid #b3927c;
+      outline-offset: 2px;
+    }
+    button.primary {
+      background: #1e1e1e;
+      color: white;
+      border: none;
+      padding: 8px 24px;
+      font-weight: 520;
+      letter-spacing: 0.2px;
+    }
+    button.primary:hover {
+      background: #383838;
+    }
+    button.primary:active {
+      transform: scale(0.96);
+    }
+    .canvas-wrapper {
+      background: #e8e4dd;
+      border-radius: 28px;
+      padding: 12px;
+      margin-bottom: 12px;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x pan-y;
+      position: relative;
+    }
+    .canvas-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 300px;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      transition: transform 0.1s;
+    }
+    .zoom-controls {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin: 6px 0 18px;
+      flex-wrap: wrap;
+    }
+    .zoom-controls button {
+      background: #e8e4dd;
+      color: #1f1f1f;
+      border: 1px solid #d5cfc7;
+      padding: 6px 20px;
+      font-size: 1.2rem;
+      font-weight: 500;
+      box-shadow: none;
+    }
+    .zoom-controls button:hover {
+      background: #ddd6cc;
+    }
+    .stats {
+      background: #f6f3ef;
+      border-radius: 28px;
+      padding: 18px 20px;
+      margin-top: 6px;
+    }
+    .stats h3 {
+      font-weight: 520;
+      font-size: 1.15rem;
+      margin-bottom: 14px;
+      color: #1e1e1e;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .stats h3 span {
+      font-weight: 400;
+      font-size: 0.9rem;
+      color: #6f6a64;
+      background: #ece7e0;
+      padding: 2px 14px;
+      border-radius: 40px;
+    }
+    .color-table {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 8px;
+    }
+    .color-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: white;
+      padding: 6px 14px;
+      border-radius: 60px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      font-size: 0.85rem;
+    }
+    .color-swatch {
+      width: 30px;
+      height: 30px;
+      border-radius: 60px;
+      border: 1px solid rgba(0,0,0,0.06);
+      flex-shrink: 0;
+    }
+    .color-info {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .color-hex {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: #3a3a3a;
+    }
+    .color-count {
+      font-weight: 520;
+      color: #1a1a1a;
+    }
+    .empty-state {
+      color: #6f6a64;
+      padding: 24px 0;
+      text-align: center;
+    }
+    .footer-note {
+      margin-top: 18px;
+      font-size: 0.8rem;
+      color: #8a8580;
+      text-align: center;
+    }
+    @media (max-width: 600px) {
+      .app { padding: 16px; }
+      .controls { flex-direction: column; align-items: stretch; border-radius: 32px; }
+      .control-group { justify-content: space-between; }
+      .color-table { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <h1>
+    🧩 拼豆图纸
+    <small>像素 · 色彩 · 采购单</small>
+  </h1>
+
+  <div class="upload-area" id="uploadArea">
+    <div class="icon">🖼️</div>
+    <p><strong>点击上传图片</strong> 或拖拽 · JPG / PNG</p>
+    <input type="file" id="fileInput" accept="image/*">
+  </div>
+
+  <div class="controls">
+    <div class="control-group">
+      <label for="gridSelect">网格</label>
+      <select id="gridSelect">
+        <option value="32">32×32</option>
+        <option value="48" selected>48×48</option>
+        <option value="64">64×64</option>
+        <option value="80">80×80</option>
+        <option value="96">96×96</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label for="colorSelect">颜色数</label>
+      <select id="colorSelect">
+        <option value="8">8 色</option>
+        <option value="10">10 色</option>
+        <option value="12">12 色</option>
+        <option value="15" selected>15 色</option>
+        <option value="18">18 色</option>
+        <option value="20">20 色</option>
+        <option value="24">24 色</option>
+      </select>
+    </div>
+    <button class="primary" id="generateBtn">✨ 生成图纸</button>
+  </div>
+
+  <div class="canvas-wrapper">
+    <div class="canvas-container" id="canvasContainer">
+      <canvas id="mainCanvas" width="480" height="480"></canvas>
+    </div>
+  </div>
+
+  <div class="zoom-controls">
+    <button id="zoomOutBtn">−</button>
+    <button id="zoomInBtn">+</button>
+    <button id="resetZoomBtn">◉ 重置</button>
+  </div>
+
+  <div class="stats" id="statsPanel">
+    <h3>
+      📊 颜色用量
+      <span id="colorCountBadge">0 色</span>
+    </h3>
+    <div id="colorTableContainer" class="color-table">
+      <div class="empty-state">上传图片并生成图纸</div>
+    </div>
+  </div>
+  <div class="footer-note">每个色块代表一颗拼豆 · 按数量采购</div>
+</div>
+
+<script>
+  (function() {
+    // DOM
+    const fileInput = document.getElementById('fileInput');
+    const uploadArea = document.getElementById('uploadArea');
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+    const gridSelect = document.getElementById('gridSelect');
+    const colorSelect = document.getElementById('colorSelect');
+    const generateBtn = document.getElementById('generateBtn');
+    const colorTableContainer = document.getElementById('colorTableContainer');
+    const colorCountBadge = document.getElementById('colorCountBadge');
+    const zoomInBtn = document.getElementById('zoomInBtn');
+    const zoomOutBtn = document.getElementById('zoomOutBtn');
+    const resetZoomBtn = document.getElementById('resetZoomBtn');
+
+    // 状态
+    let currentImage = null;
+    let currentGridSize = 48;
+    let currentColorCount = 15;
+    let zoomLevel = 1.0;
+    const BASE_CANVAS_SIZE = 480;
+
+    // 缓存网格数据，避免重复生成
+    let cachedGrid = null;
+    let cachedGridSize = 0;
+
+    // 初始化画布
+    canvas.width = BASE_CANVAS_SIZE;
+    canvas.height = BASE_CANVAS_SIZE;
+
+    // ---- 工具 ----
+    function hexFromRGB(r, g, b) {
+      return '#' + [r, g, b].map(c => Math.round(c).toString(16).padStart(2, '0')).join('');
+    }
+
+    // ---------- 改进的中位切分 (高质量, 支持更多颜色) ----------
+    function medianCutQuantize(imageData, maxColors) {
+      const data = imageData.data;
+      const pixels = [];
+      for (let i = 0; i < data.length; i += 4) {
+        pixels.push([data[i], data[i+1], data[i+2]]);
+      }
+      if (pixels.length === 0) return [];
+
+      function cut(bucket, depth, maxDepth) {
+        if (bucket.length === 0) return [];
+        if (depth >= maxDepth || bucket.length <= 1) {
+          const sum = [0, 0, 0];
+          for (const p of bucket) {
+            sum[0] += p[0];
+            sum[1] += p[1];
+            sum[2] += p[2];
+          }
+          const len = bucket.length;
+          return [[sum[0]/len, sum[1]/len, sum[2]/len]];
+        }
+        let minR = 255, maxR = 0, minG = 255, maxG = 0, minB = 255, maxB = 0;
+        for (const p of bucket) {
+          if (p[0] < minR) minR = p[0]; if (p[0] > maxR) maxR = p[0];
+          if (p[1] < minG) minG = p[1]; if (p[1] > maxG) maxG = p[1];
+          if (p[2] < minB) minB = p[2]; if (p[2] > maxB) maxB = p[2];
+        }
+        const rangeR = maxR - minR, rangeG = maxG - minG, rangeB = maxB - minB;
+        let channel = 0;
+        if (rangeG >= rangeR && rangeG >= rangeB) channel = 1;
+        else if (rangeB >= rangeR && rangeB >= rangeG) channel = 2;
+        bucket.sort((a, b) => a[channel] - b[channel]);
+        const medianIdx = Math.floor(bucket.length / 2);
+        if (medianIdx === 0 || medianIdx === bucket.length) {
+          const sum = [0, 0, 0];
+          for (const p of bucket) { sum[0]+=p[0]; sum[1]+=p[1]; sum[2]+=p[2]; }
+          const len = bucket.length;
+          return [[sum[0]/len, sum[1]/len, sum[2]/len]];
+        }
+        const left = bucket.slice(0, medianIdx);
+        const right = bucket.slice(medianIdx);
+        return [...cut(left, depth+1, maxDepth), ...cut(right, depth+1, maxDepth)];
+      }
+
+      let depth = 1;
+      while (Math.pow(2, depth) < maxColors) depth++;
+      depth = Math.min(depth + 1, 10);
+      let palette = cut(pixels, 0, depth);
+      palette = palette.map(c => [Math.round(c[0]), Math.round(c[1]), Math.round(c[2])]);
+
+      const uniqueMap = new Map();
+      for (const c of palette) {
+        const key = c.join(',');
+        if (!uniqueMap.has(key)) uniqueMap.set(key, c);
+      }
+      let uniqueColors = Array.from(uniqueMap.values());
+
+      while (uniqueColors.length > maxColors) {
+        let minDist = Infinity;
+        let mergeA = 0, mergeB = 0;
+        for (let i = 0; i < uniqueColors.length; i++) {
+          for (let j = i+1; j < uniqueColors.length; j++) {
+            const d = (uniqueColors[i][0]-uniqueColors[j][0])**2 +
+                      (uniqueColors[i][1]-uniqueColors[j][1])**2 +
+                      (uniqueColors[i][2]-uniqueColors[j][2])**2;
+            if (d < minDist) {
+              minDist = d;
+              mergeA = i;
+              mergeB = j;
+            }
+          }
+        }
+        const avg = [
+          Math.round((uniqueColors[mergeA][0] + uniqueColors[mergeB][0]) / 2),
+          Math.round((uniqueColors[mergeA][1] + uniqueColors[mergeB][1]) / 2),
+          Math.round((uniqueColors[mergeA][2] + uniqueColors[mergeB][2]) / 2)
+        ];
+        uniqueColors[mergeA] = avg;
+        uniqueColors.splice(mergeB, 1);
+      }
+      return uniqueColors;
+    }
+
+    // ---- 生成拼豆网格 (使用高质量降色) ----
+    function generatePattern(image, gridSize, colorCount) {
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = gridSize;
+      tempCanvas.height = gridSize;
+      const tempCtx = tempCanvas.getContext('2d');
+      tempCtx.imageSmoothingEnabled = false;
+      tempCtx.drawImage(image, 0, 0, gridSize, gridSize);
+      const imageData = tempCtx.getImageData(0, 0, gridSize, gridSize);
+
+      const palette = medianCutQuantize(imageData, colorCount);
+      if (!palette || palette.length === 0) {
+        const fallbackGrid = [];
+        for (let i = 0; i < imageData.data.length; i += 4) {
+          fallbackGrid.push([imageData.data[i], imageData.data[i+1], imageData.data[i+2]]);
+        }
+        return { grid: fallbackGrid, palette: [] };
+      }
+
+      const grid = [];
+      const data = imageData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i], g = data[i+1], b = data[i+2];
+        let minDist = Infinity;
+        let bestColor = palette[0];
+        for (const color of palette) {
+          const d = (r-color[0])**2 + (g-color[1])**2 + (b-color[2])**2;
+          if (d < minDist) {
+            minDist = d;
+            bestColor = color;
+          }
+        }
+        grid.push(bestColor);
+      }
+      return { grid, palette };
+    }
+
+    // ---- 渲染网格 (性能优化: 使用离屏Canvas缓存网格) ----
+    let offscreenCanvas = null;
+    let offscreenCtx = null;
+
+    function renderGrid(grid, gridSize) {
+      const size = BASE_CANVAS_SIZE;
+      
+      // 如果离屏canvas不存在或尺寸不匹配，重新创建
+      if (!offscreenCanvas || offscreenCanvas.width !== size || offscreenCanvas.height !== size) {
+        offscreenCanvas = document.createElement('canvas');
+        offscreenCanvas.width = size;
+        offscreenCanvas.height = size;
+        offscreenCtx = offscreenCanvas.getContext('2d');
+      }
+
+      const offCtx = offscreenCtx;
+      offCtx.clearRect(0, 0, size, size);
+
+      if (!grid || grid.length === 0) {
+        offCtx.fillStyle = '#f0ede8';
+        offCtx.fillRect(0, 0, size, size);
+        // 复制到主canvas
+        ctx.clearRect(0, 0, size, size);
+        ctx.drawImage(offscreenCanvas, 0, 0);
+        return;
+      }
+
+      const cellSize = size / gridSize;
+      offCtx.fillStyle = '#f7f5f2';
+      offCtx.fillRect(0, 0, size, size);
+
+      // 绘制色块
+      for (let row = 0; row < gridSize; row++) {
+        for (let col = 0; col < gridSize; col++) {
+          const idx = row * gridSize + col;
+          if (idx >= grid.length) continue;
+          const [r, g, b] = grid[idx];
+          offCtx.fillStyle = `rgb(${r},${g},${b})`;
+          offCtx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+        }
+      }
+
+      // 绘制网格线 (使用更高效的循环)
+      offCtx.strokeStyle = 'rgba(0,0,0,0.12)';
+      offCtx.lineWidth = 0.8;
+      offCtx.beginPath();
+      for (let col = 0; col <= gridSize; col++) {
+        const x = col * cellSize;
+        offCtx.moveTo(x, 0);
+        offCtx.lineTo(x, size);
+      }
+      for (let row = 0; row <= gridSize; row++) {
+        const y = row * cellSize;
+        offCtx.moveTo(0, y);
+        offCtx.lineTo(size, y);
+      }
+      offCtx.stroke();
+
+      // 复制到主canvas
+      ctx.clearRect(0, 0, size, size);
+      ctx.drawImage(offscreenCanvas, 0, 0);
+    }
+
+    // ---- 更新统计 ----
+    function updateStats(grid) {
+      if (!grid || grid.length === 0) {
+        colorTableContainer.innerHTML = '<div class="empty-state">暂无数据</div>';
+        colorCountBadge.textContent = '0 色';
+        return;
+      }
+      const colorMap = new Map();
+      for (const color of grid) {
+        const key = color.join(',');
+        colorMap.set(key, (colorMap.get(key) || 0) + 1);
+      }
+      const sorted = Array.from(colorMap.entries()).sort((a, b) => b[1] - a[1]);
+      colorCountBadge.textContent = `${sorted.length} 色`;
+
+      let html = '';
+      for (const [key, count] of sorted) {
+        const [r, g, b] = key.split(',').map(Number);
+        const hex = hexFromRGB(r, g, b);
+        html += `
+          <div class="color-item">
+            <div class="color-swatch" style="background:${hex}"></div>
+            <div class="color-info">
+              <span class="color-hex">${hex}</span>
+              <span class="color-count">${count}</span>
+            </div>
+          </div>
+        `;
+      }
+      colorTableContainer.innerHTML = html;
+    }
+
+    // ---- 主流程 (缓存网格) ----
+    function processImage(image, gridSize, colorCount) {
+      currentGridSize = gridSize;
+      currentColorCount = colorCount;
+      const { grid, palette } = generatePattern(image, gridSize, colorCount);
+      // 缓存网格
+      cachedGrid = grid;
+      cachedGridSize = gridSize;
+      renderGrid(grid, gridSize);
+      updateStats(grid);
+    }
+
+    // ---- 加载图片 ----
+    function loadImageFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          currentImage = img;
+          const gridSize = parseInt(gridSelect.value, 10);
+          const colorCount = parseInt(colorSelect.value, 10);
+          processImage(img, gridSize, colorCount);
+          zoomLevel = 1.0;
+          applyZoom();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ---- 缩放 (优化: 直接缩放Canvas CSS, 不重新渲染) ----
+    function applyZoom() {
+      const container = document.getElementById('canvasContainer');
+      const cvs = canvas;
+      const baseSize = BASE_CANVAS_SIZE;
+      const newSize = baseSize * zoomLevel;
+      cvs.style.width = newSize + 'px';
+      cvs.style.height = newSize + 'px';
+      const containerWidth = container.clientWidth;
+      if (newSize > containerWidth) {
+        cvs.style.maxWidth = '100%';
+        cvs.style.height = 'auto';
+      } else {
+        cvs.style.maxWidth = newSize + 'px';
+      }
+    }
+
+    // ---- 事件 ----
+    uploadArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        loadImageFile(e.target.files[0]);
+      }
+    });
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = '#b3927c';
+    });
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.style.borderColor = '#ccc5bc';
+    });
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = '#ccc5bc';
+      if (e.dataTransfer.files.length > 0) {
+        loadImageFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    generateBtn.addEventListener('click', () => {
+      if (!currentImage) {
+        alert('请先上传一张图片');
+        return;
+      }
+      const gridSize = parseInt(gridSelect.value, 10);
+      const colorCount = parseInt(colorSelect.value, 10);
+      processImage(currentImage, gridSize, colorCount);
+      zoomLevel = 1.0;
+      applyZoom();
+    });
+
+    zoomInBtn.addEventListener('click', () => {
+      zoomLevel = Math.min(zoomLevel + 0.25, 3.0);
+      applyZoom();
+    });
+    zoomOutBtn.addEventListener('click', () => {
+      zoomLevel = Math.max(zoomLevel - 0.25, 0.5);
+      applyZoom();
+    });
+    resetZoomBtn.addEventListener('click', () => {
+      zoomLevel = 1.0;
+      applyZoom();
+    });
+
+    // ---- 默认占位 (渐变) ----
+    (function initPlaceholder() {
+      const size = 48;
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = size;
+      tempCanvas.height = size;
+      const tCtx = tempCanvas.getContext('2d');
+      const gradient = tCtx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#f7b731');
+      gradient.addColorStop(0.5, '#e8637a');
+      gradient.addColorStop(1, '#3b8c9e');
+      tCtx.fillStyle = gradient;
+      tCtx.fillRect(0, 0, size, size);
+      const img = new Image();
+      img.onload = () => {
+        currentImage = img;
+        processImage(img, 48, 15);
+      };
+      img.src = tempCanvas.toDataURL();
+    })();
+  })();
+</script>
+</body>
+</html>

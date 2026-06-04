@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>拼豆图纸生成器 · Perler Beads</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #f7f5f0;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            padding: 1.5rem 1rem 3rem;
+            color: #2c2c2c;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .app-container {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+            padding: 1.8rem 1.5rem 2.2rem;
+            transition: all 0.2s;
+        }
+
+        h1 {
+            font-weight: 600;
+            font-size: 1.9rem;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.6rem;
+        }
+        h1 small {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: #6b6b6b;
+            margin-left: 0.2rem;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem 1.2rem;
+            padding: 1.2rem 0 0.8rem;
+            border-bottom: 1px solid #eae7e0;
+            margin-bottom: 1.6rem;
+        }
+
+        .upload-area {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .file-label {
+            background: #2c2c2c;
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+        .file-label:hover {
+            background: #444;
+        }
+        .file-label input {
+            display: none;
+        }
+
+        .control-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.8rem 1.2rem;
+        }
+
+        .control-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem 0.6rem;
+            flex-wrap: wrap;
+        }
+        .control-item label {
+            font-size: 0.85rem;
+            font-weight: 450;
+            color: #3a3a3a;
+        }
+
+        select, .btn-outline {
+            background: white;
+            border: 1px solid #d6d2ca;
+            border-radius: 40px;
+            padding: 0.35rem 1rem 0.35rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 450;
+            color: #1f1f1f;
+            cursor: pointer;
+            transition: 0.1s;
+            outline: none;
+        }
+        select:focus {
+            border-color: #8a857c;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #cbc6be;
+            padding: 0.35rem 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-outline:hover {
+            background: #f0ede8;
+        }
+        .btn-outline:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .zoom-group {
+            display: flex;
+            gap: 0.3rem;
+            margin-left: auto;
+        }
+        .zoom-group button {
+            width: 34px;
+            height: 34px;
+            border-radius: 40px;
+            border: 1px solid #d6d2ca;
+            background: white;
+            font-size: 1.2rem;
+            font-weight: 400;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.1s;
+            color: #1f1f1f;
+        }
+        .zoom-group button:hover {
+            background: #f0ede8;
+        }
+        .zoom-group span {
+            min-width: 48px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 450;
+            align-self: center;
+        }
+
+        .canvas-wrapper {
+            background: #fcfaf7;
+            border-radius: 24px;
+            padding: 1.2rem 0.8rem;
+            margin: 1rem 0 1.2rem;
+            display: flex;
+            justify-content: center;
+            border: 1px solid #efebe6;
+            position: relative;
+            min-height: 280px;
+            align-items: center;
+        }
+        .canvas-wrapper canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            image-rendering: crisp-edges; 
+            image-rendering: pixelated;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            border-radius: 4px;
+            touch-action: manipulation;
+        }
+
+        .placeholder-tip {
+            color: #9e9a92;
+            font-size: 1rem;
+            padding: 2rem 1rem;
+            text-align: center;
+            width: 100%;
+        }
+
+        .stats-section {
+            margin-top: 1.6rem;
+            border-top: 1px solid #eae7e0;
+            padding-top: 1.2rem;
+        }
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.8rem;
+        }
+        .stats-header h3 {
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+        .stats-table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 16px;
+            border: 1px solid #efebe6;
+            background: #fcfaf7;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            min-width: 280px;
+        }
+        th {
+            text-align: left;
+            padding: 0.7rem 0.8rem;
+            background: #f3f0eb;
+            font-weight: 500;
+            color: #2c2c2c;
+        }
+        td {
+            padding: 0.5rem 0.8rem;
+            border-top: 1px solid #eae5de;
+        }
+        .color-swatch {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: 1px solid #ddd8d0;
+            vertical-align: middle;
+            margin-right: 6px;
+            background: #eee;
+        }
+        .color-hex {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.75rem;
+            color: #5a5a5a;
+        }
+        .num-col {
+            font-weight: 450;
+        }
+        .pct-col {
+            color: #5a5a5a;
+        }
+
+        .export-bar {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+            justify-content: flex-end;
+        }
+
+        .footer-note {
+            margin-top: 1.8rem;
+            font-size: 0.75rem;
+            color: #a39f97;
+            text-align: center;
+        }
+
+        @media (max-width: 640px) {
+            .app-container {
+                padding: 1.2rem 0.8rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.8rem;
+            }
+            .zoom-group {
+                margin-left: 0;
+                justify-content: flex-end;
+            }
+            .control-group {
+                justify-content: space-between;
+            }
+            .canvas-wrapper {
+                padding: 0.6rem 0.2rem;
+                min-height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container" id="app">
+    <h1>
+        🧩 拼豆图纸
+        <small>Perler Beads</small>
+    </h1>
+
+    <div class="toolbar">
+        <div class="upload-area">
+            <label class="file-label" id="uploadLabel">
+                <span>📁 上传图片</span>
+                <input type="file" id="fileInput" accept="image/png,image/jpeg,image/gif,image/bmp,image/webp">
+            </label>
+            <span id="fileName" style="font-size:0.8rem;color:#6b6b6b;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+        </div>
+
+        <div class="control-group">
+            <div class="control-item">
+                <label for="gridSelect">网格</label>
+                <select id="gridSelect">
+                    <option value="32">32×32</option>
+                    <option value="48" selected>48×48</option>
+                    <option value="64">64×64</option>
+                </select>
+            </div>
+            <div class="control-item">
+                <label for="colorSelect">颜色</label>
+                <select id="colorSelect">
+                    <option value="10">10 色</option>
+                    <option value="12">12 色</option>
+                    <option value="15" selected>15 色</option>
+                    <option value="18">18 色</option>
+                    <option value="20">20 色</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="zoom-group">
+            <button id="zoomOutBtn" title="缩小">−</button>
+            <span id="zoomLevel">100%</span>
+            <button id="zoomInBtn" title="放大">+</button>
+        </div>
+    </div>
+
+    <!-- Canvas 渲染区 -->
+    <div class="canvas-wrapper" id="canvasWrapper">
+        <canvas id="patternCanvas" width="480" height="480"></canvas>
+        <div class="placeholder-tip" id="placeholderTip">⬆️ 上传图片，生成拼豆图纸</div>
+    </div>
+
+    <!-- 统计 & 导出 -->
+    <div class="stats-section" id="statsSection" style="display:none;">
+        <div class="stats-header">
+            <h3>📊 颜色统计</h3>
+            <span id="totalBeads" style="font-size:0.85rem;color:#5a5a5a;"></span>
+        </div>
+        <div class="stats-table-wrap">
+            <table id="statsTable">
+                <thead>
+                    <tr><th>颜色</th><th>数量</th><th>占比</th></tr>
+                </thead>
+                <tbody id="statsBody"></tbody>
+            </table>
+        </div>
+        <div class="export-bar">
+            <button class="btn-outline" id="exportPngBtn">⬇️ 导出 PNG</button>
+        </div>
+    </div>
+
+    <div class="footer-note">点击格子可查看颜色 · 滚动缩放 · 纯前端处理</div>
+</div>
+
+<script>
+    (function() {
+        'use strict';
+
+        // ----- DOM refs -----
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const gridSelect = document.getElementById('gridSelect');
+        const colorSelect = document.getElementById('colorSelect');
+        const canvas = document.getElementById('patternCanvas');
+        const ctx = canvas.getContext('2d');
+        const placeholderTip = document.getElementById('placeholderTip');
+        const statsSection = document.getElementById('statsSection');
+        const statsBody = document.getElementById('statsBody');
+        const totalBeads = document.getElementById('totalBeads');
+        const zoomLevel = document.getElementById('zoomLevel');
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+        const exportPngBtn = document.getElementById('exportPngBtn');
+
+        // ----- state -----
+        let currentImageData = null;          // ImageData (原始像素)
+        let currentPalette = [];              // [{r,g,b}, ...]
+        let currentIndexMatrix = [];          // 二维索引 (原始尺寸)
+        let patternMatrix = [];               // 二维索引 (网格尺寸)
+        let gridSize = 48;
+        let targetColors = 15;
+        let zoom = 1.0;                       // 缩放系数 (1 = 每个格子 10px)
+        const BASE_CELL = 10;                 // 基础格子大小
+
+        // 原始图片宽高 (用于占位)
+        let origWidth = 0, origHeight = 0;
+
+        // 是否已经处理过图片
+        let hasImage = false;
+
+        // ----- 工具函数 -----
+        function rgbToHex(r, g, b) {
+            return '#' + [r, g, b].map(c => Math.round(c).toString(16).padStart(2, '0')).join('');
+        }
+
+        // 更新缩放显示
+        function updateZoomLabel() {
+            zoomLevel.textContent = Math.round(zoom * 100) + '%';
+        }
+
+        // 计算格子大小
+        function getCellSize() {
+            return Math.max(4, Math.round(BASE_CELL * zoom));
+        }
+
+        // ----- 核心渲染 (模块D) -----
+        function renderPattern() {
+            if (!hasImage || patternMatrix.length === 0) {
+                canvas.style.display = 'none';
+                placeholderTip.style.display = 'block';
+                return;
+            }
+            canvas.style.display = 'block';
+            placeholderTip.style.display = 'none';
+
+            const cellSize = getCellSize();
+            const matrixSize = patternMatrix.length; // gridSize
+            const canvasSize = matrixSize * cellSize;
+
+            // 设置canvas实际尺寸
+            canvas.width = canvasSize;
+            canvas.height = canvasSize;
+            canvas.style.width = canvasSize + 'px';
+            canvas.style.height = canvasSize + 'px';
+
+            // 清空
+            ctx.clearRect(0, 0, canvasSize, canvasSize);
+
+            // 绘制每个格子 (最近邻风格)
+            const imageData = ctx.createImageData(canvasSize, canvasSize);
+            const data = imageData.data;
+
+            for (let row = 0; row < matrixSize; row++) {
+                for (let col = 0; col < matrixSize; col++) {
+                    const idx = patternMatrix[row][col];
+                    const color = currentPalette[idx];
+                    if (!color) continue;
+                    const r = color.r, g = color.g, b = color.b;
+
+                    // 填充 cellSize x cellSize 区域
+                    const startY = row * cellSize;
+                    const startX = col * cellSize;
+                    for (let dy = 0; dy < cellSize; dy++) {
+                        for (let dx = 0; dx < cellSize; dx++) {
+                            const px = startX + dx;
+                            const py = startY + dy;
+                            const offset = (py * canvasSize + px) * 4;
+                            data[offset] = r;
+                            data[offset + 1] = g;
+                            data[offset + 2] = b;
+                            data[offset + 3] = 255;
+                        }
+                    }
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+        }
+
+        // ----- 统计表格 (模块E) -----
+        function updateStatistics() {
+            if (!hasImage || patternMatrix.length === 0) {
+                statsSection.style.display = 'none';
+                return;
+            }
+            statsSection.style.display = 'block';
+
+            const total = gridSize * gridSize;
+            const countMap = new Map();
+            for (let row = 0; row < gridSize; row++) {
+                for (let col = 0; col < gridSize; col++) {
+                    const idx = patternMatrix[row][col];
+                    countMap.set(idx, (countMap.get(idx) || 0) + 1);
+                }
+            }
+
+            // 按数量降序
+            const sorted = Array.from(countMap.entries()).sort((a, b) => b[1] - a[1]);
+
+            let html = '';
+            for (const [idx, count] of sorted) {
+                const color = currentPalette[idx];
+                if (!color) continue;
+                const hex = rgbToHex(color.r, color.g, color.b);
+                const pct = ((count / total) * 100).toFixed(1);
+                html += `<tr>
+                    <td><span class="color-swatch" style="background:${hex};"></span><span class="color-hex">${hex}</span></td>
+                    <td class="num-col">${count}</td>
+                    <td class="pct-col">${pct}%</td>
+                </tr>`;
+            }
+            statsBody.innerHTML = html;
+            totalBeads.textContent = `共 ${total} 颗拼豆`;
+        }
+
+        // ----- 模块C: 网格映射 (最近邻重采样) -----
+        function mapToGrid(indexedPixels, gridSize) {
+            const inH = indexedPixels.length;
+            const inW = indexedPixels[0].length;
+            const out = [];
+            for (let r = 0; r < gridSize; r++) {
+                const row = [];
+                const srcR = Math.floor((r / gridSize) * inH);
+                for (let c = 0; c < gridSize; c++) {
+                    const srcC = Math.floor((c / gridSize) * inW);
+                    row.push(indexedPixels[srcR][srcC]);
+                }
+                out.push(row);
+            }
+            return out;
+        }
+
+        // ----- 模块B: 中位切分法颜色量化 -----
+        function quantizeColors(imageData, targetCount) {
+            const w = imageData.width, h = imageData.height;
+            const pixels = [];
+            const data = imageData.data;
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const idx = (y * w + x) * 4;
+                    pixels.push({
+                        r: data[idx],
+                        g: data[idx + 1],
+                        b: data[idx + 2]
+                    });
+                }
+            }
+
+            // 中位切分
+            function medianCut(list, depth, maxDepth) {
+                if (depth >= maxDepth || list.length === 0) {
+                    // 计算平均色
+                    const avg = { r: 0, g: 0, b: 0 };
+                    for (const p of list) {
+                        avg.r += p.r;
+                        avg.g += p.g;
+                        avg.b += p.b;
+                    }
+                    const len = list.length || 1;
+                    avg.r = Math.round(avg.r / len);
+                    avg.g = Math.round(avg.g / len);
+                    avg.b = Math.round(avg.b / len);
+                    return [avg];
+                }
+
+                // 找到范围最大的通道
+                let minR = 255, maxR = 0, minG = 255, maxG = 0, minB = 255, maxB = 0;
+                for (const p of list) {
+                    if (p.r < minR) minR = p.r;
+                    if (p.r > maxR) maxR = p.r;
+                    if (p.g < minG) minG = p.g;
+                    if (p.g > maxG) maxG = p.g;
+                    if (p.b < minB) minB = p.b;
+                    if (p.b > maxB) maxB = p.b;
+                }
+                const rangeR = maxR - minR, rangeG = maxG - minG, rangeB = maxB - minB;
+
+                let channel;
+                if (rangeR >= rangeG && rangeR >= rangeB) channel = 'r';
+                else if (rangeG >= rangeR && rangeG >= rangeB) channel = 'g';
+                else channel = 'b';
+
+                // 按通道排序
+                list.sort((a, b) => a[channel] - b[channel]);
+                const mid = Math.floor(list.length / 2);
+                const left = list.slice(0, mid);
+                const right = list.slice(mid);
+
+                return [
+                    ...medianCut(left, depth + 1, maxDepth),
+                    ...medianCut(right, depth + 1, maxDepth)
+                ];
+            }
+
+            const maxDepth = Math.ceil(Math.log2(targetCount));
+            const palette = medianCut(pixels, 0, maxDepth);
+
+            // 构建索引矩阵 (最近邻匹配)
+            const indexed = [];
+            for (let y = 0; y < h; y++) {
+                const row = [];
+                for (let x = 0; x < w; x++) {
+                    const idx = (y * w + x) * 4;
+                    const pr = data[idx], pg = data[idx + 1], pb = data[idx + 2];
+                    let bestDist = Infinity, bestIdx = 0;
+                    for (let k = 0; k < palette.length; k++) {
+                        const dr = pr - palette[k].r;
+                        const dg = pg - palette[k].g;
+                        const db = pb - palette[k].b;
+                        const dist = dr * dr + dg * dg + db * db;
+                        if (dist < bestDist) {
+                            bestDist = dist;
+                            bestIdx = k;
+                        }
+                    }
+                    row.push(bestIdx);
+                }
+                indexed.push(row);
+            }
+
+            return { palette, indexedPixels: indexed };
+        }
+
+        // ----- 模块A: 加载图片并提取ImageData (预处理缩放) -----
+        function loadImageData(file, maxDimension) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        // 缩放至 maxDimension 以内
+                        let w = img.width, h = img.height;
+                        if (w > maxDimension || h > maxDimension) {
+                            const ratio = Math.min(maxDimension / w, maxDimension / h);
+                            w = Math.round(w * ratio);
+                            h = Math.round(h * ratio);
+                        }
+                        const offscreen = document.createElement('canvas');
+                        offscreen.width = w;
+                        offscreen.height = h;
+                        const offCtx = offscreen.getContext('2d');
+                        offCtx.drawImage(img, 0, 0, w, h);
+                        const imageData = offCtx.getImageData(0, 0, w, h);
+                        resolve(imageData);
+                    };
+                    img.onerror = () => reject(new Error('图片加载失败'));
+                    img.src = e.target.result;
+                };
+                reader.onerror = () => reject(new Error('文件读取失败'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // ----- 主处理流程 (上传 + 参数变更) -----
+        async function processImage(file) {
+            if (!file) return;
+            // 校验文件类型
+            if (!file.type.startsWith('image/')) {
+                alert('请上传图片文件 (JPEG/PNG/GIF/BMP/WebP)');
+                return;
+            }
+            try {
+                // 显示加载状态 (可选)
+                placeholderTip.textContent = '⏳ 处理中...';
+                placeholderTip.style.display = 'block';
+                canvas.style.display = 'none';
+
+                // 模块A: 加载并预处理 (最大尺寸 512)
+                const imageData = await loadImageData(file, 512);
+                currentImageData = imageData;
+                origWidth = imageData.width;
+                origHeight = imageData.height;
+
+                // 模块B: 颜色量化
+                const result = quantizeColors(imageData, targetColors);
+                currentPalette = result.palette;
+                currentIndexMatrix = result.indexedPixels;
+
+                // 模块C: 网格映射
+                patternMatrix = mapToGrid(currentIndexMatrix, gridSize);
+
+                // 更新UI
+                hasImage = true;
+                renderPattern();
+                updateStatistics();
+
+                // 显示文件名
+                fileName.textContent = file.name;
+            } catch (err) {
+                alert('处理图片时出错: ' + err.message);
+                console.error(err);
+                hasImage = false;
+                canvas.style.display = 'none';
+                placeholderTip.textContent = '⬆️ 上传图片，生成拼豆图纸';
+                placeholderTip.style.display = 'block';
+                statsSection.style.display = 'none';
+            }
+        }
+
+        // ----- 事件绑定 -----
+        // 文件上传
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                processImage(file);
+            }
+        });
+
+        // 网格尺寸变更
+        gridSelect.addEventListener('change', () => {
+            if (!hasImage) return;
+            gridSize = parseInt(gridSelect.value, 10);
+            // 重新映射
+            if (currentIndexMatrix.length > 0) {
+                patternMatrix = mapToGrid(currentIndexMatrix, gridSize);
+                renderPattern();
+                updateStatistics();
+            }
+        });
+
+        // 颜色数量变更
+        colorSelect.addEventListener('change', () => {
+            if (!hasImage) return;
+            targetColors = parseInt(colorSelect.value, 10);
+            // 重新量化 (需要原始ImageData)
+            if (currentImageData) {
+                const result = quantizeColors(currentImageData, targetColors);
+                currentPalette = result.palette;
+                currentIndexMatrix = result.indexedPixels;
+                patternMatrix = mapToGrid(currentIndexMatrix, gridSize);
+                renderPattern();
+                updateStatistics();
+            }
+        });
+
+        // 缩放
+        zoomInBtn.addEventListener('click', () => {
+            if (!hasImage) return;
+            zoom = Math.min(zoom + 0.25, 4.0);
+            updateZoomLabel();
+            renderPattern();
+        });
+        zoomOutBtn.addEventListener('click', () => {
+            if (!hasImage) return;
+            zoom = Math.max(zoom - 0.25, 0.5);
+            updateZoomLabel();
+            renderPattern();
+        });
+
+        // 导出PNG
+        exportPngBtn.addEventListener('click', () => {
+            if (!hasImage || patternMatrix.length === 0) return;
+            const link = document.createElement('a');
+            link.download = `拼豆图纸_${gridSize}x${gridSize}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        // 初始化缩放显示
+        updateZoomLabel();
+
+        // 拖拽上传 (简单支持)
+        const wrapper = document.getElementById('canvasWrapper');
+        wrapper.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            wrapper.style.background = '#f0ede8';
+        });
+        wrapper.addEventListener('dragleave', () => {
+            wrapper.style.background = '';
+        });
+        wrapper.addEventListener('drop', (e) => {
+            e.preventDefault();
+            wrapper.style.background = '';
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.type.startsWith('image/')) {
+                    processImage(file);
+                    // 同步fileInput
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    fileInput.files = dt.files;
+                    fileName.textContent = file.name;
+                } else {
+                    alert('请拖入图片文件');
+                }
+            }
+        });
+
+        // 点击canvas显示颜色 (移动端友好)
+        canvas.addEventListener('click', (e) => {
+            if (!hasImage || patternMatrix.length === 0) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const mx = (e.clientX - rect.left) * scaleX;
+            const my = (e.clientY - rect.top) * scaleY;
+            const cellSize = getCellSize();
+            const col = Math.floor(mx / cellSize);
+            const row = Math.floor(my / cellSize);
+            if (row >= 0 && row < gridSize && col >= 0 && col < gridSize) {
+                const idx = patternMatrix[row][col];
+                const color = currentPalette[idx];
+                if (color) {
+                    const hex = rgbToHex(color.r, color.g, color.b);
+                    alert(`位置 (${row+1}, ${col+1})  颜色: ${hex}`);
+                }
+            }
+        });
+
+        console.log('🧩 拼豆图纸生成器已启动');
+    })();
+</script>
+</body>
+</html>

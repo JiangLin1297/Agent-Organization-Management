@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025年度销售数据分析报告</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #06b6d4;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.08);
+            --radius: 16px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .container { padding: 24px; }
+        }
+
+        header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+            color: white;
+            padding: 28px 20px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);
+        }
+
+        @media (min-width: 768px) {
+            header { padding: 48px 40px; }
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            font-weight: 800;
+        }
+
+        @media (min-width: 768px) {
+            header h1 { font-size: 2.5rem; }
+        }
+
+        header p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        @media (min-width: 640px) {
+            .dashboard { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        }
+
+        @media (min-width: 1024px) {
+            .dashboard { grid-template-columns: repeat(5, 1fr); gap: 20px; }
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .card:nth-child(1)::before { background: var(--primary); }
+        .card:nth-child(2)::before { background: var(--danger); }
+        .card:nth-child(3)::before { background: var(--success); }
+        .card:nth-child(4)::before { background: var(--warning); }
+        .card:nth-child(5)::before { background: var(--info); }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .card h3 {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+        }
+
+        .card-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        @media (min-width: 768px) {
+            .card-value { font-size: 1.8rem; }
+        }
+
+        .card-change {
+            display: inline-block;
+            font-size: 0.7rem;
+            margin-top: 8px;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .positive { background: rgba(16, 185, 129, 0.1); color: #059669; }
+        .negative { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 32px 0 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .section-header h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .badge {
+            background: var(--primary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .table-container {
+            background: var(--card);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+
+        thead th {
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            color: white;
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.88rem;
+        }
+
+        tbody tr:hover {
+            background: rgba(99, 102, 241, 0.04);
+        }
+
+        tbody tr.total-row {
+            background: rgba(99, 102, 241, 0.08);
+            font-weight: 700;
+        }
+
+        .region-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .region-north { background: rgba(99, 102, 241, 0.12); color: #4f46e5; }
+        .region-south { background: rgba(236, 72, 153, 0.12); color: #db2777; }
+        .region-east { background: rgba(16, 185, 129, 0.12); color: #059669; }
+        .region-west { background: rgba(245, 158, 11, 0.12); color: #d97706; }
+        .region-central { background: rgba(6, 182, 212, 0.12); color: #0891b2; }
+
+        .trend-up { color: var(--success); font-weight: 600; }
+        .trend-down { color: var(--danger); font-weight: 600; }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (min-width: 1024px) {
+            .charts-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+        }
+
+        .chart-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .chart-card h3 {
+            font-size: 1rem;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-wrapper { height: 360px; }
+        }
+
+        .chart-wrapper.tall {
+            height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-wrapper.tall { height: 480px; }
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (min-width: 768px) {
+            .insights-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        }
+
+        .insight-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+        }
+
+        .insight-card:nth-child(2) { border-left-color: var(--success); }
+        .insight-card:nth-child(3) { border-left-color: var(--warning); }
+        .insight-card:nth-child(4) { border-left-color: var(--info); }
+        .insight-card:nth-child(5) { border-left-color: #ec4899; }
+
+        .insight-card h4 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .insight-card p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 0.9rem;
+        }
+
+        .insight-card ul {
+            margin-top: 10px;
+            padding-left: 18px;
+            color: var(--text-secondary);
+        }
+
+        .insight-card li {
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        .summary {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.3);
+        }
+
+        @media (min-width: 768px) {
+            .summary { padding: 40px; }
+        }
+
+        .summary h2 {
+            font-size: 1.4rem;
+            margin-bottom: 24px;
+            font-weight: 800;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        @media (min-width: 640px) {
+            .summary-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (min-width: 1024px) {
+            .summary-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        .summary-card {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .summary-card h4 {
+            font-size: 0.8rem;
+            margin-bottom: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .summary-item:last-child { border-bottom: none; }
+
+        .summary-label {
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 0.85rem;
+        }
+
+        .summary-value {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .highlight-green { color: #34d399; }
+        .highlight-yellow { color: #fbbf24; }
+
+        footer {
+            text-align: center;
+            padding: 24px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            margin-top: 32px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 2025年度销售数据分析报告</h1>
+            <p>五大区域 · 全年12个月 · 完整深度分析</p>
+        </header>
+
+        <div class="dashboard">
+            <div class="card">
+                <div class="card-header">
+                    <h3>总收入</h3>
+                    <div class="card-icon" style="background:rgba(99,102,241,0.1)">💰</div>
+                </div>
+                <div class="card-value" id="total-revenue">--</div>
+                <div class="card-change positive">📈 全年累计</div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3>总成本</h3>
+                    <div class="card-icon" style="background:rgba(239,68,68,0.1)">📦</div>
+                </div>
+                <div class="card-value" id="total-cost">--</div>
+                <div class="card-change negative">📉 运营支出</div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3>总利润</h3>
+                    <div class="card-icon" style="background:rgba(16,185,129,0.1)">💎</div>
+                </div>
+                <div class="card-value" id="total-profit">--</div>
+                <div class="card-change positive" id="profit-change">--</div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3>总销量</h3>
+                    <div class="card-icon" style="background:rgba(245,158,11,0.1)">📊</div>
+                </div>
+                <div class="card-value" id="total-units">--</div>
+                <div class="card-change positive">📦 件商品</div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3>平均利润率</h3>
+                    <div class="card-icon" style="background:rgba(6,182,212,0.1)">📈</div>
+                </div>
+                <div class="card-value" id="avg-margin">--</div>
+                <div class="card-change positive">✅ 健康水平</div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h2>📋 数据总览</h2>
+            <span class="badge">5个区域</span>
+        </div>
+        <div class="table-container">
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>区域</th>
+                            <th>品类</th>
+                            <th>总收入</th>
+                            <th>总成本</th>
+                            <th>总利润</th>
+                            <th>利润率</th>
+                            <th>总销量</th>
+                            <th>年增长率</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h2>📈 趋势分析图表</h2>
+            <span class="badge">6种图表</span>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card full-width">
+                <h3>📊 各区域月度收入趋势</h3>
+                <div class="chart-wrapper tall">
+                    <canvas id="monthlyTrendChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>📊 区域收入 vs 成本对比</h3>
+                <div class="chart-wrapper">
+                    <canvas id="revenueVsCostChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>🍩 收入占比分布</h3>
+                <div class="chart-wrapper">
+                    <canvas id="revenuePieChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>📊 季度销售对比</h3>
+                <div class="chart-wrapper">
+                    <canvas id="quarterlyChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>📊 各区域利润率对比</h3>
+                <div class="chart-wrapper">
+                    <canvas id="marginChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card full-width">
+                <h3>📈 月度总销售额趋势（面积图）</h3>
+                <div class="chart-wrapper">
+                    <canvas id="areaChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>🎯 区域综合绩效雷达图</h3>
+                <div class="chart-wrapper">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>📊 各品类年度表现</h3>
+                <div class="chart-wrapper">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h2>💡 关键发现和建议</h2>
+            <span class="badge">5项洞察</span>
+        </div>
+
+        <div class="insights-grid" id="insights-container"></div>
+
+        <div class="summary">
+            <h2>📋 分析报告摘要</h2>
+            <div class="summary-grid" id="summary-container"></div>
+        </div>
+
+        <footer>
+            <p>📊 销售数据分析报告 © 2025 | 数据分析师生成</p>
+            <p>基于五个区域（North, South, East, West, Central）全年销售数据自动生成</p>
+        </footer>
+    </div>
+
+    <script>
+        // 销售数据
+        const salesData = [
+            {region:"North",month:"2025-01",revenue:125000,cost:82000,units:450,category:"Electronics"},
+            {region:"North",month:"2025-02",revenue:132000,cost:85000,units:480,category:"Electronics"},
+            {region:"North",month:"2025-03",revenue:118000,cost:79000,units:420,category:"Electronics"},
+            {region:"North",month:"2025-04",revenue:145000,cost:91000,units:520,category:"Electronics"},
+            {region:"North",month:"2025-05",revenue:156000,cost:95000,units:560,category:"Electronics"},
+            {region:"North",month:"2025-06",revenue:168000,cost:102000,units:600,category:"Electronics"},
+            {region:"North",month:"2025-07",revenue:142000,cost:88000,units:510,category:"Electronics"},
+            {region:"North",month:"2025-08",revenue:138000,cost:86000,units:495,category:"Electronics"},
+            {region:"North",month:"2025-09",revenue:151000,cost:93000,units:540,category:"Electronics"},
+            {region:"North",month:"2025-10",revenue:162000,cost:98000,units:580,category:"Electronics"},
+            {region:"North",month:"2025-11",revenue:175000,cost:105000,units:625,category:"Electronics"},
+            {region:"North",month:"2025-12",revenue:198000,cost:118000,units:710,category:"Electronics"},
+            {region:"South",month:"2025-01",revenue:98000,cost:65000,units:380,category:"Electronics"},
+            {region:"South",month:"2025-02",revenue:105000,cost:68000,units:400,category:"Electronics"},
+            {region:"South",month:"2025-03",revenue:92000,cost:62000,units:355,category:"Electronics"},
+            {region:"South",month:"2025-04",revenue:112000,cost:72000,units:430,category:"Electronics"},
+            {region:"South",month:"2025-05",revenue:119000,cost:75000,units:455,category:"Electronics"},
+            {region:"South",month:"2025-06",revenue:128000,cost:80000,units:490,category:"Electronics"},
+            {region:"South",month:"2025-07",revenue:115000,cost:73000,units:440,category:"Electronics"},
+            {region:"South",month:"2025-08",revenue:110000,cost:71000,units:425,category:"Electronics"},
+            {region:"South",month:"2025-09",revenue:121000,cost:76000,units:465,category:"Electronics"},
+            {region:"South",month:"2025-10",revenue:130000,cost:81000,units:500,category:"Electronics"},
+            {region:"South",month:"2025-11",revenue:140000,cost:86000,units:535,category:"Electronics"},
+            {region:"South",month:"2025-12",revenue:158000,cost:95000,units:605,category:"Electronics"},
+            {region:"East",month:"2025-01",revenue:85000,cost:58000,units:320,category:"Home"},
+            {region:"East",month:"2025-02",revenue:89000,cost:60000,units:335,category:"Home"},
+            {region:"East",month:"2025-03",revenue:82000,cost:56000,units:310,category:"Home"},
+            {region:"East",month:"2025-04",revenue:95000,cost:63000,units:360,category:"Home"},
+            {region:"East",month:"2025-05",revenue:102000,cost:67000,units:385,category:"Home"},
+            {region:"East",month:"2025-06",revenue:110000,cost:71000,units:415,category:"Home"},
+            {region:"East",month:"2025-07",revenue:98000,cost:65000,units:370,category:"Home"},
+            {region:"East",month:"2025-08",revenue:94000,cost:63000,units:355,category:"Home"},
+            {region:"East",month:"2025-09",revenue:101000,cost:66000,units:380,category:"Home"},
+            {region:"East",month:"2025-10",revenue:108000,cost:70000,units:408,category:"Home"},
+            {region:"East",month:"2025-11",revenue:116000,cost:74000,units:438,category:"Home"},
+            {region:"East",month:"2025-12",revenue:132000,cost:83000,units:498,category:"Home"},
+            {region:"West",month:"2025-01",revenue:72000,cost:50000,units:280,category:"Home"},
+            {region:"West",month:"2025-02",revenue:76000,cost:52000,units:295,category:"Home"},
+            {region:"West",month:"2025-03",revenue:68000,cost:48000,units:265,category:"Home"},
+            {region:"West",month:"2025-04",revenue:82000,cost:55000,units:320,category:"Home"},
+            {region:"West",month:"2025-05",revenue:88000,cost:58000,units:342,category:"Home"},
+            {region:"West",month:"2025-06",revenue:95000,cost:62000,units:370,category:"Home"},
+            {region:"West",month:"2025-07",revenue:85000,cost:57000,units:330,category:"Home"},
+            {region:"West",month:"2025-08",revenue:81000,cost:55000,units:315,category:"Home"},
+            {region:"West",month:"2025-09",revenue:87000,cost:57500,units:338,category:"Home"},
+            {region:"West",month:"2025-10",revenue:93000,cost:60500,units:362,category:"Home"},
+            {region:"West",month:"2025-11",revenue:100000,cost:64000,units:390,category:"Home"},
+            {region:"West",month:"2025-12",revenue:115000,cost:72000,units:448,category:"Home"},
+            {region:"Central",month:"2025-01",revenue:65000,cost:45000,units:250,category:"Fashion"},
+            {region:"Central",month:"2025-02",revenue:68000,cost:47000,units:262,category:"Fashion"},
+            {region:"Central",month:"2025-03",revenue:62000,cost:43000,units:240,category:"Fashion"},
+            {region:"Central",month:"2025-04",revenue:74000,cost:49000,units:288,category:"Fashion"},
+            {region:"Central",month:"2025-05",revenue:79000,cost:52000,units:308,category:"Fashion"},
+            {region:"Central",month:"2025-06",revenue:86000,cost:56000,units:335,category:"Fashion"},
+            {region:"Central",month:"2025-07",revenue:76000,cost:50000,units:295,category:"Fashion"},
+            {region:"Central",month:"2025-08",revenue:73000,cost:49000,units:282,category:"Fashion"},
+            {region:"Central",month:"2025-09",revenue:78000,cost:51500,units:302,category:"Fashion"},
+            {region:"Central",month:"2025-10",revenue:84000,cost:54500,units:326,category:"Fashion"},
+            {region:"Central",month:"2025-11",revenue:91000,cost:58000,units:353,category:"Fashion"},
+            {region:"Central",month:"2025-12",revenue:104000,cost:65000,units:403,category:"Fashion"}
+        ];
+
+        // 格式化数字
+        function formatNum(n) {
+            return '¥' + n.toLocaleString();
+        }
+
+        // 计算区域汇总
+        function calcRegionSummary() {
+            const regions = {};
+            salesData.forEach(d => {
+                if (!regions[d.region]) {
+                    regions[d.region] = { revenue: 0, cost: 0, units: 0, category: d.category, monthly: [] };
+                }
+                regions[d.region].revenue += d.revenue;
+                regions[d.region].cost += d.cost;
+                regions[d.region].units += d.units;
+                regions[d.region].monthly.push(d);
+            });
+            Object.keys(regions).forEach(r => {
+                const reg = regions[r];
+                reg.profit = reg.revenue - reg.cost;
+                reg.margin = ((reg.profit / reg.revenue) * 100).toFixed(1);
+                reg.janRevenue = reg.monthly[0].revenue;
+                reg.decRevenue = reg.monthly[11].revenue;
+                reg.growth = (((reg.decRevenue - reg.janRevenue) / reg.janRevenue) * 100).toFixed(1);
+            });
+            return regions;
+        }
+
+        // 计算总体汇总
+        function calcTotalSummary(regions) {
+            let revenue = 0, cost = 0, units = 0;
+            Object.values(regions).forEach(r => {
+                revenue += r.revenue;
+                cost += r.cost;
+                units += r.units;
+            });
+            const profit = revenue - cost;
+            const margin = ((profit / revenue) * 100).toFixed(1);
+            return { revenue, cost, profit, units, margin };
+        }
+
+        // 计算月度总计
+        function calcMonthlyTotals() {
+            const monthly = {};
+            salesData.forEach(d => {
+                const m = d.month;
+                if (!monthly[m]) monthly[m] = { revenue: 0, cost: 0, units: 0 };
+                monthly[m].revenue += d.revenue;
+                monthly[m].cost += d.cost;
+                monthly[m].units += d.units;
+            });
+            return monthly;
+        }
+
+        // 计算季度数据
+        function calcQuarterly() {
+            const q = {

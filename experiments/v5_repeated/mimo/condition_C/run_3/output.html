@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拼豆图纸生成器</title>
+    <style>
+        /* 全局样式 */
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --background-color: #f8f9fa;
+            --card-color: #ffffff;
+            --text-color: #2d3436;
+            --border-color: #dfe6e9;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* 头部 */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            background-color: var(--card-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        .panel-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .panel-title i {
+            font-size: 1.2rem;
+        }
+
+        /* 上传区域 */
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+            cursor: pointer;
+            background-color: rgba(108, 92, 231, 0.05);
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(108, 92, 231, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .upload-hint {
+            font-size: 0.9rem;
+            color: #636e72;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* 控制选项 */
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+        }
+
+        .grid-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .grid-option {
+            padding: 0.75rem;
+            background-color: var(--background-color);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .grid-option:hover, .grid-option.active {
+            border-color: var(--primary-color);
+            background-color: rgba(108, 92, 231, 0.1);
+            color: var(--primary-color);
+        }
+
+        /* 滑块样式 */
+        .slider-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .slider-value {
+            font-weight: 600;
+            color: var(--primary-color);
+            background-color: rgba(108, 92, 231, 0.1);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+        }
+
+        .color-slider {
+            width: 100%;
+            height: 10px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--border-color);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .color-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(108, 92, 231, 0.4);
+        }
+
+        /* 生成按钮 */
+        .generate-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(108, 92, 231, 0.4);
+        }
+
+        .generate-btn:disabled {
+            background: #b2bec3;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-icon {
+            font-size: 1.2rem;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* 预览容器 */
+        .preview-container {
+            background-color: var(--card-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .preview-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1.1rem;
+        }
+
+        .zoom-btn:hover {
+            background-color: rgba(108, 92, 231, 0.1);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .canvas-container {
+            width: 100%;
+            height: 500px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            background-color: #f1f3f4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #patternCanvas {
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .canvas-placeholder {
+            text-align: center;
+            color: #636e72;
+            padding: 2rem;
+        }
+
+        .placeholder-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* 颜色统计表格 */
+        .statistics-container {
+            background-color: var(--card-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .statistics-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .statistics-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .statistics-table th {
+            background-color: var(--background-color);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-color);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .statistics-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .color-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 0.75rem;
+        }
+
+        .color-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .hex-value {
+            font-family: monospace;
+            font-weight: 500;
+            background-color: var(--background-color);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .quantity-value {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* 导出按钮 */
+        .export-section {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .export-btn {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .export-btn:hover {
+            background-color: rgba(108, 92, 231, 0.1);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* 加载状态 */
+        .loading {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--border-color);
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 300px 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 1.5rem;
+            }
+            
+            .control-panel {
+                position: static;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .grid-options {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .canvas-container {
+                height: 400px;
+            }
+            
+            .zoom-controls {
+                gap: 0.25rem;
+            }
+            
+            .zoom-btn {
+                width: 35px;
+                height: 35px;
+            }
+            
+            .statistics-table th,
+            .statistics-table td {
+                padding: 0.75rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .preview-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .canvas-container {
+                height: 350px;
+            }
+            
+            .export-section {
+                flex-direction: column;
+            }
+            
+            .export-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部 -->
+    <header class="header">
+        <h1>拼豆图纸生成器</h1>
+        <p>上传图片，一键转换为拼豆制作图纸</p>
+    </header>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 控制面板 -->
+        <aside class="control-panel">
+            <h2 class="panel-title"><i>⚙️</i> 控制面板</h2>
+            
+            <!-- 图片上传 -->
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">点击或拖拽上传图片</div>
+                <div class="upload-hint">支持 JPG、PNG、GIF 格式</div>
+                <input type="file" id="fileInput" class="file-input" accept="image/*">
+            </div>
+            
+            <!-- 网格尺寸选择 -->
+            <div class="control-group">
+                <label class="control-label">网格尺寸</label>
+                <div class="grid-options">
+                    <div class="grid-option active" data-size="32">32×32</div>
+                    <div class="grid-option" data-size="48">48×48</div>
+                    <div class="grid-option" data-size="64">64×64</div>
+                </div>
+            </div>
+            
+            <!-- 颜色数量选择 -->
+            <div class="control-group slider-container">
+                <div class="slider-header">
+                    <label class="control-label">目标颜色数量</label>
+                    <span class="slider-value" id="colorCountValue">15</span>
+                </div>
+                <input type="range" min="10" max="20" value="15" class="color-slider" id="colorSlider">
+            </div>
+            
+            <!-- 生成按钮 -->
+            <button class="generate-btn" id="generateBtn">
+                <span class="btn-icon">🎨</span>
+                生成拼豆图纸
+            </button>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <!-- 预览容器 -->
+            <div class="preview-container">
+                <div class="preview-header">
+                    <h3 class="preview-title">图纸预览</h3>
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" id="zoomInBtn" title="放大">🔍+</button>
+                        <button class="zoom-btn" id="zoomOutBtn" title="缩小">🔍-</button>
+                        <button class="zoom-btn" id="resetZoomBtn" title="重置">↺</button>
+                    </div>
+                </div>
+                <div class="canvas-container" id="canvasContainer">
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <div class="loading-text">正在处理图像...</div>
+                    </div>
+                    <div class="canvas-placeholder" id="canvasPlaceholder">
+                        <div class="placeholder-icon">🧩</div>
+                        <p>上传图片并设置参数后<br>点击"生成拼豆图纸"按钮</p>
+                    </div>
+                    <canvas id="patternCanvas" style="display: none;"></canvas>
+                </div>
+            </div>
+
+            <!-- 颜色统计表格 -->
+            <div class="statistics-container" id="statisticsContainer">
+                <h3 class="statistics-title"><i>📊</i> 颜色统计</h3>
+                <div class="table-container">
+                    <table class="statistics-table" id="statisticsTable">
+                        <thead>
+                            <tr>
+                                <th>颜色预览</th>
+                                <th>十六进制值</th>
+                                <th>RGB值</th>
+                                <th>使用数量</th>
+                            </tr>
+                        </thead>
+                        <tbody id="statisticsBody">
+                            <!-- 动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="export-section">
+                    <button class="export-btn" id="exportImgBtn">
+                        <span>📥</span>
+                        导出图片
+                    </button>
+                    <button class="export-btn" id="exportCsvBtn">
+                        <span>📄</span>
+                        导出CSV
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ==================== 图像处理核心算法模块 ====================
+        
+        /**
+         * 图像缩放函数（支持自定义网格大小）
+         * @param {ImageData} imageData - 原始图像数据
+         * @param {number} targetWidth - 目标宽度
+         * @param {number} targetHeight - 目标高度
+         * @returns {ImageData} 缩放后的图像数据
+         */
+        function resizeImage(imageData, targetWidth, targetHeight) {
+            // 创建临时canvas进行缩放
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            // 设置目标尺寸
+            tempCanvas.width = targetWidth;
+            tempCanvas.height = targetHeight;
+            
+            // 创建源图像canvas
+            const sourceCanvas = document.createElement('canvas');
+            const sourceCtx = sourceCanvas.getContext('2d');
+            sourceCanvas.width = imageData.width;
+            sourceCanvas.height = imageData.height;
+            sourceCtx.putImageData(imageData, 0, 0);
+            
+            // 使用双线性插值进行缩放
+            tempCtx.drawImage(sourceCanvas, 0, 0, imageData.width, imageData.height, 
+                              0, 0, targetWidth, targetHeight);
+            
+            return tempCtx.getImageData(0, 0, targetWidth, targetHeight);
+        }
+
+        /**
+         * 图像预处理（去除透明通道）
+         * @param {ImageData} imageData - 图像数据
+         * @returns {ImageData} 处理后的图像数据
+         */
+        function preprocessImage(imageData) {
+            const data = imageData.data;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                // 如果透明度为0，设置为白色
+                if (data[i + 3] === 0) {
+                    data[i] = 255;      // R
+                    data[i + 1] = 255;  // G
+                    data[i + 2] = 255;  // B
+                    data[i + 3] = 255;  // A
+                }
+            }
+            
+            return imageData;
+        }
+
+        /**
+         * 颜色量化函数（中位切分法）
+         * @param {ImageData} imageData - 图像数据
+         * @param {number} colorCount - 目标颜色数量（10-20）
+         * @returns {Object} 包含调色板和颜色索引的对象
+         */
+        function quantizeColors(imageData, colorCount) {
+            // 提取所有像素的颜色信息
+            const pixels = [];
+            const data = imageData.data;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                pixels.push({
+                    r: data[i],
+                    g: data[i + 1],
+                    b: data[i + 2],
+                    a: data[i + 3]
+                });
+            }
+            
+            // 实现中位切分法
+            function medianCut(pixels, targetCount) {
+                if (pixels.length <= 1 || targetCount <= 1) {
+                    return [pixels];
+                }
+                
+                // 计算每个维度的范围
+                let rMin = 255, rMax = 0, gMin = 255, gMax = 0, bMin = 255, bMax = 0;
+                
+                pixels.forEach(pixel => {
+                    rMin = Math.min(rMin, pixel.r);
+                    rMax = Math.max(rMax, pixel.r);
+                    gMin = Math.min(gMin, pixel.g);
+                    gMax = Math.max(gMax, pixel.g);
+                    bMin = Math.min(bMin, pixel.b);
+                    bMax = Math.max(bMax, pixel.b);
+                });
+                
+                // 找出最大范围维度
+                const rRange = rMax - rMin;
+                const gRange = gMax - gMin;
+                const bRange = bMax - bMin;
+                
+                let splitDimension;
+                if (rRange >= gRange && rRange >= bRange) {
+                    splitDimension = 'r';
+                } else if (gRange >= rRange && gRange >= bRange) {
+                    splitDimension = 'g';
+                } else {
+                    splitDimension = 'b';
+                }
+                
+                // 按该维度排序
+                pixels.sort((a, b) => a[splitDimension] - b[splitDimension]);
+                
+                // 找到中位数位置
+                const medianIndex = Math.floor(pixels.length / 2);
+                
+                // 递归分割
+                const leftPixels = pixels.slice(0, medianIndex);
+                const rightPixels = pixels.slice(medianIndex);
+                
+                const leftBoxes = medianCut(leftPixels, Math.ceil(targetCount / 2));
+                const rightBoxes = medianCut(rightPixels, Math.floor(targetCount / 2));
+                
+                return [...leftBoxes, ...rightBoxes];
+            }
+            
+            // 执行中位切分
+            const boxes = medianCut(pixels, colorCount);
+            
+            // 为每个盒子计算平均颜色
+            const palette = boxes.map(box => {
+                if (box.length === 0) return { r: 0, g: 0, b: 0, hex: '#000000' };
+                
+                const total = { r: 0, g: 0, b: 0 };
+                box.forEach(pixel => {
+                    total.r += pixel.r;
+                    total.g += pixel.g;
+                    total.b += pixel.b;
+                });
+                
+                const avgR = Math.round(total.r / box.length);
+                const avgG = Math.round(total.g / box.length);
+                const avgB = Math.round(total.b / box.length);
+                
+                const hex = `#${avgR.toString(16).padStart(2, '0')}${avgG.toString(16).padStart(2, '0')}${avgB.toString(16).padStart(2, '0')}`;
+                
+                return { r: avgR, g: avgG, b: avgB, hex: hex };
+            });
+            
+            // 创建颜色索引映射
+            const width = imageData.width;
+            const height = imageData.height;
+            const indexMap = new Array(height);
+            
+            for (let y = 0; y < height; y++) {
+                indexMap[y] = new Array(width);
+                for (let x = 0; x < width; x++) {
+                    const pixelIndex = (y * width + x) * 4;
+                    const pixel = {
+                        r: data[pixelIndex],
+                        g: data[pixelIndex + 1],
+                        b: data[pixelIndex + 2]
+                    };
+                    
+                    // 找到最匹配的调色板颜色
+                    let minDistance = Infinity;
+                    let bestIndex = 0;
+                    
+                    palette.forEach((color, index) => {
+                        const distance = Math.sqrt(
+                            Math.pow(pixel.r - color.r, 2) +
+                            Math.pow(pixel.g - color.g, 2) +
+                            Math.pow(pixel.b - color.b, 2)
+                        );
+                        
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            bestIndex = index;
+                        }
+                    });
+                    
+                    indexMap[y][x] = bestIndex;
+                }
+            }
+            
+            return { palette, indexMap };
+        }
+
+        /**
+         * 颜色统计函数（计算每种颜色的使用数量）
+         * @param {Array} indexMap - 颜色索引矩阵
+         * @param {Array} palette - 调色板
+         * @returns {Array} 颜色统计数组
+         */
+        function getColorStatistics(indexMap, palette) {
+            const stats = [];
+            const countMap = new Map();
+            
+            // 统计每种颜色的出现次数
+            for (let y = 0; y < indexMap.length; y++) {
+                for (let x = 0; x < indexMap[y].length; x++) {
+                    const colorIndex = indexMap[y][x];
+                    const count = countMap.get(colorIndex) || 0;
+                    countMap.set(colorIndex, count + 1);
+                }
+            }
+            
+            // 转换为统计数组
+            countMap.forEach((count, index) => {
+                if (index < palette.length) {
+                    stats.push({
+                        color: palette[index],
+                        count: count,
+                        hex: palette[index].hex
+                    });
+                }
+            });
+            
+            // 按使用数量降序排序
+            stats.sort((a, b) => b.count - a.count);
+            
+            return stats;
+        }
+
+        /**
+         * 生成拼豆图纸网格数据
+         * @param {ImageData} imageData - 图像数据
+         * @param {Object} config - 配置参数
+         * @returns {Object} 包含所有处理结果的对象
+         */
+        function generatePerlerPattern(imageData, config) {
+            const { gridSize, colorCount } = config;
+            
+            // 1. 图像缩放
+            const resizedImage = resizeImage(imageData, gridSize, gridSize);
+            
+            // 2. 颜色量化
+            const { palette, indexMap } = quantizeColors(resizedImage, colorCount);
+            
+            // 3. 颜色统计
+            const colorStats = getColorStatistics(indexMap, palette);
+            
+            return {
+                palette: palette,
+                indexMap: indexMap,
+                gridSize: gridSize,
+                colorStats: colorStats
+            };
+        }
+
+        // ==================== 前端交互逻辑模块 ====================
+        
+        // 全局状态
+        const state = {
+            imageElement: null,
+            currentSize: 32,
+            colorCount: 15,
+            patternData: null,
+            zoomLevel: 1,
+            isDragging: false,
+            startX: 0,
+            startY: 0,
+            translateX: 0,
+            translateY: 0
+        };
+
+        // DOM元素
+        const elements = {
+            uploadArea: document.getElementById('uploadArea'),
+            fileInput: document.getElementById('fileInput'),
+            gridOptions: document.querySelectorAll('.grid-option'),
+            colorSlider: document.getElementById('colorSlider'),
+            colorCountValue: document.getElementById('colorCountValue'),
+            generateBtn: document.getElementById('generateBtn'),
+            patternCanvas: document.getElementById('patternCanvas'),
+            canvasContainer: document.getElementById('canvasContainer'),
+            canvasPlaceholder: document.getElementById('canvasPlaceholder'),
+            loading: document.getElementById('loading'),
+            statisticsBody: document.getElementById('statisticsBody'),
+            zoomInBtn: document.getElementById('zoomInBtn'),
+            zoomOutBtn: document.getElementById('zoomOutBtn'),
+            resetZoomBtn: document.getElementById('resetZoomBtn'),
+            exportImgBtn: document.getElementById('exportImgBtn'),
+            exportCsvBtn: document.getElementById('exportCsvBtn')
+        };
+
+        // ==================== 事件监听器 ====================
+        
+        // 文件上传
+        elements.uploadArea.addEventListener('click', () => {
+            elements.fileInput.click();
+        });
+        
+        elements.fileInput.addEventListener('change', handleFileSelect);
+        
+        // 拖拽上传
+        elements.uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            elements.uploadArea.style.borderColor = 'var(--primary-color)';
+            elements.uploadArea.style.backgroundColor = 'rgba(108, 92, 231, 0.1)';
+        });
+        
+        elements.uploadArea.addEventListener('dragleave', () => {
+            elements.uploadArea.style.borderColor = 'var(--border-color)';
+            elements.uploadArea.style.backgroundColor = 'rgba(108, 92, 231, 0.05)';
+        });
+        
+        elements.uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            elements.uploadArea.style.borderColor = 'var(--border-color)';
+            elements.uploadArea.style.backgroundColor = 'rgba(108, 92, 231, 0.05)';
+            
+            if (e.dataTransfer.files.length) {
+                handleFileSelect({ target: { files: e.dataTransfer.files } });
+            }
+        });
+        
+        // 网格尺寸选择
+        elements.gridOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                elements.gridOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                state.currentSize = parseInt(option.dataset.size);
+            });
+        });
+        
+        // 颜色数量滑块
+        elements.colorSlider.addEventListener('input', (e) => {
+            state.colorCount = parseInt(e.target.value);
+            elements.colorCountValue.textContent = state.colorCount;
+        });
+        
+        // 生成按钮
+        elements.generateBtn.addEventListener('click', generatePattern);
+        
+        // 缩放控制
+        elements.zoomInBtn.addEventListener('click', () => {
+            state.zoomLevel = Math.min(state.zoomLevel * 1.2, 3);
+            updateCanvasTransform();
+        });
+        
+        elements.zoomOutBtn.addEventListener('click', () => {
+            state.zoomLevel = Math.max(state.zoomLevel / 1.2, 0.5);
+            updateCanvasTransform();
+        });
+        
+        elements.resetZoomBtn.addEventListener('click', () => {
+            state.zoomLevel = 1;
+            state.translateX = 0;
+            state.translateY = 0;
+            updateCanvasTransform();
+        });
+        
+        // 鼠标/触摸拖动
+        elements.patternCanvas.addEventListener('mousedown', startDrag);
+        elements.patternCanvas.addEventListener('touchstart', startDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('mouseup', endDrag);
+        document.addEventListener('touchend', endDrag);
+        
+        // 导出按钮
+        elements.exportImgBtn.addEventListener('click', exportAsImage);
+        elements.exportCsvBtn.addEventListener('click', exportAsCsv);
+        
+        // ==================== 核心功能函数 ====================
+        
+        /**
+         * 处理文件选择
+         * @param {Event} e - 文件选择事件
+         */
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            
+            if (!file || !file.type.match('image.*')) {
+                alert('请选择有效的图片文件！');
+                return;
+            }
+            
+            const reader = new FileReader();
+            
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    state.imageElement = img;
+                    
+                    // 显示预览
+                    const previewCanvas = document.createElement('canvas');
+                    const previewCtx = previewCanvas.getContext('2d');
+                    const maxSize = 200;
+                    
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    if (width > maxSize || height > maxSize) {
+                        if (width > height) {
+                            height = Math.round(height * maxSize / width);
+                            width = maxSize;
+                        } else {
+                            width = Math.round(width * maxSize / height);
+                            height = maxSize;
+                        }
+                    }
+                    
+                    previewCanvas.width = width;
+                    previewCanvas.height = height;
+                    previewCtx.drawImage(img, 0, 0, width, height);
+                    
+                    // 更新上传区域显示
+                    elements

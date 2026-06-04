@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>销售数据分析报告</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background: #f6f9fc;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .report-container {
+            max-width: 1280px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px -12px rgba(0, 20, 30, 0.15);
+            padding: 2rem 2rem 2.5rem;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: #0b2b3b;
+            margin-bottom: 0.25rem;
+        }
+        .subhead {
+            color: #4b6a7a;
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #3b8b9b;
+            padding-left: 1rem;
+            background: #eef6f9;
+            border-radius: 0 12px 12px 0;
+            display: inline-block;
+            padding: 0.5rem 1.2rem;
+        }
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.8rem;
+            margin: 2rem 0 1.5rem;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 1.2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            border: 1px solid #eaf0f4;
+        }
+        .card-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #1a3b4a;
+            margin-bottom: 0.75rem;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 1rem 0 0.5rem;
+            border-radius: 18px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            min-width: 600px;
+        }
+        th {
+            background: #eef4f8;
+            color: #1a3b4a;
+            font-weight: 600;
+            padding: 12px 8px;
+            text-align: center;
+            border-bottom: 2px solid #d0dfe7;
+        }
+        td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid #e6edf2;
+            color: #1f3f4f;
+        }
+        .summary-block {
+            background: #f0f7fa;
+            border-radius: 24px;
+            padding: 1.6rem 2rem;
+            margin: 2rem 0 0.8rem;
+            border: 1px solid #dae9f0;
+        }
+        .summary-title {
+            font-weight: 600;
+            font-size: 1.3rem;
+            color: #0b2b3b;
+            margin-bottom: 1rem;
+        }
+        .summary-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.8rem 3rem;
+            align-items: baseline;
+        }
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .summary-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #4b6a7a;
+        }
+        .summary-value {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #0b2b3b;
+            line-height: 1.2;
+        }
+        .findings {
+            margin-top: 1.2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #cde0e8;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem 2.5rem;
+        }
+        .findings p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #1f3f4f;
+        }
+        .footer-note {
+            text-align: right;
+            font-size: 0.75rem;
+            color: #6b8a9a;
+            margin-top: 1.5rem;
+            border-top: 1px solid #e0ecf2;
+            padding-top: 1rem;
+        }
+        @media (max-width: 800px) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="report-container">
+    <h1>📊 销售数据 · 全景报告</h1>
+    <div class="subhead">5 大区域 · 12 个月 · 收入 / 成本 / 利润洞察</div>
+
+    <!-- 数据总览表格 -->
+    <div class="card">
+        <div class="card-title">📋 区域总览</div>
+        <div class="table-wrapper">
+            <table id="summaryTable">
+                <thead>
+                    <tr>
+                        <th>区域</th>
+                        <th>总收入</th>
+                        <th>总成本</th>
+                        <th>总利润</th>
+                        <th>总销量</th>
+                        <th>利润率</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- 由 JavaScript 动态渲染 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 图表区域 -->
+    <div class="grid-2col">
+        <div class="card">
+            <div class="card-title">📈 月度收入趋势</div>
+            <canvas id="trendChart" width="400" height="240" style="width:100%; height:auto; max-height:260px;"></canvas>
+        </div>
+        <div class="card">
+            <div class="card-title">💰 收入 vs 成本</div>
+            <canvas id="comparisonChart" width="400" height="240" style="width:100%; height:auto; max-height:260px;"></canvas>
+        </div>
+    </div>
+
+    <!-- 文字摘要 -->
+    <div class="summary-block" id="summaryBlock">
+        <div class="summary-title">🔍 关键发现 & 摘要</div>
+        <div class="summary-grid" id="summaryGrid">
+            <!-- 由 JS 填充 -->
+        </div>
+        <div class="findings" id="findingsContainer">
+            <!-- 动态生成 -->
+        </div>
+    </div>
+    <div class="footer-note">基于 2025 年销售数据 · 报告自动生成</div>
+</div>
+
+<script>
+    (function() {
+        // ---------- 模块A: 原始数据 ----------
+        const rawSalesData = [
+            { region: "North", month: "2025-01", revenue: 125000, cost: 82000, units_sold: 450, category: "Electronics" },
+            { region: "North", month: "2025-02", revenue: 132000, cost: 85000, units_sold: 480, category: "Electronics" },
+            { region: "North", month: "2025-03", revenue: 118000, cost: 79000, units_sold: 420, category: "Electronics" },
+            { region: "North", month: "2025-04", revenue: 145000, cost: 91000, units_sold: 520, category: "Electronics" },
+            { region: "North", month: "2025-05", revenue: 156000, cost: 95000, units_sold: 560, category: "Electronics" },
+            { region: "North", month: "2025-06", revenue: 168000, cost: 102000, units_sold: 600, category: "Electronics" },
+            { region: "North", month: "2025-07", revenue: 142000, cost: 88000, units_sold: 510, category: "Electronics" },
+            { region: "North", month: "2025-08", revenue: 138000, cost: 86000, units_sold: 495, category: "Electronics" },
+            { region: "North", month: "2025-09", revenue: 151000, cost: 93000, units_sold: 540, category: "Electronics" },
+            { region: "North", month: "2025-10", revenue: 162000, cost: 98000, units_sold: 580, category: "Electronics" },
+            { region: "North", month: "2025-11", revenue: 175000, cost: 105000, units_sold: 625, category: "Electronics" },
+            { region: "North", month: "2025-12", revenue: 198000, cost: 118000, units_sold: 710, category: "Electronics" },
+            { region: "South", month: "2025-01", revenue: 98000, cost: 65000, units_sold: 380, category: "Electronics" },
+            { region: "South", month: "2025-02", revenue: 105000, cost: 68000, units_sold: 400, category: "Electronics" },
+            { region: "South", month: "2025-03", revenue: 92000, cost: 62000, units_sold: 355, category: "Electronics" },
+            { region: "South", month: "2025-04", revenue: 112000, cost: 72000, units_sold: 430, category: "Electronics" },
+            { region: "South", month: "2025-05", revenue: 119000, cost: 75000, units_sold: 455, category: "Electronics" },
+            { region: "South", month: "2025-06", revenue: 128000, cost: 80000, units_sold: 490, category: "Electronics" },
+            { region: "South", month: "2025-07", revenue: 115000, cost: 73000, units_sold: 440, category: "Electronics" },
+            { region: "South", month: "2025-08", revenue: 110000, cost: 71000, units_sold: 425, category: "Electronics" },
+            { region: "South", month: "2025-09", revenue: 121000, cost: 76000, units_sold: 465, category: "Electronics" },
+            { region: "South", month: "2025-10", revenue: 130000, cost: 81000, units_sold: 500, category: "Electronics" },
+            { region: "South", month: "2025-11", revenue: 140000, cost: 86000, units_sold: 535, category: "Electronics" },
+            { region: "South", month: "2025-12", revenue: 158000, cost: 95000, units_sold: 605, category: "Electronics" },
+            { region: "East", month: "2025-01", revenue: 85000, cost: 58000, units_sold: 320, category: "Home" },
+            { region: "East", month: "2025-02", revenue: 89000, cost: 60000, units_sold: 335, category: "Home" },
+            { region: "East", month: "2025-03", revenue: 82000, cost: 56000, units_sold: 310, category: "Home" },
+            { region: "East", month: "2025-04", revenue: 95000, cost: 63000, units_sold: 360, category: "Home" },
+            { region: "East", month: "2025-05", revenue: 102000, cost: 67000, units_sold: 385, category: "Home" },
+            { region: "East", month: "2025-06", revenue: 110000, cost: 71000, units_sold: 415, category: "Home" },
+            { region: "East", month: "2025-07", revenue: 98000, cost: 65000, units_sold: 370, category: "Home" },
+            { region: "East", month: "2025-08", revenue: 94000, cost: 63000, units_sold: 355, category: "Home" },
+            { region: "East", month: "2025-09", revenue: 101000, cost: 66000, units_sold: 380, category: "Home" },
+            { region: "East", month: "2025-10", revenue: 108000, cost: 70000, units_sold: 408, category: "Home" },
+            { region: "East", month: "2025-11", revenue: 116000, cost: 74000, units_sold: 438, category: "Home" },
+            { region: "East", month: "2025-12", revenue: 132000, cost: 83000, units_sold: 498, category: "Home" },
+            { region: "West", month: "2025-01", revenue: 72000, cost: 50000, units_sold: 280, category: "Home" },
+            { region: "West", month: "2025-02", revenue: 76000, cost: 52000, units_sold: 295, category: "Home" },
+            { region: "West", month: "2025-03", revenue: 68000, cost: 48000, units_sold: 265, category: "Home" },
+            { region: "West", month: "2025-04", revenue: 82000, cost: 55000, units_sold: 320, category: "Home" },
+            { region: "West", month: "2025-05", revenue: 88000, cost: 58000, units_sold: 342, category: "Home" },
+            { region: "West", month: "2025-06", revenue: 95000, cost: 62000, units_sold: 370, category: "Home" },
+            { region: "West", month: "2025-07", revenue: 85000, cost: 57000, units_sold: 330, category: "Home" },
+            { region: "West", month: "2025-08", revenue: 81000, cost: 55000, units_sold: 315, category: "Home" },
+            { region: "West", month: "2025-09", revenue: 87000, cost: 57500, units_sold: 338, category: "Home" },
+            { region: "West", month: "2025-10", revenue: 93000, cost: 60500, units_sold: 362, category: "Home" },
+            { region: "West", month: "2025-11", revenue: 100000, cost: 64000, units_sold: 390, category: "Home" },
+            { region: "West", month: "2025-12", revenue: 115000, cost: 72000, units_sold: 448, category: "Home" },
+            { region: "Central", month: "2025-01", revenue: 65000, cost: 45000, units_sold: 250, category: "Fashion" },
+            { region: "Central", month: "2025-02", revenue: 68000, cost: 47000, units_sold: 262, category: "Fashion" },
+            { region: "Central", month: "2025-03", revenue: 62000, cost: 43000, units_sold: 240, category: "Fashion" },
+            { region: "Central", month: "2025-04", revenue: 74000, cost: 49000, units_sold: 288, category: "Fashion" },
+            { region: "Central", month: "2025-05", revenue: 79000, cost: 52000, units_sold: 308, category: "Fashion" },
+            { region: "Central", month: "2025-06", revenue: 86000, cost: 56000, units_sold: 335, category: "Fashion" },
+            { region: "Central", month: "2025-07", revenue: 76000, cost: 50000, units_sold: 295, category: "Fashion" },
+            { region: "Central", month: "2025-08", revenue: 73000, cost: 49000, units_sold: 282, category: "Fashion" },
+            { region: "Central", month: "2025-09", revenue: 78000, cost: 51500, units_sold: 302, category: "Fashion" },
+            { region: "Central", month: "2025-10", revenue: 84000, cost: 54500, units_sold: 326, category: "Fashion" },
+            { region: "Central", month: "2025-11", revenue: 91000, cost: 58000, units_sold: 353, category: "Fashion" },
+            { region: "Central", month: "2025-12", revenue: 104000, cost: 65000, units_sold: 403, category: "Fashion" }
+        ];
+
+        // ---------- 模块B: 计算层 ----------
+        function calculateDataSummary(rawData) {
+            const regionNames = [...new Set(rawData.map(d => d.region))];
+            const months = [...new Set(rawData.map(d => d.month))].sort();
+
+            // 1. 全局汇总
+            let totalRevenue = 0, totalCost = 0, totalUnitsSold = 0;
+            rawData.forEach(d => {
+                totalRevenue += d.revenue;
+                totalCost += d.cost;
+                totalUnitsSold += d.units_sold;
+            });
+            const totalProfit = totalRevenue - totalCost;
+
+            // 2. 区域汇总
+            const regionSummary = regionNames.map(region => {
+                const regionData = rawData.filter(d => d.region === region);
+                let rev = 0, cost = 0, units = 0;
+                regionData.forEach(d => {
+                    rev += d.revenue;
+                    cost += d.cost;
+                    units += d.units_sold;
+                });
+                const profit = rev - cost;
+                return {
+                    region,
+                    totalRevenue: rev,
+                    totalCost: cost,
+                    totalProfit: profit,
+                    totalUnitsSold: units,
+                    profitMargin: rev > 0 ? profit / rev : 0
+                };
+            });
+
+            // 3. 月度趋势
+            const monthlyTrend = {
+                labels: months.map(m => m.split('-')[1] + '月'),
+                datasets: regionNames.map(region => {
+                    const regionData = rawData.filter(d => d.region === region);
+                    return {
+                        label: region,
+                        data: months.map(m => {
+                            const record = regionData.find(d => d.month === m);
+                            return record ? record.revenue : 0;
+                        }),
+                        borderColor: getColor(region),
+                        backgroundColor: getColor(region, 0.2),
+                        tension: 0.3
+                    };
+                })
+            };
+
+            // 4. 关键发现
+            const bestRegion = regionSummary.reduce((a, b) => a.totalProfit > b.totalProfit ? a : b);
+            const worstRegion = regionSummary.reduce((a, b) => a.totalProfit < b.totalProfit ? a : b);
+
+            // 季节性趋势：计算各月总收入
+            const monthlyRevenue = months.map(m => {
+                return rawData.filter(d => d.month === m).reduce((sum, d) => sum + d.revenue, 0);
+            });
+            const peakMonth = months[monthlyRevenue.indexOf(Math.max(...monthlyRevenue))].split('-')[1] + '月';
+            const lowMonth = months[monthlyRevenue.indexOf(Math.min(...monthlyRevenue))].split('-')[1] + '月';
+
+            // 增长率：基于1月和12月总收入
+            const janRevenue = rawData.filter(d => d.month === months[0]).reduce((sum, d) => sum + d.revenue, 0);
+            const decRevenue = rawData.filter(d => d.month === months[months.length - 1]).reduce((sum, d) => sum + d.revenue, 0);
+            const growthRate = janRevenue > 0 ? ((decRevenue - janRevenue) / janRevenue) * 100 : 0;
+
+            return {
+                totalRevenue,
+                totalCost,
+                totalProfit,
+                totalUnitsSold,
+                regionSummary,
+                monthlyTrend,
+                keyFindings: {
+                    bestRegion: bestRegion.region,
+                    worstRegion: worstRegion.region,
+                    seasonalTrend: `收入高峰在${peakMonth}，低谷在${lowMonth}，呈现明显的年末增长趋势。`,
+                    growthRate: growthRate
+                }
+            };
+        }
+
+        // 辅助函数：为区域分配颜色
+        function getColor(region, alpha = 1) {
+            const colors = {
+                'North': `rgba(54, 162, 235, ${alpha})`,
+                'South': `rgba(255, 99, 132, ${alpha})`,
+                'East': `rgba(75, 192, 192, ${alpha})`,
+                'West': `rgba(255, 159, 64, ${alpha})`,
+                'Central': `rgba(153, 102, 255, ${alpha})`
+            };
+            return colors[region] || `rgba(201, 203, 207, ${alpha})`;
+        }
+
+        // ---------- 模块C: 渲染层 ----------
+        function renderTable(summary) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            summary.regionSummary.forEach(region => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="region-name">${region.region}</td>
+                    <td>${region.totalRevenue.toLocaleString()}</td>
+                    <td>${region.totalCost.toLocaleString()}</td>
+                    <td class="${region.totalProfit >= 0 ? 'profit-positive' : 'profit-negative'}">${region.totalProfit.toLocaleString()}</td>
+                    <td>${region.totalUnitsSold.toLocaleString()}</td>
+                    <td>${(region.profitMargin * 100).toFixed(2)}%</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function renderTrendChart(summary) {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: summary.monthlyTrend,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) { return value.toLocaleString(); }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderComparisonChart(summary) {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            const regions = summary.regionSummary.map(r => r.region);
+            const revenues = summary.regionSummary.map(r => r.totalRevenue);
+            const costs = summary.regionSummary.map(r => r.totalCost);
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: regions,
+                    datasets: [
+                        {
+                            label: '总收入',
+                            data: revenues,
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '总成本',
+                            data: costs,
+                            backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) { return value.toLocaleString(); }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderSummary(summary) {
+            // 填充摘要网格
+            const grid = document.getElementById('summaryGrid');
+            grid.innerHTML = `
+                <div class="summary-item">
+                    <span class="summary-label">总收入</span>
+                    <span class="summary-value">${summary.totalRevenue.toLocaleString()} <small>元</small></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">总成本</span>
+                    <span class="summary-value">${summary.totalCost.toLocaleString()} <small>元</small></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">总利润</span>
+                    <span class="summary-value">${summary.totalProfit.toLocaleString()} <small>元</small></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">总销量</span>
+                    <span class="summary-value">${summary.totalUnitsSold.toLocaleString()} <small>件</small></span>
+                </div>
+            `;
+
+            // 填充关键发现
+            const findings = document.getElementById('findingsContainer');
+            findings.innerHTML = `
+                <p>🏆 <strong>最佳区域：</strong>${summary.keyFindings.bestRegion}（利润最高）</p>
+                <p>⚠️ <strong>待改进区域：</strong>${summary.keyFindings.worstRegion}（利润最低）</p>
+                <p>📅 <strong>季节性趋势：</strong>${summary.keyFindings.seasonalTrend}</p>
+                <p>📈 <strong>增长率：</strong>${summary.keyFindings.growthRate.toFixed(2)}%（基于1月与12月对比）</p>
+            `;
+        }
+
+        // ---------- 主执行流程 ----------
+        const dataSummary = calculateDataSummary(rawSalesData);
+        renderTable(dataSummary);
+        renderTrendChart(dataSummary);
+        renderComparisonChart(dataSummary);
+        renderSummary(dataSummary);
+    })();
+</script>
+</body>
+</html>

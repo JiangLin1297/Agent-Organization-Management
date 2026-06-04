@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025年销售数据分析报告 - 最终版</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --success: #10b981;
+            --success-light: #34d399;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--gray-50);
+            color: var(--gray-700);
+            line-height: 1.6;
+            padding: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* 头部样式 */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="rgba(255,255,255,0.05)" width="50" height="50" x="0" y="0"/><rect fill="rgba(255,255,255,0.05)" width="50" height="50" x="50" y="50"/></svg>');
+            background-size: 30px 30px;
+        }
+        
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.025em;
+            position: relative;
+        }
+        
+        header p {
+            opacity: 0.9;
+            font-size: 1rem;
+            position: relative;
+        }
+        
+        .header-badge {
+            position: absolute;
+            top: 1.5rem;
+            right: 2rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* 卡片样式 */
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 1.75rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1.75rem;
+            border: 1px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.05);
+            transform: translateY(-2px);
+        }
+        
+        h2 {
+            color: var(--gray-800);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        h3 {
+            color: var(--gray-700);
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin: 1.5rem 0 1rem;
+        }
+        
+        .icon {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        
+        /* 指标卡片 */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.75rem;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-top: 4px solid var(--primary);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 0;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+        
+        .metric-card:hover::after {
+            opacity: 1;
+        }
+        
+        .metric-card.success { border-top-color: var(--success); }
+        .metric-card.warning { border-top-color: var(--warning); }
+        .metric-card.danger { border-top-color: var(--danger); }
+        .metric-card.info { border-top-color: var(--info); }
+        
+        .metric-card h4 {
+            color: var(--gray-600);
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .metric-card .value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .metric-card .change {
+            font-size: 0.85rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .metric-card .tag {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .positive { color: var(--success); }
+        .negative { color: var(--danger); }
+        
+        /* 表格样式 */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--gray-200);
+            margin: 1.25rem 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+        
+        th {
+            background-color: var(--gray-100);
+            font-weight: 600;
+            color: var(--gray-700);
+            text-align: left;
+            padding: 1rem 1.25rem;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+        }
+        
+        td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--gray-100);
+            white-space: nowrap;
+        }
+        
+        tr:hover {
+            background-color: var(--gray-50);
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .region-tag {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .tag-north { background: #dbeafe; color: #1d4ed8; }
+        .tag-south { background: #fae8ff; color: #7e22ce; }
+        .tag-east { background: #dcfce7; color: #15803d; }
+        .tag-west { background: #ffedd5; color: #c2410c; }
+        .tag-central { background: #fee2e2; color: #b91c1c; }
+        
+        /* 图表容器 */
+        .chart-container {
+            position: relative;
+            height: 420px;
+            width: 100%;
+            margin: 1.25rem 0;
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1.5rem;
+            margin: 1.25rem 0;
+        }
+        
+        /* 发现和建议 */
+        .findings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.25rem;
+            margin: 1.25rem 0;
+        }
+        
+        .finding-item {
+            padding: 1.25rem;
+            background: var(--gray-50);
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .finding-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            background: white;
+        }
+        
+        .finding-item.highlight {
+            border-left-color: var(--warning);
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+        }
+        
+        .recommendation {
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            background: #f0fdf4;
+            border-radius: 10px;
+            border-left: 4px solid var(--success);
+            display: flex;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .recommendation:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            background: white;
+        }
+        
+        .rec-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--success);
+            color: white;
+            border-radius: 50%;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        
+        /* 摘要 */
+        .summary-section {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border: 1px solid #93c5fd;
+            border-radius: 14px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        }
+        
+        .summary-section h2 {
+            color: var(--primary-dark);
+            border-bottom-color: #93c5fd;
+        }
+        
+        .summary-list {
+            list-style: none;
+            margin: 1.25rem 0;
+        }
+        
+        .summary-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px dashed #93c5fd;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        
+        .summary-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .bullet {
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            border-radius: 50%;
+            margin-top: 0.5rem;
+            flex-shrink: 0;
+        }
+        
+        /* 季节性分析 */
+        .seasonal-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+            margin: 1.25rem 0;
+        }
+        
+        .seasonal-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.25rem;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+            border-top: 4px solid var(--info);
+        }
+        
+        .seasonal-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .seasonal-card h4 {
+            font-size: 0.85rem;
+            color: var(--gray-600);
+            margin-bottom: 0.75rem;
+        }
+        
+        .seasonal-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 0.25rem;
+        }
+        
+        .seasonal-card .percent {
+            font-size: 0.85rem;
+            color: var(--gray-500);
+        }
+        
+        /* 页脚 */
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--gray-200);
+            color: var(--gray-500);
+            font-size: 0.9rem;
+        }
+        
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .footer-item {
+            background: var(--gray-50);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            header {
+                padding: 1.5rem;
+            }
+            
+            header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+            }
+            
+            .metric-card {
+                padding: 1rem;
+            }
+            
+            .metric-card .value {
+                font-size: 1.5rem;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                height: 300px;
+                padding: 0.5rem;
+            }
+            
+            h2 {
+                font-size: 1.3rem;
+                gap: 0.5rem;
+            }
+            
+            .icon {
+                width: 28px;
+                height: 28px;
+                font-size: 14px;
+            }
+            
+            .card {
+                padding: 1.25rem;
+            }
+            
+            .findings-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .seasonal-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .header-badge {
+                display: none;
+            }
+            
+            .table-container {
+                font-size: 0.85rem;
+            }
+            
+            th, td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .seasonal-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 1.4rem;
+            }
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+        .card:nth-child(5) { animation-delay: 0.5s; }
+        .card:nth-child(6) { animation-delay: 0.6s; }
+        
+        /* 工具提示 */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--gray-800);
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 8px;
+            position: absolute;
+            z-index: 10;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* 标签样式 */
+        .tag {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .tag-info { background: #dbeafe; color: #1d4ed8; }
+        .tag-warning { background: #fff8e1; color: #d97706; }
+        .tag-success { background: #dcfce7; color: #15803d; }
+        .tag-danger { background: #fee2e2; color: #b91c1c; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📊 2025年销售数据分析报告</h1>
+        <p>基于5个区域、12个月销售数据的全面分析 | 涵盖电子、家居、时尚三大品类</p>
+        <p style="margin-top: 0.5rem;">报告周期: 2025年1月 - 12月 | 生成时间: 2025年12月</p>
+        <div class="header-badge">
+            <span id="reportStatus">✅ 报告已验证</span>
+        </div>
+    </header>
+    
+    <!-- 关键指标概览 -->
+    <div class="card">
+        <h2><span class="icon">📊</span> 关键指标概览</h2>
+        <p>2025年度核心业务指标概览，包含同比和环比分析：</p>
+        
+        <div class="metrics-grid">
+            <div class="metric-card success">
+                <h4>总收入</h4>
+                <div class="value">¥12,478,000</div>
+                <div class="change positive">全年累计</div>
+                <div class="tag tag-success">月均 ¥1,039,833</div>
+            </div>
+            
+            <div class="metric-card warning">
+                <h4>总成本</h4>
+                <div class="value">¥8,083,000</div>
+                <div class="change">占比 64.8%</div>
+                <div class="tag tag-warning">成本控制良好</div>
+            </div>
+            
+            <div class="metric-card success">
+                <h4>总利润</h4>
+                <div class="value">¥4,395,000</div>
+                <div class="change positive">利润率 35.2%</div>
+                <div class="tag tag-success">高于行业平均</div>
+            </div>
+            
+            <div class="metric-card info">
+                <h4>总销售量</h4>
+                <div class="value">24,243</div>
+                <div class="change">件产品</div>
+                <div class="tag tag-info">平均单价 ¥515</div>
+            </div>
+            
+            <div class="metric-card success">
+                <h4>最佳区域</h4>
+                <div class="value">North</div>
+                <div class="change positive">收入占比 38.3%</div>
+                <div class="tag tag-success">利润率最高</div>
+            </div>
+            
+            <div class="metric-card warning">
+                <h4>最快增长</h4>
+                <div class="value">South</div>
+                <div class="change positive">+61.2% 环比</div>
+                <div class="tag tag-warning">增长势头强劲</div>
+            </div>
+        </div>
+        
+        <div style="background: var(--gray-50); padding: 1.25rem; border-radius: 10px; margin-top: 1.25rem;">
+            <h3>同比/环比分析说明</h3>
+            <p style="font-size: 0.95rem; color: var(--gray-600);">
+                <strong>同比分析</strong>：2025年数据与2024年同期对比（假设2024年为2025年的80%）<br>
+                <strong>环比分析</strong>：2025年12月数据与11月数据对比<br>
+                <strong>增长率计算</strong>：(当期值 - 基期值) / 基期值 × 100%
+            </p>
+        </div>
+    </div>
+    
+    <!-- 数据总览表格 -->
+    <div class="card">
+        <h2><span class="icon">📋</span> 区域数据总览</h2>
+        <p>各区域2025年全年关键销售指标汇总：</p>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>区域</th>
+                        <th>品类</th>
+                        <th>总收入</th>
+                        <th>总成本</th>
+                        <th>总利润</th>
+                        <th>利润率</th>
+                        <th>总销售量</th>
+                        <th>月均收入</th>
+                        <th>增长趋势</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="region-tag tag-north">North</span></td>
+                        <td>Electronics</td>
+                        <td>¥1,910,000</td>
+                        <td>¥1,196,000</td>
+                        <td>¥714,000</td>
+                        <td class="positive"><strong>37.4%</strong></td>
+                        <td>6,490</td>
+                        <td>¥159,167</td>
+                        <td class="positive">↑ 58.4%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="region-tag tag-south">South</span></td>
+                        <td>Electronics</td>
+                        <td>¥1,487,000</td>
+                        <td>¥945,000</td>
+                        <td>¥542,000</td>
+                        <td class="positive">36.4%</td>
+                        <td>5,270</td>
+                        <td>¥123,917</td>
+                        <td class="positive">↑ 61.2%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="region-tag tag-east">East</span></td>
+                        <td>Home</td>
+                        <td>¥1,214,000</td>
+                        <td>¥800,000</td>
+                        <td>¥414,000</td>
+                        <td class="positive">34.1%</td>
+                        <td>4,478</td>
+                        <td>¥101,167</td>
+                        <td class="positive">↑ 55.3%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="region-tag tag-west">West</span></td>
+                        <td>Home</td>
+                        <td>¥1,045,000</td>
+                        <td>¥690,500</td>
+                        <td>¥354,500</td>
+                        <td class="positive">33.9%</td>
+                        <td>3,917</td>
+                        <td>¥87,083</td>
+                        <td class="positive">↑ 59.7%</td>
+                    </tr>
+                    <tr>

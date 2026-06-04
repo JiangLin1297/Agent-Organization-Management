@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拼豆图纸生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 16px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+            transform: translateY(-2px);
+        }
+
+        .upload-area.has-image {
+            padding: 20px;
+        }
+
+        .upload-area input {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .upload-text {
+            font-size: 18px;
+            color: #666;
+        }
+
+        .upload-hint {
+            font-size: 14px;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        .preview-img {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 8px;
+            margin-top: 16px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-end;
+        }
+
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        input[type="range"] {
+            padding: 0;
+            height: 40px;
+            cursor: pointer;
+        }
+
+        .range-value {
+            text-align: center;
+            font-weight: 600;
+            color: #667eea;
+            margin-top: 4px;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .canvas-container {
+            position: relative;
+            overflow: auto;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: #f5f5f5;
+            max-height: 600px;
+        }
+
+        .canvas-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .canvas-controls .btn {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .zoom-info {
+            margin-left: auto;
+            color: #666;
+            font-weight: 600;
+        }
+
+        #gridCanvas {
+            display: block;
+            margin: 0 auto;
+            image-rendering: pixelated;
+        }
+
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .color-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .color-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            transition: transform 0.2s;
+        }
+
+        .color-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .color-swatch {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            margin-right: 14px;
+            border: 2px solid #ddd;
+            flex-shrink: 0;
+        }
+
+        .color-info {
+            flex: 1;
+        }
+
+        .color-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .color-hex {
+            font-size: 12px;
+            color: #888;
+            font-family: monospace;
+        }
+
+        .color-count {
+            font-size: 20px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .color-count-label {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .total-summary {
+            margin-top: 16px;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .total-summary span {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e0e0e0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .show-grid-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: #ccc;
+            border-radius: 13px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #667eea;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(24px);
+        }
+
+        .download-btns {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .instructions {
+            padding: 16px;
+            background: #fff3cd;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #ffc107;
+        }
+
+        .instructions p {
+            color: #856404;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .control-group {
+                min-width: 100%;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .upload-area {
+                padding: 24px;
+            }
+
+            .upload-icon {
+                font-size: 48px;
+            }
+
+            .color-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .drag-over {
+            border-color: #764ba2 !important;
+            background: #e8e0ff !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 拼豆图纸生成器</h1>
+        
+        <!-- Upload Section -->
+        <div class="card">
+            <h2>📤 上传图片</h2>
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" accept="image/*">
+                <div id="uploadPlaceholder">
+                    <div class="upload-icon">🖼️</div>
+                    <div class="upload-text">点击或拖拽图片到此处</div>
+                    <div class="upload-hint">支持 JPG、PNG、GIF、WebP 等格式</div>
+                </div>
+                <img id="previewImg" class="preview-img hidden">
+            </div>
+        </div>
+
+        <!-- Controls Section -->
+        <div class="card">
+            <h2>⚙️ 参数设置</h2>
+            <div class="controls">
+                <div class="control-group">
+                    <label>📐 网格大小</label>
+                    <select id="gridSize">
+                        <option value="16">16 × 16</option>
+                        <option value="24">24 × 24</option>
+                        <option value="32" selected>32 × 32</option>
+                        <option value="48">48 × 48</option>
+                        <option value="64">64 × 64</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>🎨 颜色数量: <span id="colorCountValue">16</span></label>
+                    <input type="range" id="colorCount" min="4" max="30" value="16">
+                </div>
+                <div class="control-group">
+                    <label>⚙️ 降色算法</label>
+                    <select id="algorithm">
+                        <option value="medianCut">中位切分法 (Median Cut)</option>
+                        <option value="kmeans">K-Means 聚类</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary" id="generateBtn" disabled>
+                        🚀 生成拼豆图纸
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Section -->
+        <div class="card hidden" id="resultSection">
+            <h2>🖼️ 拼豆图纸</h2>
+            <div class="canvas-controls">
+                <button class="btn btn-secondary" id="zoomInBtn">🔍+ 放大</button>
+                <button class="btn btn-secondary" id="zoomOutBtn">🔍- 缩小</button>
+                <button class="btn btn-secondary" id="zoomFitBtn">↔️ 适应窗口</button>
+                <div class="show-grid-toggle">
+                    <span>显示网格线</span>
+                    <div class="toggle-switch active" id="gridToggle"></div>
+                </div>
+                <span class="zoom-info" id="zoomInfo">100%</span>
+                <div class="download-btns">
+                    <button class="btn btn-primary" id="downloadBtn">💾 下载图纸</button>
+                    <button class="btn btn-secondary" id="downloadHDBtn">💾 下载高清图纸</button>
+                </div>
+            </div>
+            <div class="canvas-container" id="canvasContainer">
+                <canvas id="gridCanvas"></canvas>
+            </div>
+        </div>
+
+        <!-- Color Stats Section -->
+        <div class="card hidden" id="statsSection">
+            <h2>📊 颜色统计</h2>
+            <div class="instructions">
+                <p>💡 以下统计表可用于实际拼豆采购参考。每个颜色对应拼豆的数量。</p>
+            </div>
+            <div class="color-stats" id="colorStats"></div>
+            <div class="total-summary">
+                拼豆总数：<span id="totalCount">0</span> 颗
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <div>正在生成拼豆图纸...</div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== Global State ====================
+        let originalImage = null;
+        let processedColors = [];  // Array of {r, g, b, count}
+        let pixelGrid = [];        // 2D array of color indices
+        let zoom = 1;
+        let showGrid = true;
+
+        // ==================== DOM Elements ====================
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewImg = document.getElementById('previewImg');
+        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+        const gridSizeSelect = document.getElementById('gridSize');
+        const colorCountInput = document.getElementById('colorCount');
+        const colorCountValue = document.getElementById('colorCountValue');
+        const algorithmSelect = document.getElementById('algorithm');
+        const generateBtn = document.getElementById('generateBtn');
+        const resultSection = document.getElementById('resultSection');
+        const statsSection = document.getElementById('statsSection');
+        const gridCanvas = document.getElementById('gridCanvas');
+        const canvasContainer = document.getElementById('canvasContainer');
+        const colorStats = document.getElementById('colorStats');
+        const totalCount = document.getElementById('totalCount');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const zoomInfo = document.getElementById('zoomInfo');
+        const gridToggle = document.getElementById('gridToggle');
+
+        // ==================== Event Listeners ====================
+        
+        // Upload area click
+        uploadArea.addEventListener('click', (e) => {
+            if (e.target !== previewImg) {
+                fileInput.click();
+            }
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Color count slider
+        colorCountInput.addEventListener('input', () => {
+            colorCountValue.textContent = colorCountInput.value;
+        });
+
+        // Generate button
+        generateBtn.addEventListener('click', generatePerlerPattern);
+
+        // Zoom controls
+        document.getElementById('zoomInBtn').addEventListener('click', () => {
+            setZoom(zoom * 1.25);
+        });
+
+        document.getElementById('zoomOutBtn').addEventListener('click', () => {
+            setZoom(zoom / 1.25);
+        });
+
+        document.getElementById('zoomFitBtn').addEventListener('click', fitToWindow);
+
+        // Grid toggle
+        gridToggle.addEventListener('click', () => {
+            showGrid = !showGrid;
+            gridToggle.classList.toggle('active', showGrid);
+            if (pixelGrid.length > 0) {
+                renderGrid();
+            }
+        });
+
+        // Download buttons
+        document.getElementById('downloadBtn').addEventListener('click', () => downloadImage(1));
+        document.getElementById('downloadHDBtn').addEventListener('click', () => downloadImage(4));
+
+        // ==================== File Handling ====================
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('请上传图片文件！');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    originalImage = img;
+                    previewImg.src = e.target.result;
+                    previewImg.classList.remove('hidden');
+                    uploadPlaceholder.classList.add('hidden');
+                    uploadArea.classList.add('has-image');
+                    generateBtn.disabled = false;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ==================== Image Processing ====================
+        
+        /**
+         * Resize image to target grid dimensions
+         */
+        function resizeImage(img, targetSize) {
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = targetSize;
+            tempCanvas.height = targetSize;
+            
+            // Calculate aspect ratio preserving dimensions
+            const size = Math.max(img.width, img.height);
+            const offsetX = (size - img.width) / 2;
+            const offsetY = (size - img.height) / 2;
+            
+            // Fill with white background
+            tempCtx.fillStyle = '#FFFFFF';
+            tempCtx.fillRect(0, 0, targetSize, targetSize);
+            
+            // Draw image centered and stretched to square
+            const scale = targetSize / size;
+            tempCtx.drawImage(img, 
+                offsetX * scale, 
+                offsetY * scale, 
+                img.width * scale, 
+                img.height * scale
+            );
+            
+            return tempCtx.getImageData(0, 0, targetSize, targetSize);
+        }
+
+        /**
+         * Extract all pixel colors from ImageData
+         */
+        function extractPixels(imageData) {
+            const pixels = [];
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                pixels.push({
+                    r: data[i],
+                    g: data[i + 1],
+                    b: data[i + 2]
+                });
+            }
+            return pixels;
+        }
+
+        // ==================== Median Cut Algorithm ====================
+        function medianCut(pixels, numColors) {
+            if (pixels.length === 0) return [];
+            
+            // Start with all pixels in one box
+            let boxes = [{ pixels: pixels }];
+            
+            while (boxes.length < numColors) {
+                // Find the box with the largest range
+                let maxRange = -1;
+                let maxIndex = -1;
+                
+                boxes.forEach((box, index) => {
+                    const range = getColorRange(box.pixels);
+                    const maxChannelRange = Math.max(range.rRange, range.gRange, range.bRange);
+                    if (maxChannelRange > maxRange && box.pixels.length > 1) {
+                        maxRange = maxChannelRange;
+                        maxIndex = index;
+                    }
+                });
+                
+                if (maxIndex === -1) break;
+                
+                // Split the box with largest range
+                const boxToSplit = boxes[maxIndex];
+                const range = getColorRange(boxToSplit.pixels);
+                
+                // Find the channel with the largest range
+                let splitChannel = 'r';
+                if (range.gRange > range.rRange && range.gRange > range.bRange) {
+                    splitChannel = 'g';
+                } else if (range.bRange > range.rRange && range.bRange > range.gRange) {
+                    splitChannel = 'b';
+                }
+                
+                // Sort by the split channel
+                boxToSplit.pixels.sort((a, b) => a[splitChannel] - b[splitChannel]);
+                
+                // Split at median
+                const mid = Math.floor(boxToSplit.pixels.length / 2);
+                
+                boxes.splice(maxIndex, 1, 
+                    { pixels: boxToSplit.pixels.slice(0, mid) },
+                    { pixels: boxToSplit.pixels.slice(mid) }
+                );
+            }
+            
+            // Calculate average color for each box
+            return boxes.map(box => {
+                const avg = getAverageColor(box.pixels);
+                return { r: Math.round(avg.r), g: Math.round(avg.g), b: Math.round(avg.b) };
+            });
+        }
+
+        function getColorRange(pixels) {
+            let rMin = 255, rMax = 0;
+            let gMin = 255, gMax = 0;
+            let bMin = 255, bMax = 0;
+            
+            pixels.forEach(p => {
+                rMin = Math.min(rMin, p.r);
+                rMax = Math.max(rMax, p.r);
+                gMin = Math.min(gMin, p.g);
+                gMax = Math.max(gMax, p.g);
+                bMin = Math.min(bMin, p.b);
+                bMax = Math.max(bMax, p.b);
+            });
+            
+            return {
+                rRange: rMax - rMin,
+                gRange: gMax - gMin,
+                bRange: bMax - bMin
+            };
+        }
+
+        function getAverageColor(pixels) {
+            let rSum = 0, gSum = 0, bSum = 0;
+            pixels.forEach(p => {
+                rSum += p.r;
+                gSum += p.g;
+                bSum += p.b;
+            });
+            return {
+                r: rSum / pixels.length,
+                g: gSum / pixels.length,
+                b: bSum / pixels.length
+            };
+        }
+
+        // ==================== K-Means Algorithm ====================
+        function kMeans(pixels, k, maxIterations = 20) {
+            // Initialize centroids randomly from pixels
+            let centroids = [];
+            const step = Math.max(1, Math.floor(pixels.length / k));
+            for (let i = 0; i < k; i++) {
+                centroids.push({ ...pixels[Math.min(i * step, pixels.length - 1)] });
+            }
+            
+            let assignments = new Array(pixels.length);
+            
+            for (let iter = 0; iter < maxIterations; iter++) {
+                // Assignment step
+                let changed = false;
+                for (let i = 0; i < pixels.length; i++) {
+                    let minDist = Infinity;
+                    let bestCluster = 0;
+                    for (let j = 0; j < centroids.length; j++) {
+                        const dist = colorDistance(pixels[i], centroids[j]);
+                        if (dist < minDist) {
+                            minDist = dist;
+                            bestCluster = j;
+                        }
+                    }
+                    if (assignments[i] !== bestCluster) {
+                        assignments[i] = bestCluster;
+                        changed = true;
+                    }
+                }
+                
+                if (!changed) break;
+                
+                // Update step
+                const sums = centroids.map(() => ({ r: 0, g: 0, b: 0, count: 0 }));
+                for (let i = 0; i < pixels.length; i++) {
+                    const c = assignments[i];
+                    sums[c].r += pixels[i].r;
+                    sums[c].g += pixels[i].g;
+                    sums[c].b += pixels[i].b;
+                    sums[c].count++;
+                }
+                
+                for (let j = 0; j < centroids.length; j++) {
+                    if (sums[j].count > 0) {
+                        centroids[j] = {
+                            r: sums[j].r / sums[j].count,
+                            g: sums[j].g / sums[j].count,
+                            b: sums[j].b / sums[j].count
+                        };
+                    }
+                }
+            }
+            
+            return centroids.map(c => ({
+                r: Math.round(c.r),
+                g: Math.round(c.g),
+                b: Math.round(c.b)
+            }));
+        }
+
+        function colorDistance(c1, c2) {
+            const dr = c1.r - c2.r;
+            const dg = c1.g - c2.g;
+            const db = c1.b - c2.b;
+            return dr * dr + dg * dg + db * db;
+        }
+
+        // ==================== Map Pixels to Palette ====================
+        function mapPixelsToPalette(pixels, palette) {
+            return pixels.map(pixel => {
+                let minDist = Infinity;
+                let bestIndex = 0;
+                for (let i = 0; i < palette.length; i++) {
+                    const dist = colorDistance(pixel, palette[i]);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        bestIndex = i;
+                    }
+                }
+                return bestIndex;
+            });
+        }
+
+        // ==================== Main Generate Function ====================
+        async function generatePerlerPattern() {
+            if (!originalImage) return;
+            
+            showLoading(true);
+            
+            // Use setTimeout to allow UI to update
+            await new Promise(resolve => setTimeout(resolve, 50));
+            
+            try {
+                const gridSize = parseInt(gridSizeSelect.value);
+                const numColors = parseInt(colorCountInput.value);
+                const algorithm = algorithmSelect.value;
+                
+                // Step 1: Resize image
+                const imageData = resizeImage(originalImage, gridSize);
+                const pixels = extractPixels(imageData);
+                
+                // Step 2: Reduce colors
+                let palette;
+                if (algorithm === 'medianCut') {
+                    palette = medianCut(pixels, numColors);
+                } else {
+                    palette = kMeans(pixels, numColors);
+                }
+                
+                // Step 3: Map each pixel to nearest palette color
+                const colorIndices = mapPixelsToPalette(pixels, palette);
+                
+                // Step 4: Build grid
+                pixelGrid = [];
+                for (let y = 0; y < gridSize; y++) {
+                    pixelGrid[y] = [];
+                    for (let x = 0; x < gridSize; x++) {
+                        pixelGrid[y][x] = colorIndices[y * gridSize + x];
+                    }
+                }
+                
+                // Step 5: Count colors
+                processedColors = palette.map((color, index) => ({
+                    ...color,
+                    count: 0
+                }));
+                
+                colorIndices.forEach(idx => {
+                    processedColors[idx].count++;
+                });
+                
+                // Sort by count descending
+                processedColors.sort((a, b) => b.count - a.count);
+                
+                // Re-index the grid after sorting
+                const colorMap = {};
+                palette.forEach((color, oldIndex) => {
+                    const newIndex = processedColors.findIndex(c => 
+                        c.r === color.r && c.g === color.g && c.b === color.b && c.count > 0
+                    );
+                    colorMap[oldIndex] = newIndex >= 0 ? newIndex : 0;
+                });
+                
+                for (let y = 0; y < gridSize; y++) {
+                    for (let x = 0; x < gridSize; x++) {
+                        pixelGrid[y][x] = colorMap[pixelGrid[y][x]];
+                    }
+                }
+                
+                // Filter out colors with 0 count
+                processedColors = processedColors.filter(c => c.count > 0);
+                
+                // Step 6: Render
+                renderGrid();
+                renderStats();
+                fitToWindow();
+                
+                resultSection.classList.remove('hidden');
+                statsSection.classList.remove('hidden');
+                
+                // Scroll to result
+                resultSection.scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                console.error(error);
+                alert('生成失败：' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // ==================== Rendering ====================
+        function renderGrid() {
+            const gridSize = pixelGrid.length;
+            const cellSize = 20;
+            const totalSize = gridSize * cellSize;
+            
+            gridCanvas.width = totalSize;
+            gridCanvas.height = totalSize;
+            
+            const ctx = gridCanvas.getContext('2d');
+            
+            // Draw colored cells
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    const colorIdx = pixelGrid[y][x];
+                    const color = processedColors[colorIdx];
+                    ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`;
+                    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                }
+            }
+            
+            // Draw grid lines
+            if (showGrid) {
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.lineWidth = 0.5;
+                
+                for (let i = 0; i <= gridSize; i++) {
+                    // Vertical lines
+                    ctx.beginPath();
+                    ctx.moveTo(i * cellSize, 0);
+                    ctx.lineTo(i * cellSize, totalSize);
+                    ctx.stroke();
+                    
+                    // Horizontal lines
+                    ctx.beginPath();
+                    ctx.moveTo(0, i * cellSize);
+                    ctx.lineTo(totalSize, i * cellSize);
+                    ctx.stroke();
+                }
+            }
+            
+            // Apply zoom
+            gridCanvas.style.width = (totalSize * zoom) + 'px';
+            gridCanvas.style.height = (totalSize * zoom) + 'px';
+            
+            zoomInfo.textContent = Math.round(zoom * 100) + '%';
+        }
+
+        function renderStats() {
+            colorStats.innerHTML = '';
+            let total = 0;
+            
+            processedColors.forEach((color, index) => {
+                total += color.count;
+                
+                const colorHex = rgbToHex(color.r, color.g, color.b);
+                const colorName = getColorName(color.r, color.g, color.b);
+                
+                const item = document.createElement('div');
+                item.className = 'color-item';
+                item.innerHTML = `
+                    <div class="color-swatch" style="background-color: ${colorHex}"></div>
+                    <div class="color-info">
+                        <div class="color-name">颜色 #${index + 1} ${colorName}</div>
+                        <div class="color-hex">${colorHex}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="color-count">${color.count}</div>
+                        <div class="color-count-label">颗</div>
+                    </div>
+                `;
+                colorStats.appendChild(item);
+            });
+            
+            totalCount.textContent = total.toLocaleString();
+        }
+
+        // ==================== Zoom Controls ====================
+        function setZoom(newZoom) {
+            zoom = Math.max(0.1, Math.min(10, newZoom));
+            if (pixelGrid.length > 0) {
+                renderGrid();
+            }
+        }
+
+        function fitToWindow() {
+            if (pixelGrid.length === 0) return;
+            
+            const containerWidth = canvasContainer.clientWidth - 4;
+            const gridSize = pixelGrid.length;
+            const cellSize = 20;
+            const naturalSize = gridSize * cellSize;
+            
+            zoom = Math.min(containerWidth / naturalSize, 2);
+            renderGrid();
+        }
+
+        // ==================== Download ====================
+        function downloadImage(scale) {
+            if (pixelGrid.length === 0) return;
+            
+            const gridSize = pixelGrid.length;
+            const cellSize = 20 * scale;
+            const totalSize = gridSize * cellSize;
+            
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = totalSize;
+            tempCanvas.height = totalSize;
+            const ctx = tempCanvas.getContext('2d');
+            
+            // Draw cells
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    const colorIdx = pixelGrid[y][x];
+                    const color = processedColors[colorIdx];
+                    ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`;
+                    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                }
+            }
+            
+            // Draw grid
+            if (showGrid) {
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.lineWidth = scale;
+                
+                for (let i = 0; i <= gridSize; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(i * cellSize, 0);
+                    ctx.lineTo(i * cellSize, totalSize);
+                    ctx.stroke

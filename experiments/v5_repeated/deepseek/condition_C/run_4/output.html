@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>拼豆图纸生成器 · 手工创意工具</title>
+    <style>
+        /* ===== generative S2 风格 ===== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #f7f5f2;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #1e1e1e;
+            padding: 1.5rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 32px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.02);
+            padding: 2rem 2rem 2.5rem;
+            transition: all 0.2s ease;
+        }
+
+        /* 头部 */
+        .app-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            gap: 1rem 1.5rem;
+        }
+
+        .app-title {
+            font-weight: 600;
+            font-size: 1.8rem;
+            letter-spacing: -0.02em;
+            background: linear-gradient(145deg, #2b2b2b, #4a4a4a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .upload-area {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .upload-btn-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: #1e1e1e;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.4rem;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            letter-spacing: 0.01em;
+            transition: background 0.15s, transform 0.1s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: #3a3a3a;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #1e1e1e;
+            border: 1px solid #d0d0d0;
+        }
+        .btn-outline:hover {
+            background: #f0eeeb;
+            border-color: #b0b0b0;
+        }
+
+        .btn-icon {
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        /* 控制栏 */
+        .control-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1.8rem 2.5rem;
+            background: #fafaf9;
+            padding: 1rem 1.5rem;
+            border-radius: 48px;
+            margin-bottom: 2rem;
+            border: 1px solid #ecece9;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .control-group label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #3a3a3a;
+            letter-spacing: 0.01em;
+        }
+
+        .control-group select,
+        .control-group input[type="range"] {
+            background: white;
+            border: 1px solid #d4d4d0;
+            border-radius: 40px;
+            padding: 0.4rem 1rem 0.4rem 1.2rem;
+            font-size: 0.9rem;
+            font-weight: 450;
+            color: #1e1e1e;
+            outline: none;
+            transition: border 0.1s;
+            min-width: 80px;
+        }
+
+        .control-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23333' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.4rem;
+        }
+
+        .control-group select:focus,
+        .control-group input[type="range"]:focus {
+            border-color: #8a8a86;
+        }
+
+        .control-group input[type="range"] {
+            padding: 0;
+            width: 140px;
+            height: 6px;
+            background: #dcdcd8;
+            border-radius: 10px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #1e1e1e;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            cursor: pointer;
+        }
+
+        .color-count-value {
+            min-width: 2.2rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* 主布局：左侧画布 + 右侧表格 */
+        .main-layout {
+            display: flex;
+            flex-direction: row;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+
+        .canvas-wrapper {
+            flex: 1 1 60%;
+            min-width: 280px;
+            background: #fcfcfb;
+            border-radius: 24px;
+            padding: 1rem;
+            border: 1px solid #eae8e4;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            cursor: grab;
+            touch-action: none;  /* 阻止移动端滚动 */
+            background: #f3f1ee;
+            border-radius: 16px;
+        }
+
+        .canvas-container canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transform-origin: 0 0;
+            transition: none;
+            image-rendering: pixelated;
+            background: #ffffff;
+        }
+
+        .canvas-hint {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a8a6a0;
+            font-size: 1rem;
+            font-weight: 450;
+            pointer-events: none;
+            background: #f8f7f5;
+            border-radius: 16px;
+        }
+
+        /* 右侧统计面板 */
+        .stats-panel {
+            flex: 0 0 280px;
+            max-height: 70vh;
+            overflow-y: auto;
+            background: #fafaf9;
+            border-radius: 24px;
+            padding: 1.2rem 1rem 1rem;
+            border: 1px solid #eae8e4;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .stats-panel h3 {
+            font-weight: 500;
+            font-size: 1rem;
+            letter-spacing: 0.02em;
+            color: #3a3a3a;
+            margin-bottom: 1rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid #e0deda;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .stats-table th {
+            text-align: left;
+            font-weight: 500;
+            color: #5a5a56;
+            padding-bottom: 0.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .stats-table td {
+            padding: 0.4rem 0.2rem;
+            border-bottom: 1px solid #efedea;
+            vertical-align: middle;
+        }
+
+        .color-swatch {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.06);
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        .stats-table .color-info {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .stats-table .rgb-text {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.75rem;
+            color: #4a4a46;
+        }
+
+        .stats-table .count-badge {
+            font-weight: 500;
+            background: #eae8e4;
+            padding: 0.1rem 0.6rem;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            display: inline-block;
+        }
+
+        .stats-table .ratio-bar {
+            width: 100%;
+            height: 6px;
+            background: #e3e1dd;
+            border-radius: 10px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+
+        .ratio-fill {
+            height: 100%;
+            background: #1e1e1e;
+            border-radius: 10px;
+        }
+
+        .empty-stats {
+            color: #a8a6a0;
+            text-align: center;
+            padding: 2rem 0;
+            font-size: 0.9rem;
+        }
+
+        /* 错误提示 */
+        .toast-error {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #d94a4a;
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 60px;
+            font-weight: 500;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            font-size: 0.95rem;
+        }
+
+        .toast-error.show {
+            opacity: 1;
+        }
+
+        /* 响应式 */
+        @media (max-width: 860px) {
+            .app-container {
+                padding: 1.2rem;
+            }
+            .main-layout {
+                flex-direction: column;
+            }
+            .stats-panel {
+                flex: 1 1 auto;
+                max-height: 50vh;
+                width: 100%;
+            }
+            .control-bar {
+                gap: 1rem 1.5rem;
+                padding: 0.8rem 1.2rem;
+                border-radius: 32px;
+            }
+            .control-group input[type="range"] {
+                width: 100px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0.8rem;
+            }
+            .app-container {
+                padding: 1rem;
+                border-radius: 24px;
+            }
+            .app-title {
+                font-size: 1.4rem;
+            }
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+            .control-group select {
+                min-width: 60px;
+                padding: 0.3rem 1.8rem 0.3rem 0.8rem;
+            }
+        }
+
+        /* 滚动条 */
+        .stats-panel::-webkit-scrollbar {
+            width: 4px;
+        }
+        .stats-panel::-webkit-scrollbar-track {
+            background: #f0eeeb;
+            border-radius: 10px;
+        }
+        .stats-panel::-webkit-scrollbar-thumb {
+            background: #cac6c0;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container" id="app">
+    <!-- 头部 -->
+    <header class="app-header">
+        <span class="app-title">🧩 拼豆图纸</span>
+        <div class="upload-area">
+            <div class="upload-btn-wrapper">
+                <button class="btn" id="uploadBtn">📁 上传图片</button>
+                <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif,image/bmp" />
+            </div>
+            <button class="btn btn-outline" id="resetBtn">⟲ 重置</button>
+        </div>
+    </header>
+
+    <!-- 控制栏 -->
+    <div class="control-bar">
+        <div class="control-group">
+            <label for="gridSelect">网格</label>
+            <select id="gridSelect">
+                <option value="32">32×32</option>
+                <option value="48" selected>48×48</option>
+                <option value="64">64×64</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="colorSlider">颜色 <span id="colorCountDisplay" class="color-count-value">15</span></label>
+            <input type="range" id="colorSlider" min="10" max="20" value="15" step="1" />
+        </div>
+    </div>
+
+    <!-- 主区域 -->
+    <div class="main-layout">
+        <!-- 左侧画布 -->
+        <div class="canvas-wrapper">
+            <div class="canvas-container" id="canvasContainer">
+                <canvas id="gridCanvas" width="480" height="480"></canvas>
+                <div class="canvas-hint" id="canvasHint">上传图片后自动生成网格</div>
+            </div>
+        </div>
+
+        <!-- 右侧统计 -->
+        <div class="stats-panel" id="statsPanel">
+            <h3>📊 颜色统计</h3>
+            <div id="statsContent">
+                <div class="empty-stats">等待图片处理…</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 错误提示浮层 -->
+<div id="toastError" class="toast-error"></div>
+
+<script>
+    (function() {
+        'use strict';
+
+        // ===== DOM 引用 =====
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const gridSelect = document.getElementById('gridSelect');
+        const colorSlider = document.getElementById('colorSlider');
+        const colorCountDisplay = document.getElementById('colorCountDisplay');
+        const canvas = document.getElementById('gridCanvas');
+        const canvasContainer = document.getElementById('canvasContainer');
+        const canvasHint = document.getElementById('canvasHint');
+        const statsContent = document.getElementById('statsContent');
+        const toast = document.getElementById('toastError');
+
+        // ===== 状态 =====
+        let currentFile = null;
+        let gridSize = 48;
+        let targetColorCount = 15;
+        let imageDataScaled = null;
+        let gridResult = null;
+        let isProcessing = false;
+
+        // 缩放状态
+        let scaleLevel = 1;
+        let panX = 0, panY = 0;
+
+        // ===== 辅助函数 =====
+        function showToast(msg, duration = 3000) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => toast.classList.remove('show'), duration);
+        }
+
+        function hideToast() {
+            toast.classList.remove('show');
+            clearTimeout(toast._timer);
+        }
+
+        function resetZoom() {
+            scaleLevel = 1;
+            panX = 0;
+            panY = 0;
+            applyCanvasTransform();
+        }
+
+        function applyCanvasTransform() {
+            canvas.style.transform = `scale(${scaleLevel}) translate(${panX}px, ${panY}px)`;
+        }
+
+        // ===== 图像处理核心 (内联) =====
+
+        function resizeImage(sourceData, targetWidth, targetHeight) {
+            const srcW = sourceData.width;
+            const srcH = sourceData.height;
+            const srcPixels = sourceData.data;
+            const canvas2 = document.createElement('canvas');
+            canvas2.width = targetWidth;
+            canvas2.height = targetHeight;
+            const ctx = canvas2.getContext('2d');
+            const targetData = ctx.createImageData(targetWidth, targetHeight);
+            const dstPixels = targetData.data;
+            const xRatio = srcW / targetWidth;
+            const yRatio = srcH / targetHeight;
+            for (let y = 0; y < targetHeight; y++) {
+                for (let x = 0; x < targetWidth; x++) {
+                    const srcX = x * xRatio;
+                    const srcY = y * yRatio;
+                    const x1 = Math.floor(srcX);
+                    const y1 = Math.floor(srcY);
+                    const x2 = Math.min(x1 + 1, srcW - 1);
+                    const y2 = Math.min(y1 + 1, srcH - 1);
+                    const xWeight = srcX - x1;
+                    const yWeight = srcY - y1;
+                    const idx11 = (y1 * srcW + x1) * 4;
+                    const idx12 = (y2 * srcW + x1) * 4;
+                    const idx21 = (y1 * srcW + x2) * 4;
+                    const idx22 = (y2 * srcW + x2) * 4;
+                    const dstIdx = (y * targetWidth + x) * 4;
+                    for (let c = 0; c < 4; c++) {
+                        const top = srcPixels[idx11 + c] * (1 - xWeight) + srcPixels[idx21 + c] * xWeight;
+                        const bottom = srcPixels[idx12 + c] * (1 - xWeight) + srcPixels[idx22 + c] * xWeight;
+                        dstPixels[dstIdx + c] = Math.round(top * (1 - yWeight) + bottom * yWeight);
+                    }
+                }
+            }
+            return targetData;
+        }
+
+        function quantizeColors(imageData, targetColorCount) {
+            const pixels = imageData.data;
+            const width = imageData.width;
+            const height = imageData.height;
+            const totalPixels = width * height;
+            const colors = [];
+            for (let i = 0; i < totalPixels; i++) {
+                const offset = i * 4;
+                const r = pixels[offset];
+                const g = pixels[offset + 1];
+                const b = pixels[offset + 2];
+                const a = pixels[offset + 3];
+                if (a > 128) {
+                    colors.push({ r, g, b, index: i });
+                }
+            }
+            if (colors.length === 0) {
+                const defaultColor = { r: 255, g: 255, b: 255 };
+                const palette = Array(targetColorCount).fill(defaultColor);
+                const indexedData = new Uint8Array(totalPixels);
+                return { palette, indexedData };
+            }
+            const boxes = [colors];
+            while (boxes.length < targetColorCount && boxes.length < colors.length) {
+                let maxBoxIndex = 0;
+                let maxSize = boxes[0].length;
+                for (let i = 1; i < boxes.length; i++) {
+                    if (boxes[i].length > maxSize) {
+                        maxSize = boxes[i].length;
+                        maxBoxIndex = i;
+                    }
+                }
+                const box = boxes[maxBoxIndex];
+                if (box.length <= 1) break;
+                let minR = 255, maxR = 0;
+                let minG = 255, maxG = 0;
+                let minB = 255, maxB = 0;
+                for (const color of box) {
+                    minR = Math.min(minR, color.r);
+                    maxR = Math.max(maxR, color.r);
+                    minG = Math.min(minG, color.g);
+                    maxG = Math.max(maxG, color.g);
+                    minB = Math.min(minB, color.b);
+                    maxB = Math.max(maxB, color.b);
+                }
+                const rangeR = maxR - minR;
+                const rangeG = maxG - minG;
+                const rangeB = maxB - minB;
+                let channel;
+                if (rangeR >= rangeG && rangeR >= rangeB) channel = 'r';
+                else if (rangeG >= rangeR && rangeG >= rangeB) channel = 'g';
+                else channel = 'b';
+                box.sort((a, b) => a[channel] - b[channel]);
+                const medianIndex = Math.floor(box.length / 2);
+                const box1 = box.slice(0, medianIndex);
+                const box2 = box.slice(medianIndex);
+                boxes[maxBoxIndex] = box1;
+                boxes.push(box2);
+            }
+            const palette = boxes.map(box => {
+                let sumR = 0, sumG = 0, sumB = 0;
+                for (const color of box) {
+                    sumR += color.r;
+                    sumG += color.g;
+                    sumB += color.b;
+                }
+                const count = box.length;
+                return {
+                    r: Math.round(sumR / count),
+                    g: Math.round(sumG / count),
+                    b: Math.round(sumB / count)
+                };
+            });
+            while (palette.length < targetColorCount) {
+                palette.push({ r: 128, g: 128, b: 128 });
+            }
+            const indexedData = new Uint8Array(totalPixels);
+            for (let i = 0; i < totalPixels; i++) {
+                const offset = i * 4;
+                const r = pixels[offset];
+                const g = pixels[offset + 1];
+                const b = pixels[offset + 2];
+                const a = pixels[offset + 3];
+                if (a <= 128) {
+                    indexedData[i] = 0;
+                    continue;
+                }
+                let minDist = Infinity;
+                let nearestIndex = 0;
+                for (let j = 0; j < palette.length; j++) {
+                    const dr = r - palette[j].r;
+                    const dg = g - palette[j].g;
+                    const db = b - palette[j].b;
+                    const dist = dr * dr + dg * dg + db * db;
+                    if (dist < minDist) {
+                        minDist = dist;
+                        nearestIndex = j;
+                    }
+                }
+                indexedData[i] = nearestIndex;
+            }
+            return { palette, indexedData };
+        }
+
+        function mapToGrid(indexedData, palette, gridSize) {
+            const totalCells = gridSize * gridSize;
+            const gridColors = [];
+            const colorCountMap = new Map();
+            for (let i = 0; i < palette.length; i++) {
+                colorCountMap.set(i, 0);
+            }
+            for (let i = 0; i < totalCells && i < indexedData.length; i++) {
+                const colorIndex = indexedData[i];
+                const color = palette[colorIndex] || palette[0];
+                gridColors.push(color);
+                colorCountMap.set(colorIndex, (colorCountMap.get(colorIndex) || 0) + 1);
+            }
+            while (gridColors.length < totalCells) {
+                gridColors.push(palette[0]);
+            }
+            const colorStats = [];
+            for (const [index, count] of colorCountMap) {
+                if (count > 0) {
+                    colorStats.push({
+                        color: palette[index],
+                        count: count
+                    });
+                }
+            }
+            colorStats.sort((a, b) => b.count - a.count);
+            return { gridColors, colorStats };
+        }
+
+        // ===== 渲染函数 =====
+
+        function renderGrid() {
+            if (!gridResult) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+            const cellSize = w / gridSize;
+            const colors = gridResult.gridColors;
+            for (let i = 0; i < colors.length; i++) {
+                const x = (i % gridSize) * cellSize;
+                const y = Math.floor(i / gridSize) * cellSize;
+                const c = colors[i];
+                ctx.fillStyle = `rgb(${c.r},${c.g},${c.b})`;
+                ctx.fillRect(x, y, cellSize, cellSize);
+                ctx.strokeStyle = '#d0cec8';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(x, y, cellSize, cellSize);
+            }
+            canvasHint.style.display = 'none';
+        }
+
+        function updateStats() {
+            if (!gridResult || !gridResult.colorStats.length) {
+                statsContent.innerHTML = '<div class="empty-stats">暂无数据</div>';
+                return;
+            }
+            const stats = gridResult.colorStats;
+            const total = stats.reduce((acc, s) => acc + s.count, 0);
+            let html = '<table class="stats-table"><thead><tr><th>颜色</th><th>RGB</th><th>数量</th><th>比例</th></tr></thead><tbody>';
+            for (const item of stats) {
+                const c = item.color;
+                const ratio = (item.count / total * 100).toFixed(1);
+                html += `<tr>
+                    <td><div class="color-info"><span class="color-swatch" style="background:rgb(${c.r},${c.g},${c.b})"></span></div></td>
+                    <td><span class="rgb-text">${c.r},${c.g},${c.b}</span></td>
+                    <td><span class="count-badge">${item.count}</span></td>
+                    <td><div class="ratio-bar"><div class="ratio-fill" style="width:${ratio}%"></div></div></td>
+                </tr>`;
+            }
+            html += '</tbody></table>';
+            statsContent.innerHTML = html;
+        }
+
+        // ===== 主处理流程 =====
+
+        function processImage() {
+            if (!currentFile || isProcessing) return;
+            isProcessing = true;
+            hideToast();
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    try {
+                        // 缩放
+                        const tempCanvas = document.createElement('canvas');
+                        tempCanvas.width = gridSize;
+                        tempCanvas.height = gridSize;
+                        const tempCtx = tempCanvas.getContext('2d');
+                        tempCtx.drawImage(img, 0, 0, gridSize, gridSize);
+                        const sourceData = tempCtx.getImageData(0, 0, gridSize, gridSize);
+                        // 量化
+                        const quantResult = quantizeColors(sourceData, targetColorCount);
+                        // 映射到网格
+                        gridResult = mapToGrid(quantResult.indexedData, quantResult.palette, gridSize);
+                        // 渲染
+                        renderGrid();
+                        updateStats();
+                        resetZoom();
+                        canvasHint.style.display = 'none';
+                    } catch (err) {
+                        showToast('处理图片时出错: ' + err.message);
+                    } finally {
+                        isProcessing = false;
+                    }
+                };
+                img.onerror = function() {
+                    showToast('图片加载失败，请检查文件');
+                    isProcessing = false;
+                };
+                img.src = e.target.result;
+            };
+            reader.onerror = function() {
+                showToast('文件读取失败');
+                isProcessing = false;
+            };
+            reader.readAsDataURL(currentFile);
+        }
+
+        // ===== 事件绑定 =====
+
+        // 上传
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            // 校验类型
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp'];
+            if (!validTypes.includes(file.type)) {
+                showToast('仅支持图片格式 (JPEG/PNG/GIF/BMP)');
+                fileInput.value = '';
+                return;
+            }
+            // 校验大小 (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('文件过大，请上传小于10MB的图片');
+                fileInput.value = '';
+                return;
+            }
+            currentFile = file;
+            processImage();
+        });
+
+        // 重置
+        resetBtn.addEventListener('click', function() {
+            currentFile = null;
+            imageDataScaled = null;
+            gridResult = null;
+            fileInput.value = '';
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvasHint.style.display = 'flex';
+            statsContent.innerHTML = '<div class="empty-stats">等待图片处理…</div>';
+            resetZoom();
+            hideToast();
+        });
+
+        // 网格选择
+        gridSelect.addEventListener('change', function() {
+            gridSize = parseInt(this.value, 10);
+            if (currentFile) processImage();
+        });
+
+        // 颜色滑块
+        colorSlider.addEventListener('input', function() {
+            targetColorCount = parseInt(this.value, 10);
+            colorCountDisplay.textContent = targetColorCount;
+            if (currentFile) processImage();
+        });
+
+        // ===== 缩放与平移 (鼠标 + 触摸) =====
+
+        let isDragging = false;
+        let startX, startY;
+        let lastPanX = 0, lastPanY = 0;
+
+        canvasContainer.addEventListener('mousedown', function(e) {
+            if (e.button !== 0) return;
+            isDragging = true;
+            startX = e.clientX - panX;
+            startY = e.clientY - panY;
+            canvasContainer.style.cursor = 'grabbing';
+        });
+
+        window.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            panX = e.clientX - startX;
+            panY = e.clientY - startY;
+            applyCanvasTransform();
+        });
+
+        window.addEventListener('mouseup', function() {
+            isDragging = false;
+            canvasContainer.style.cursor = 'grab';
+        });
+
+        canvasContainer.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -0.1 : 0.1;
+            const newScale = Math.min(3, Math.max(0.5, scaleLevel + delta));
+            // 以鼠标位置为缩放中心
+            const rect = canvasContainer.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            const scaleRatio = newScale / scaleLevel;
+            panX = mouseX - (mouseX - panX) * scaleRatio;
+            panY = mouseY - (mouseY - panY) * scaleRatio;
+            scaleLevel = newScale;
+            applyCanvasTransform();
+        }, { passive: false });
+
+        // 触摸支持
+        let lastTouchDist = 0;
+        let touchStartX, touchStartY;
+        let touchPanX = 0, touchPanY = 0;
+
+        canvasContainer.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                touchStartX = e.touches[0].clientX - panX;
+                touchStartY = e.touches[0].clientY - panY;
+            } else if (e.touches.length === 2) {
+                isDragging = false;
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                lastTouchDist = Math.sqrt(dx * dx + dy * dy);
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        canvasContainer.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+            if (e.touches.length === 1 && isDragging) {
+                panX = e.touches[0].clientX - touchStartX;
+                panY = e.touches[0].clientY - touchStartY;
+                applyCanvasTransform();
+            } else if (e.touches.length === 2) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (lastTouchDist > 0) {
+                    const scaleRatio = dist / lastTouchDist;
+                    const newScale = Math.min(3, Math.max(0.5, scaleLevel * scaleRatio));
+                    // 以双指中心为缩放中心
+                    const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                    const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                    const rect = canvasContainer.getBoundingClientRect();
+                    const centerX = cx - rect.left;
+                    const centerY = cy - rect.top;
+                    const ratio = newScale / scaleLevel;
+                    panX = centerX - (centerX - panX) * ratio;
+                    panY = centerY - (centerY - panY) * ratio;
+                    scaleLevel = newScale;
+                    applyCanvasTransform();
+                }
+                lastTouchDist = dist;
+            }
+        }, { passive: false });
+
+        canvasContainer.addEventListener('touchend', function(e) {
+            isDragging = false;
+            lastTouchDist = 0;
+        });
+
+        // 初始化
+        resetZoom();
+        canvasHint.style.display = 'flex';
+    })();
+</script>
+</body>
+</html>

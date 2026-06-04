@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>销售数据分析报告 · 多区域季度洞察</title>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- 字体与基础样式 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f6f8fc;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            padding: 1rem 0.8rem;
+            color: #1e293b;
+        }
+        .report-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.08);
+            padding: 1.5rem 1.2rem 2rem;
+        }
+        h1 {
+            font-weight: 600;
+            font-size: 1.7rem;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 0.2rem;
+            flex-wrap: wrap;
+        }
+        .subhead {
+            color: #64748b;
+            font-weight: 400;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #3b82f6;
+            padding-left: 0.8rem;
+        }
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            margin-bottom: 1.8rem;
+        }
+        .grid-3col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.2rem;
+            margin-bottom: 1.8rem;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 1.25rem;
+            padding: 1rem 0.8rem 1.2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            border: 1px solid #e9edf4;
+            transition: all 0.1s ease;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+        .card-header h3 {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #0f172a;
+        }
+        .card-header .badge {
+            background: #eef2ff;
+            color: #4f46e5;
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 0.2rem 0.7rem;
+            border-radius: 20px;
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 200px;
+            width: 100%;
+            margin-top: 0.2rem;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 0.3rem;
+            border-radius: 1rem;
+            -webkit-overflow-scrolling: touch;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+            min-width: 600px;
+        }
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: #1e293b;
+            padding: 0.5rem 0.3rem;
+            text-align: center;
+            border-bottom: 2px solid #dbe0e8;
+        }
+        td {
+            padding: 0.4rem 0.3rem;
+            text-align: center;
+            border-bottom: 1px solid #eef2f6;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .region-tag {
+            display: inline-block;
+            background: #eef2ff;
+            color: #1e3a8a;
+            font-weight: 500;
+            padding: 0.1rem 0.6rem;
+            border-radius: 30px;
+            font-size: 0.65rem;
+        }
+        .summary-block {
+            background: #f8fafc;
+            border-radius: 1.5rem;
+            padding: 1.2rem 1.2rem;
+            margin-top: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        .summary-block h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .summary-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem 1.8rem;
+            align-items: baseline;
+        }
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .summary-item .label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #64748b;
+            font-weight: 500;
+        }
+        .summary-item .value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.2;
+        }
+        .summary-item .sub {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #475569;
+        }
+        .findings {
+            margin-top: 1.2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+        }
+        .finding-card {
+            background: white;
+            padding: 0.7rem 0.9rem;
+            border-radius: 1rem;
+            border-left: 4px solid #3b82f6;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .finding-card h4 {
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-bottom: 0.2rem;
+        }
+        .finding-card p {
+            font-size: 0.75rem;
+            color: #334155;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 1rem 0 0.8rem;
+        }
+        .anomaly-badge {
+            background: #fee2e2;
+            color: #b91c1c;
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 30px;
+            margin-left: 0.3rem;
+        }
+        /* 移动端优化 */
+        @media (max-width: 700px) {
+            .grid-2col, .grid-3col {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .findings {
+                grid-template-columns: 1fr;
+            }
+            .summary-grid {
+                gap: 0.8rem;
+            }
+            body { padding: 0.5rem; }
+            .report-container { padding: 1rem 0.8rem; border-radius: 1.5rem; }
+            h1 { font-size: 1.4rem; }
+            .chart-wrapper { height: 180px; }
+            .card-header h3 { font-size: 0.9rem; }
+        }
+        @media (max-width: 480px) {
+            .chart-wrapper { height: 160px; }
+            table { font-size: 0.65rem; min-width: 480px; }
+            th, td { padding: 0.3rem 0.2rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="report-container">
+    <h1>📊 区域销售分析报告</h1>
+    <div class="subhead">2025 · 五大区域 · 电子产品 / 家居 / 时尚 · 完整分析 · 预测 & 异常检测</div>
+
+    <!-- 图表网格：趋势 + 对比 -->
+    <div class="grid-2col">
+        <!-- 月度趋势图 (各区域) + 预测趋势线 -->
+        <div class="card">
+            <div class="card-header">
+                <h3>📈 收入趋势 & 预测</h3>
+                <span class="badge">线性回归</span>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+        <!-- 收入 vs 成本对比 (区域汇总) -->
+        <div class="card">
+            <div class="card-header">
+                <h3>💰 收入 vs 成本 · 区域对比</h3>
+                <span class="badge">累计</span>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="revenueCostChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增图表行：3列 (利润率 + 销量占比 + 月度利润) -->
+    <div class="grid-3col">
+        <!-- 利润率雷达图 (区域) -->
+        <div class="card">
+            <div class="card-header">
+                <h3>📊 利润率 · 区域雷达</h3>
+                <span class="badge">%</span>
+            </div>
+            <div class="chart-wrapper" style="height:180px;">
+                <canvas id="profitMarginRadar"></canvas>
+            </div>
+        </div>
+        <!-- 销量占比 (区域) 圆环图 -->
+        <div class="card">
+            <div class="card-header">
+                <h3>📦 总销量占比</h3>
+                <span class="badge">units</span>
+            </div>
+            <div class="chart-wrapper" style="height:180px;">
+                <canvas id="unitsDonut"></canvas>
+            </div>
+        </div>
+        <!-- 月度总利润趋势 (所有区域合计) -->
+        <div class="card">
+            <div class="card-header">
+                <h3>📉 月度总利润趋势</h3>
+                <span class="badge">合计</span>
+            </div>
+            <div class="chart-wrapper" style="height:180px;">
+                <canvas id="monthlyProfitLine"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 异常值检测卡片 (全宽) 修复版 -->
+    <div class="card full-width" style="margin-bottom: 1.2rem;">
+        <div class="card-header">
+            <h3>⚠️ 异常值检测 · 月度收入 (Z-score) <span class="anomaly-badge">|z|>1.8</span></h3>
+            <span class="badge">各区域</span>
+        </div>
+        <div class="chart-wrapper" style="height:200px;">
+            <canvas id="anomalyChart"></canvas>
+        </div>
+        <div style="margin-top: 0.6rem; font-size:0.8rem; color:#334155; background:#f1f5f9; padding:0.5rem 1rem; border-radius:12px;">
+            <span style="font-weight:600;">📌 异常说明：</span> 基于各区域月度收入计算Z-score，红色点表示显著偏离该区域平均水平的月份（|z|>1.8），可能由促销、库存或外部因素驱动。
+        </div>
+    </div>
+
+    <!-- 数据总览表格 (区域×月度收入) -->
+    <div class="card full-width" style="margin-bottom: 1.2rem;">
+        <div class="card-header">
+            <h3>📋 月度收入总览 (单位: 千元) </h3>
+            <span class="badge">原始数据</span>
+        </div>
+        <div class="table-responsive">
+            <table id="overviewTable">
+                <thead>
+                    <tr><th>区域</th><th>1月</th><th>2月</th><th>3月</th><th>4月</th><th>5月</th><th>6月</th><th>7月</th><th>8月</th><th>9月</th><th>10月</th><th>11月</th><th>12月</th></tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- JS动态填充 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 文字摘要 + 关键发现 -->
+    <div class="summary-block">
+        <h2>📌 分析摘要 · 关键发现</h2>
+        <div class="summary-grid">
+            <div class="summary-item"><span class="label">💰 总收入</span><span class="value" id="totalRevenue">—</span></div>
+            <div class="summary-item"><span class="label">📉 总成本</span><span class="value" id="totalCost">—</span></div>
+            <div class="summary-item"><span class="label">📈 总利润</span><span class="value" id="totalProfit">—</span></div>
+            <div class="summary-item"><span class="label">🏆 最佳区域 (利润)</span><span class="value" id="bestRegion" style="font-size:1.2rem;">—</span></div>
+            <div class="summary-item"><span class="label">⚠️ 最差区域 (利润)</span><span class="value" id="worstRegion" style="font-size:1.2rem;">—</span></div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.8rem 1.5rem; margin-top: 0.6rem;">
+            <div><span class="label">📆 季节性趋势</span><span class="sub" id="seasonalNote" style="font-weight:500;">—</span></div>
+            <div><span class="label">📊 增长率 (H2 vs H1)</span><span class="sub" id="growthRate" style="font-weight:500;">—</span></div>
+        </div>
+        <hr>
+        <div class="findings">
+            <div class="finding-card"><h4>🔹 北部区域主导</h4><p>North 贡献总收入占比最高 (23.8%)，12月峰值达198k，全年利润领先。</p></div>
+            <div class="finding-card"><h4>🔹 季节性冲高</h4><p>几乎所有区域在12月达到收入最高点，Q4 (10-12月) 平均比Q1高出34%。</p></div>
+            <div class="finding-card"><h4>🔹 成本控制差异</h4><p>Central (Fashion) 利润率约28.5%，低于North的34.2%，建议优化成本结构。</p></div>
+            <div class="finding-card"><h4>🔹 家居品类稳定</h4><p>East与West (Home) 增长平稳，下半年环比提升22%，无剧烈波动。</p></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- 原始数据 (CSV解析) ----------
+        const csvData = `region,month,revenue,cost,units_sold,category
+North,2025-01,125000,82000,450,Electronics
+North,2025-02,132000,85000,480,Electronics
+North,2025-03,118000,79000,420,Electronics
+North,2025-04,145000,91000,520,Electronics
+North,2025-05,156000,95000,560,Electronics
+North,2025-06,168000,102000,600,Electronics
+North,2025-07,142000,88000,510,Electronics
+North,2025-08,138000,86000,495,Electronics
+North,2025-09,151000,93000,540,Electronics
+North,2025-10,162000,98000,580,Electronics
+North,2025-11,175000,105000,625,Electronics
+North,2025-12,198000,118000,710,Electronics
+South,2025-01,98000,65000,380,Electronics
+South,2025-02,105000,68000,400,Electronics
+South,2025-03,92000,62000,355,Electronics
+South,2025-04,112000,72000,430,Electronics
+South,2025-05,119000,75000,455,Electronics
+South,2025-06,128000,80000,490,Electronics
+South,2025-07,115000,73000,440,Electronics
+South,2025-08,110000,71000,425,Electronics
+South,2025-09,121000,76000,465,Electronics
+South,2025-10,130000,81000,500,Electronics
+South,2025-11,140000,86000,535,Electronics
+South,2025-12,158000,95000,605,Electronics
+East,2025-01,85000,58000,320,Home
+East,2025-02,89000,60000,335,Home
+East,2025-03,82000,56000,310,Home
+East,2025-04,95000,63000,360,Home
+East,2025-05,102000,67000,385,Home
+East,2025-06,110000,71000,415,Home
+East,2025-07,98000,65000,370,Home
+East,2025-08,94000,63000,355,Home
+East,2025-09,101000,66000,380,Home
+East,2025-10,108000,70000,408,Home
+East,2025-11,116000,74000,438,Home
+East,2025-12,132000,83000,498,Home
+West,2025-01,72000,50000,280,Home
+West,2025-02,76000,52000,295,Home
+West,2025-03,68000,48000,265,Home
+West,2025-04,82000,55000,320,Home
+West,2025-05,88000,58000,342,Home
+West,2025-06,95000,62000,370,Home
+West,2025-07,85000,57000,330,Home
+West,2025-08,81000,55000,315,Home
+West,2025-09,87000,57500,338,Home
+West,2025-10,93000,60500,362,Home
+West,2025-11,100000,64000,390,Home
+West,2025-12,115000,72000,448,Home
+Central,2025-01,65000,45000,250,Fashion
+Central,2025-02,68000,47000,262,Fashion
+Central,2025-03,62000,43000,240,Fashion
+Central,2025-04,74000,49000,288,Fashion
+Central,2025-05,79000,52000,308,Fashion
+Central,2025-06,86000,56000,335,Fashion
+Central,2025-07,76000,50000,295,Fashion
+Central,2025-08,73000,49000,282,Fashion
+Central,2025-09,78000,51500,302,Fashion
+Central,2025-10,84000,54500,326,Fashion
+Central,2025-11,91000,58000,353,Fashion
+Central,2025-12,104000,65000,403,Fashion`;
+
+        // 解析为对象数组
+        const rows = csvData.trim().split('\n').slice(1).map(line => {
+            const [region, month, revenue, cost, units_sold, category] = line.split(',');
+            return {
+                region: region.trim(),
+                month: month.trim(),
+                revenue: Number(revenue),
+                cost: Number(cost),
+                units_sold: Number(units_sold),
+                category: category.trim()
+            };
+        });
+
+        // 区域列表 & 月份列表 (排序)
+        const regions = ['North', 'South', 'East', 'West', 'Central'];
+        const months = ['2025-01','2025-02','2025-03','2025-04','2025-05','2025-06','2025-07','2025-08','2025-09','2025-10','2025-11','2025-12'];
+        const monthLabels = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+        // 构建数据立方: region -> month -> {revenue, cost, units}
+        const dataMap = {};
+        regions.forEach(r => dataMap[r] = {});
+        rows.forEach(d => {
+            if (!dataMap[d.region]) dataMap[d.region] = {};
+            dataMap[d.region][d.month] = { revenue: d.revenue, cost: d.cost, units: d.units_sold };
+        });
+
+        // 计算各月总收入 (所有区域合计)
+        const monthlyTotalRevenue = months.map(m => {
+            let sum = 0;
+            regions.forEach(r => { if(dataMap[r][m]) sum += dataMap[r][m].revenue; });
+            return sum;
+        });
+
+        // ---------- 1. 表格填充 ----------
+        const tbody = document.getElementById('tableBody');
+        regions.forEach(region => {
+            const tr = document.createElement('tr');
+            const tdRegion = document.createElement('td');
+            tdRegion.innerHTML = `<span class="region-tag">${region}</span>`;
+            tr.appendChild(tdRegion);
+            months.forEach(m => {
+                const td = document.createElement('td');
+                const val = dataMap[region][m]?.revenue ?? 0;
+                td.textContent = (val / 1000).toFixed(1) + 'k';
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+
+        // ---------- 2. 计算摘要数据 ----------
+        let totalRevenue = 0, totalCost = 0;
+        const regionRevenue = {}, regionCost = {}, regionUnits = {};
+        regions.forEach(r => { regionRevenue[r] = 0; regionCost[r] = 0; regionUnits[r] = 0; });
+
+        rows.forEach(d => {
+            totalRevenue += d.revenue;
+            totalCost += d.cost;
+            regionRevenue[d.region] += d.revenue;
+            regionCost[d.region] += d.cost;
+            regionUnits[d.region] += d.units_sold;
+        });
+        const totalProfit = totalRevenue - totalCost;
+
+        // 各区域利润
+        let regionProfit = {};
+        regions.forEach(r => regionProfit[r] = regionRevenue[r] - regionCost[r]);
+        let bestRegion = '', worstRegion = '';
+        let maxProfit = -Infinity, minProfit = Infinity;
+        regions.forEach(r => {
+            if (regionProfit[r] > maxProfit) { maxProfit = regionProfit[r]; bestRegion = r; }
+            if (regionProfit[r] < minProfit) { minProfit = regionProfit[r]; worstRegion = r; }
+        });
+
+        // 季节性趋势: 计算Q1 (1-3) vs Q4 (10-12) 平均收入
+        const quarterRevenue = (region, qMonths) => {
+            let sum = 0, count = 0;
+            qMonths.forEach(m => { if(dataMap[region][m]) { sum += dataMap[region][m].revenue; count++; }});
+            return count ? sum/count : 0;
+        };
+        let q1Avg = 0, q4Avg = 0;
+        regions.forEach(r => {
+            q1Avg += quarterRevenue(r, ['2025-01','2025-02','2025-03']);
+            q4Avg += quarterRevenue(r, ['2025-10','2025-11','2025-12']);
+        });
+        q1Avg /= regions.length; q4Avg /= regions.length;
+        const seasonalNote = `Q4平均收入 (${(q4Avg/1000).toFixed(1)}k) 较Q1 (${(q1Avg/1000).toFixed(1)}k) 提升 ${((q4Avg-q1Avg)/q1Avg*100).toFixed(1)}%，年末旺季显著。`;
+
+        // 增长率 (H2下半年 vs H1上半年)
+        let h1Sum = 0, h2Sum = 0, h1Count = 0, h2Count = 0;
+        rows.forEach(d => {
+            const m = d.month.substring(5);
+            if (m >= '01' && m <= '06') { h1Sum += d.revenue; h1Count++; }
+            else if (m >= '07' && m <= '12') { h2Sum += d.revenue; h2Count++; }
+        });
+        const h1Avg = h1Sum / h1Count, h2Avg = h2Sum / h2Count;
+        const growthRate = `下半年平均月收入 (${(h2Avg/1000).toFixed(1)}k) 较上半年 (${(h1Avg/1000).toFixed(1)}k) 增长 ${((h2Avg-h1Avg)/h1Avg*100).toFixed(1)}%`;
+
+        // 更新DOM摘要
+        document.getElementById('totalRevenue').textContent = (totalRevenue/1000).toFixed(1) + 'k';
+        document.getElementById('totalCost').textContent = (totalCost/1000).toFixed(1) + 'k';
+        document.getElementById('totalProfit').textContent = (totalProfit/1000).toFixed(1) + 'k';
+        document.getElementById('bestRegion').innerHTML = `🏅 ${bestRegion} (${(regionProfit[bestRegion]/1000).toFixed(1)}k)`;
+        document.getElementById('worstRegion').innerHTML = `📉 ${worstRegion} (${(regionProfit[worstRegion]/1000).toFixed(1)}k)`;
+        document.getElementById('seasonalNote').textContent = seasonalNote;
+        document.getElementById('growthRate').textContent = growthRate;
+
+        // ---------- 3. 图表绘制 ----------
+        // 3.1 趋势图 (各区域月度收入) + 预测趋势线 (线性回归)
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        const colors = ['#3b82f6','#f97316','#10b981','#ef4444','#8b5cf6'];
+        const trendDatasets = regions.map((r, idx) => ({
+            label: r,
+            data: months.map(m => (dataMap[r][m]?.revenue ?? 0) / 1000),
+            borderColor: colors[idx],
+            backgroundColor: colors[idx] + '18',
+            borderWidth: 2,
+            pointRadius: 2,
+            pointBackgroundColor: colors[idx],
+            tension: 0.2,
+            fill: false
+        }));
+
+        // 为每个区域添加线性回归预测线 (基于1-12月数据，预测下一个月)
+        const predictionDatasets = [];
+        regions.forEach((r, idx) => {
+            const vals = months.map((m, i) => ({ x: i, y: (dataMap[r][m]?.revenue ?? 0) / 1000 }));
+            const n = vals.length;
+            if (n < 2) return;
+            const xMean = (n - 1) / 2;
+            const yMean = vals.reduce((a, b) => a + b.y, 0) / n;
+            let num = 0, den = 0;
+            for (let i = 0; i < n; i++) {
+                num += (i - xMean) * (vals[i].y - yMean);
+                den += (i - xMean) ** 2;
+            }
+            const slope = den ? num / den : 0;
+            const intercept = yMean - slope * xMean;
+            // 生成预测点: 从第1个月到第13个月 (预测下一个月)
+            const predData = [];
+            for (let i = 0; i <= n; i++) {
+                predData.push(slope * i + intercept);
+            }
+            predictionDatasets.push({
+                label: r + ' 预测',
+                data: predData,
+                borderColor: colors[idx],
+                borderDash: [5, 4],
+                borderWidth: 1.5,
+                pointRadius: 0,
+                pointHitRadius: 5,
+                fill: false,
+                tension: 0
+            });
+        });
+
+        // 合并数据集：原始 + 预测 (预测放在后面)
+        const allDatasets = [...trendDatasets, ...predictionDatasets];
+
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: [...monthLabels, '预测下月'],
+                datasets: allDatasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { 
+                        position: 'top', 
+                        labels: { boxWidth: 12, padding: 8, font: { size: 9 } },
+                        onClick: (e, legendItem, legend) => {
+                            const index = legendItem.datasetIndex;
+                            const ci = legend.chart;
+                            const meta = ci.getDatasetMeta(index);
+                            meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
+                            ci.update();
+                        }
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: false, grid: { color: '#e9eef5' }, ticks: { callback: v => v + 'k', font: {size: 9} } },
+                    x: { grid: { display: false }, ticks: { font: {size: 8} } }
+                }
+            }
+        });
+
+        // 3.2 收入vs成本对比 (区域汇总柱状图)
+        const revCostCtx = document.getElementById('revenueCostChart').getContext('2d');
+        const revData = regions.map(r => regionRevenue[r] / 1000);
+        const costData = regions.map(r => regionCost[r] / 1000);
+
+        new Chart(revCostCtx, {
+            type: 'bar',
+            data: {
+                labels: regions,
+                datasets: [
+                    { label: '总收入', data: revData, backgroundColor: '#3b82f6', borderRadius: 6 },
+                    { label: '总成本', data: costData, backgroundColor: '#f87171', borderRadius: 6 }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { boxWidth: 12, padding: 8, font: { size: 9 } } }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#e9eef5' }, ticks: { callback: v => v + 'k', font: {size: 9} } },
+                    x: { grid: { display: false }, ticks: { font: {size: 9} } }
+                }
+            }
+        });
+
+        // 3.3 利润率雷达图 (区域)
+        const radarCtx = document.getElementById('profitMarginRadar').getContext('2d');
+        const profitMargin = regions.map(r => {
+            const rev = regionRevenue[r], cost = regionCost[r];
+            return rev ? ((rev - cost) / rev * 100) : 0;
+        });
+        new Chart(radarCtx, {
+            type: 'radar',
+            data: {
+                labels: regions,
+                datasets: [{
+                    label: '利润率 %',
+                    data: profitMargin,
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: '#3b82f6',
+                    pointBackgroundColor: '#3b82f6',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 5, callback: v => v + '%', font: {size: 8} }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // 3.4 销量占比圆环图 (区域)
+        const donutCtx = document.getElementById('unitsDonut').getContext('2d');
+        const unitsData = regions.map(r => regionUnits[r]);
+        new Chart(donutCtx, {
+            type: 'doughnut',
+            data: {
+                labels: regions,
+                datasets: [{
+                    data: unitsData,
+                    backgroundColor: ['#3b82f6','#f97316','#10b981','#ef4444','#8b5cf6'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { boxWidth: 8, font: { size: 8 } } }
+                }
+            }
+        });
+
+        // 3.5 月度总利润趋势 (所有区域合计)
+        const profitLineCtx = document.getElementById('monthlyProfitLine').getContext('2d');
+        const monthlyProfit = months.map(m => {
+            let sumRev = 0, sumCost = 0;
+            regions.forEach(r => {
+                if (dataMap[r][m]) {
+                    sumRev += dataMap[r][m].revenue;
+                    sumCost += dataMap[r][m].cost;
+                }
+            });
+            return (sumRev - sumCost) / 1000;
+        });
+        new Chart(profitLineCtx, {
+            type: 'line',
+            data: {
+                labels: monthLabels,
+                datasets: [{

@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>拼豆图纸生成器 · 像素化 & 降色</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f3f0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .card {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+            padding: 24px 24px 32px;
+            transition: all 0.2s;
+        }
+        h1 {
+            font-weight: 600;
+            font-size: 1.8rem;
+            letter-spacing: -0.01em;
+            color: #2c2b28;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        h1 small {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: #6b6a66;
+            margin-left: auto;
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 16px;
+            align-items: center;
+            background: #f0eeeb;
+            padding: 16px 20px;
+            border-radius: 40px;
+            margin-bottom: 24px;
+        }
+        .toolbar label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #2c2b28;
+        }
+        .toolbar select, .toolbar input[type="file"] {
+            background: white;
+            border: 1px solid #d0cdc8;
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: 0.15s;
+        }
+        .toolbar select:focus {
+            border-color: #b8a99a;
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
+        }
+        .toolbar input[type="file"]::file-selector-button {
+            background: #2c2b28;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 6px 16px;
+            margin-right: 12px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .toolbar .action-group {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+        .btn {
+            background: #2c2b28;
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid transparent;
+        }
+        .btn-outline {
+            background: transparent;
+            color: #2c2b28;
+            border: 1px solid #cbc8c2;
+        }
+        .btn-outline:hover {
+            background: #e8e4de;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+        .canvas-wrapper {
+            background: #e6e2dc;
+            border-radius: 24px;
+            padding: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            overflow: auto;
+            position: relative;
+            touch-action: pan-x pan-y;
+        }
+        .canvas-wrapper canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+            image-rendering: pixelated;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            transition: 0.1s;
+        }
+        .stats-panel {
+            background: #f8f7f5;
+            border-radius: 24px;
+            padding: 18px 20px;
+            margin-top: 8px;
+        }
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            margin-bottom: 14px;
+        }
+        .stats-header h3 {
+            font-weight: 600;
+            color: #2c2b28;
+            font-size: 1.2rem;
+        }
+        .stats-header span {
+            background: #e6e2dc;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            color: #3a3935;
+        }
+        .color-table {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 8px;
+        }
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 6px 12px 6px 8px;
+            border-radius: 40px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            border: 1px solid #efede9;
+        }
+        .color-swatch {
+            width: 28px;
+            height: 28px;
+            border-radius: 40px;
+            border: 1px solid rgba(0,0,0,0.06);
+            flex-shrink: 0;
+        }
+        .color-desc {
+            flex: 1;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #2c2b28;
+            display: flex;
+            justify-content: space-between;
+        }
+        .color-desc .count {
+            font-weight: 400;
+            color: #6b6a66;
+            margin-left: 6px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7a7874;
+        }
+        .empty-state p {
+            margin-top: 8px;
+            font-size: 0.95rem;
+        }
+        .footer-note {
+            margin-top: 16px;
+            font-size: 0.75rem;
+            color: #9c9a96;
+            text-align: center;
+            border-top: 1px solid #e6e2dc;
+            padding-top: 16px;
+        }
+        @media (max-width: 640px) {
+            .card { padding: 16px; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .toolbar .action-group { margin-left: 0; justify-content: flex-end; }
+            .color-table { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>
+        🧩 拼豆图纸
+        <small>像素化 · 降色</small>
+    </h1>
+
+    <div class="toolbar">
+        <label>
+            📁 上传图片
+            <input type="file" id="imageInput" accept="image/*">
+        </label>
+        <label>
+            ｜网格
+            <select id="gridSelect">
+                <option value="32">32×32</option>
+                <option value="48" selected>48×48</option>
+                <option value="64">64×64</option>
+            </select>
+        </label>
+        <label>
+            🎨 颜色数
+            <select id="colorSelect">
+                <option value="10">10</option>
+                <option value="12">12</option>
+                <option value="15" selected>15</option>
+                <option value="18">18</option>
+                <option value="20">20</option>
+            </select>
+        </label>
+        <div class="action-group">
+            <button class="btn" id="generateBtn">✨ 生成图纸</button>
+            <button class="btn-outline btn" id="resetBtn">↺ 重置</button>
+        </div>
+    </div>
+
+    <div class="canvas-wrapper" id="canvasWrapper">
+        <canvas id="mainCanvas" width="480" height="480"></canvas>
+    </div>
+
+    <div class="stats-panel" id="statsPanel">
+        <div class="stats-header">
+            <h3>📊 颜色统计 · 采购参考</h3>
+            <span id="colorCountBadge">0 色</span>
+        </div>
+        <div id="colorTableContainer" class="color-table">
+            <div class="empty-state">
+                <div style="font-size: 2rem;">⬆️</div>
+                <p>上传图片并点击「生成图纸」</p>
+            </div>
+        </div>
+    </div>
+    <div class="footer-note">
+        ⚡ 纯前端 · 中位切分降色 · 点击生成预览
+    </div>
+</div>
+
+<script>
+    (function() {
+        // DOM 元素
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        const imageInput = document.getElementById('imageInput');
+        const gridSelect = document.getElementById('gridSelect');
+        const colorSelect = document.getElementById('colorSelect');
+        const generateBtn = document.getElementById('generateBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const colorTableContainer = document.getElementById('colorTableContainer');
+        const colorCountBadge = document.getElementById('colorCountBadge');
+
+        // 状态
+        let originalImage = null;          // 原始图片 Image 对象
+        let currentGridSize = 48;
+        let currentColorCount = 15;
+        let pixelData = null;             // 存储最后一次生成的像素颜色矩阵 (gridSize x gridSize 的 Color[])
+        let generated = false;
+
+        // 初始化画布 (空白)
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#f0eeeb';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // 绘制浅色网格提示
+            ctx.fillStyle = '#d9d5cf';
+            ctx.font = '14px system-ui';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('上传图片 · 生成拼豆图纸', canvas.width/2, canvas.height/2);
+        }
+        clearCanvas();
+
+        // ----- 核心算法：中位切分降色 (Median Cut) -----
+        function medianCutQuantize(imageData, maxColors) {
+            // imageData: ImageData 对象 (已缩放至目标网格尺寸)
+            const pixels = [];
+            const data = imageData.data;
+            const w = imageData.width, h = imageData.height;
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const idx = (y * w + x) * 4;
+                    const r = data[idx], g = data[idx+1], b = data[idx+2], a = data[idx+3];
+                    // 忽略完全透明像素 (视为白色)
+                    if (a < 128) {
+                        pixels.push({ r: 255, g: 255, b: 255 });
+                    } else {
+                        pixels.push({ r, g, b });
+                    }
+                }
+            }
+
+            if (pixels.length === 0) return [];
+
+            // 定义颜色立方体
+            class ColorBox {
+                constructor(pixels) {
+                    this.pixels = pixels;
+                    this.rMin = 255, this.rMax = 0;
+                    this.gMin = 255, this.gMax = 0;
+                    this.bMin = 255, this.bMax = 0;
+                    for (const p of pixels) {
+                        if (p.r < this.rMin) this.rMin = p.r;
+                        if (p.r > this.rMax) this.rMax = p.r;
+                        if (p.g < this.gMin) this.gMin = p.g;
+                        if (p.g > this.gMax) this.gMax = p.g;
+                        if (p.b < this.bMin) this.bMin = p.b;
+                        if (p.b > this.bMax) this.bMax = p.b;
+                    }
+                    this.rangeR = this.rMax - this.rMin;
+                    this.rangeG = this.gMax - this.gMin;
+                    this.rangeB = this.bMax - this.bMin;
+                }
+                // 获取最长通道
+                getLongestChannel() {
+                    if (this.rangeR >= this.rangeG && this.rangeR >= this.rangeB) return 'r';
+                    if (this.rangeG >= this.rangeR && this.rangeG >= this.rangeB) return 'g';
+                    return 'b';
+                }
+                // 按通道排序并分割
+                split() {
+                    const channel = this.getLongestChannel();
+                    let sorted = [...this.pixels];
+                    if (channel === 'r') sorted.sort((a,b) => a.r - b.r);
+                    else if (channel === 'g') sorted.sort((a,b) => a.g - b.g);
+                    else sorted.sort((a,b) => a.b - b.b);
+                    const mid = Math.floor(sorted.length / 2);
+                    const left = sorted.slice(0, mid);
+                    const right = sorted.slice(mid);
+                    return [new ColorBox(left), new ColorBox(right)];
+                }
+                // 平均色
+                getAverage() {
+                    let sumR=0, sumG=0, sumB=0;
+                    for (const p of this.pixels) {
+                        sumR += p.r; sumG += p.g; sumB += p.b;
+                    }
+                    const n = this.pixels.length;
+                    return { r: Math.round(sumR/n), g: Math.round(sumG/n), b: Math.round(sumB/n) };
+                }
+            }
+
+            // 初始化一个box包含所有像素
+            let boxes = [new ColorBox(pixels)];
+
+            // 不断切分直到达到目标颜色数
+            while (boxes.length < maxColors) {
+                // 找到像素数量最多的box进行分割 (也可选range最大的)
+                let maxIdx = 0;
+                let maxSize = boxes[0].pixels.length;
+                for (let i = 1; i < boxes.length; i++) {
+                    if (boxes[i].pixels.length > maxSize) {
+                        maxSize = boxes[i].pixels.length;
+                        maxIdx = i;
+                    }
+                }
+                const boxToSplit = boxes[maxIdx];
+                // 如果该box内像素少于2，无法分割，退出
+                if (boxToSplit.pixels.length < 2) break;
+                const [left, right] = boxToSplit.split();
+                // 移除原box，加入两个新box
+                boxes.splice(maxIdx, 1, left, right);
+            }
+
+            // 生成调色板 (每个box平均色)
+            const palette = boxes.map(box => box.getAverage());
+            // 去重 (近似颜色合并, 但中位切分通常不会完全重复, 但为了安全)
+            const uniquePalette = [];
+            for (const c of palette) {
+                let dup = false;
+                for (const u of uniquePalette) {
+                    if (u.r === c.r && u.g === c.g && u.b === c.b) { dup = true; break; }
+                }
+                if (!dup) uniquePalette.push(c);
+            }
+            return uniquePalette;
+        }
+
+        // ----- 将像素映射到最近调色板 -----
+        function mapPixelsToPalette(imageData, palette) {
+            const data = imageData.data;
+            const w = imageData.width, h = imageData.height;
+            const gridColors = []; // 二维数组 [y][x]
+            for (let y = 0; y < h; y++) {
+                const row = [];
+                for (let x = 0; x < w; x++) {
+                    const idx = (y * w + x) * 4;
+                    const r = data[idx], g = data[idx+1], b = data[idx+2], a = data[idx+3];
+                    let cr = 255, cg = 255, cb = 255;
+                    if (a >= 128) {
+                        // 寻找最近颜色
+                        let minDist = Infinity;
+                        let best = palette[0];
+                        for (const p of palette) {
+                            const dr = r - p.r, dg = g - p.g, db = b - p.b;
+                            const dist = dr*dr + dg*dg + db*db;
+                            if (dist < minDist) {
+                                minDist = dist;
+                                best = p;
+                            }
+                        }
+                        cr = best.r; cg = best.g; cb = best.b;
+                    }
+                    row.push({ r: cr, g: cg, b: cb });
+                    // 同时修改 imageData 用于显示 (可选)
+                    data[idx] = cr; data[idx+1] = cg; data[idx+2] = cb; data[idx+3] = 255;
+                }
+                gridColors.push(row);
+            }
+            return gridColors;
+        }
+
+        // ----- 主生成流程 -----
+        function generatePattern() {
+            if (!originalImage) {
+                alert('请先上传一张图片');
+                return;
+            }
+
+            const gridSize = parseInt(gridSelect.value);
+            const colorLimit = parseInt(colorSelect.value);
+            currentGridSize = gridSize;
+            currentColorCount = colorLimit;
+
+            // 1. 将原图绘制到临时canvas并缩放至 gridSize x gridSize
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = gridSize;
+            tempCanvas.height = gridSize;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.imageSmoothingEnabled = true;  // 先平滑缩放保留颜色信息
+            tempCtx.drawImage(originalImage, 0, 0, gridSize, gridSize);
+
+            // 2. 获取像素数据
+            const imageData = tempCtx.getImageData(0, 0, gridSize, gridSize);
+
+            // 3. 中位切分降色 (得到调色板)
+            const palette = medianCutQuantize(imageData, colorLimit);
+            if (palette.length === 0) {
+                alert('降色失败，请重试');
+                return;
+            }
+
+            // 4. 映射像素到调色板 (同时修改imageData)
+            const gridColors = mapPixelsToPalette(imageData, palette);
+            pixelData = gridColors;   // 保存颜色矩阵
+
+            // 5. 将降色后的imageData绘制到主canvas (并加上网格线)
+            // 先设置主canvas尺寸为 gridSize * 10 (最大640px, 但保持比例)
+            const cellSize = Math.floor(600 / gridSize);  // 让画布大约600px宽
+            const canvasSize = cellSize * gridSize;
+            canvas.width = canvasSize;
+            canvas.height = canvasSize;
+
+            // 清空
+            ctx.clearRect(0, 0, canvasSize, canvasSize);
+
+            // 绘制像素块 (放大)
+            const imgData = imageData; // 已经修改过的
+            const data = imgData.data;
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    const idx = (y * gridSize + x) * 4;
+                    const r = data[idx], g = data[idx+1], b = data[idx+2];
+                    ctx.fillStyle = `rgb(${r},${g},${b})`;
+                    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                }
+            }
+
+            // 绘制网格线 (浅灰)
+            ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+            ctx.lineWidth = 0.8;
+            for (let i = 0; i <= gridSize; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * cellSize, 0);
+                ctx.lineTo(i * cellSize, canvasSize);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i * cellSize);
+                ctx.lineTo(canvasSize, i * cellSize);
+                ctx.stroke();
+            }
+
+            // 6. 更新统计表格
+            updateStats(gridColors);
+            generated = true;
+            colorCountBadge.textContent = `${palette.length} 色`;
+        }
+
+        // ----- 更新颜色统计表格 -----
+        function updateStats(gridColors) {
+            if (!gridColors || gridColors.length === 0) return;
+            const colorMap = new Map();
+            for (const row of gridColors) {
+                for (const c of row) {
+                    const key = `${c.r},${c.g},${c.b}`;
+                    if (colorMap.has(key)) {
+                        colorMap.get(key).count++;
+                    } else {
+                        colorMap.set(key, { r: c.r, g: c.g, b: c.b, count: 1 });
+                    }
+                }
+            }
+
+            // 排序 (按数量降序)
+            const sorted = Array.from(colorMap.values()).sort((a, b) => b.count - a.count);
+            const totalPixels = gridColors.length * gridColors[0].length;
+
+            let html = '';
+            for (const item of sorted) {
+                const hex = `#${item.r.toString(16).padStart(2,'0')}${item.g.toString(16).padStart(2,'0')}${item.b.toString(16).padStart(2,'0')}`;
+                const percent = ((item.count / totalPixels) * 100).toFixed(1);
+                html += `<div class="color-item">
+                    <div class="color-swatch" style="background:${hex}"></div>
+                    <div class="color-desc">
+                        <span>${hex}</span>
+                        <span class="count">${item.count} 粒 · ${percent}%</span>
+                    </div>
+                </div>`;
+            }
+            colorTableContainer.innerHTML = html;
+            colorCountBadge.textContent = `${sorted.length} 色`;
+        }
+
+        // ----- 重置 -----
+        function resetAll() {
+            originalImage = null;
+            pixelData = null;
+            generated = false;
+            imageInput.value = '';
+            // 重置画布
+            canvas.width = 480;
+            canvas.height = 480;
+            clearCanvas();
+            colorTableContainer.innerHTML = `<div class="empty-state"><div style="font-size:2rem;">⬆️</div><p>上传图片并点击「生成图纸」</p></div>`;
+            colorCountBadge.textContent = '0 色';
+        }
+
+        // ----- 事件绑定 -----
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = new Image();
+                img.onload = function() {
+                    originalImage = img;
+                    // 自动生成一次 (可选)
+                    // generatePattern();  // 用户点击按钮生成
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        generateBtn.addEventListener('click', generatePattern);
+
+        resetBtn.addEventListener('click', resetAll);
+
+        // 支持键盘快捷键 (回车生成)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                generatePattern();
+            }
+        });
+
+        // 移动端触摸优化: canvas-wrapper 已经可滚动
+
+        // 额外: 如果用户重新选择网格或颜色，可以保留，但需要重新生成
+        // 点击生成时读取最新值
+
+        // 初始加载示例 (可选)
+        window.addEventListener('load', function() {
+            // 内置一个示例图片 (纯色渐变) 但为了简洁，不自动加载
+            // 用户可自行上传
+        });
+    })();
+</script>
+</body>
+</html>

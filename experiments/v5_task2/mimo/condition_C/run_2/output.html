@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025年销售数据分析报告</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #6d98c8;
+            --accent: #d4a843;
+            --bg-light: #f8f9fa;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --border: #e2e8f0;
+            --success: #38a169;
+            --warning: #d69e2e;
+            --danger: #e53e3e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        /* 仪表盘部分 */
+        .dashboard {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .dashboard-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            transform: translate(30px, -30px);
+        }
+
+        .kpi-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        /* 图表容器 */
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 25px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .chart-canvas-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+
+        /* 表格部分 */
+        .table-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .table-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .data-table-responsive {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .data-table thead {
+            background: var(--bg-light);
+        }
+
+        .data-table th {
+            padding: 14px 20px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-dark);
+            border-bottom: 2px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .data-table th:hover {
+            background: #edf2f7;
+        }
+
+        .data-table th.sorted-asc::after {
+            content: " ▲";
+            font-size: 12px;
+            color: var(--primary);
+        }
+
+        .data-table th.sorted-desc::after {
+            content: " ▼";
+            font-size: 12px;
+            color: var(--primary);
+        }
+
+        .data-table td {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .currency {
+            font-weight: 500;
+            color: var(--success);
+        }
+
+        .region-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .region-north { background: #e6fffa; color: #38a169; }
+        .region-south { background: #fff5f5; color: #e53e3e; }
+        .region-east { background: #f0fff4; color: #48bb78; }
+        .region-west { background: #ebf8ff; color: #4299e1; }
+        .region-central { background: #fffaf0; color: #dd6b20; }
+
+        /* 分析部分 */
+        .analysis-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .analysis-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .analysis-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .finding-item, .suggestion-item {
+            padding: 15px;
+            border-left: 4px solid var(--primary);
+            background: var(--bg-light);
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 15px;
+            transition: transform 0.2s;
+        }
+
+        .finding-item:hover, .suggestion-item:hover {
+            transform: translateX(5px);
+        }
+
+        .finding-title, .suggestion-title {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .finding-description, .suggestion-description {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .priority-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            float: right;
+        }
+
+        .priority-high { background: #fed7d7; color: #e53e3e; }
+        .priority-medium { background: #fefcbf; color: #d69e2e; }
+        .priority-low { background: #c6f6d5; color: #38a169; }
+
+        /* 底部摘要 */
+        .summary-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .summary-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+        }
+
+        .summary-text {
+            background: var(--bg-light);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.8;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .copy-btn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #3a5688;
+            transform: translateY(-2px);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .analysis-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                gap: 20px;
+                padding: 10px;
+            }
+            
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .chart-canvas-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 仪表盘部分 -->
+        <section class="dashboard animate-in">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">2025年销售数据分析报告</h1>
+                <div class="dashboard-controls">
+                    <span>报告生成时间：2025年12月31日</span>
+                </div>
+            </div>
+            
+            <!-- KPI卡片 -->
+            <div class="kpi-grid" id="kpiGrid">
+                <!-- JavaScript将在此处动态生成KPI卡片 -->
+            </div>
+        </section>
+
+        <!-- 图表部分 -->
+        <section class="charts-section">
+            <div class="chart-container animate-in animate-delay-1">
+                <div class="chart-header">
+                    <h3 class="chart-title">各区域月度收入趋势</h3>
+                </div>
+                <div class="chart-canvas-container">
+                    <canvas id="regionTrendChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-container animate-in animate-delay-2">
+                <div class="chart-header">
+                    <h3 class="chart-title">月度总收入 vs 总成本对比</h3>
+                </div>
+                <div class="chart-canvas-container">
+                    <canvas id="revenueVsCostChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- 数据总览表格 -->
+        <section class="table-section animate-in animate-delay-3">
+            <div class="table-header">
+                <h2 class="table-title">原始销售数据总览</h2>
+            </div>
+            <div class="data-table-responsive">
+                <table class="data-table" id="salesDataTable">
+                    <thead>
+                        <tr>
+                            <th data-sort="region">区域</th>
+                            <th data-sort="month">月份</th>
+                            <th data-sort="revenue">收入</th>
+                            <th data-sort="cost">成本</th>
+                            <th data-sort="units_sold">销售数量</th>
+                            <th data-sort="category">类别</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesTableBody">
+                        <!-- JavaScript将在此处动态生成表格行 -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 关键发现与建议 -->
+        <section class="analysis-section">
+            <div class="analysis-card animate-in animate-delay-4">
+                <h3 class="analysis-title">📊 关键发现</h3>
+                <div id="findingsContainer">
+                    <!-- JavaScript将在此处动态生成关键发现 -->
+                </div>
+            </div>
+            
+            <div class="analysis-card animate-in animate-delay-5">
+                <h3 class="analysis-title">💡 商业建议</h3>
+                <div id="suggestionsContainer">
+                    <!-- JavaScript将在此处动态生成商业建议 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 底部摘要 -->
+        <section class="summary-section animate-in animate-delay-6">
+            <h3 class="summary-title">📋 报告摘要（可复制文本）</h3>
+            <div class="summary-text" id="summaryText">
+                <!-- JavaScript将在此处动态生成摘要文本 -->
+            </div>
+            <button class="copy-btn" onclick="copySummary()">复制摘要</button>
+        </section>
+    </div>
+
+    <script>
+        // 原始销售数据
+        const salesData = [
+            { region: "North", month: "2025-01", revenue: 125000, cost: 82000, units_sold: 450, category: "Electronics" },
+            { region: "North", month: "2025-02", revenue: 132000, cost: 85000, units_sold: 480, category: "Electronics" },
+            { region: "North", month: "2025-03", revenue: 118000, cost: 79000, units_sold: 420, category: "Electronics" },
+            { region: "North", month: "2025-04", revenue: 145000, cost: 91000, units_sold: 520, category: "Electronics" },
+            { region: "North", month: "2025-05", revenue: 156000, cost: 95000, units_sold: 560, category: "Electronics" },
+            { region: "North", month: "2025-06", revenue: 168000, cost: 102000, units_sold: 600, category: "Electronics" },
+            { region: "North", month: "2025-07", revenue: 142000, cost: 88000, units_sold: 510, category: "Electronics" },
+            { region: "North", month: "2025-08", revenue: 138000, cost: 86000, units_sold: 495, category: "Electronics" },
+            { region: "North", month: "2025-09", revenue: 151000, cost: 93000, units_sold: 540, category: "Electronics" },
+            { region: "North", month: "2025-10", revenue: 162000, cost: 98000, units_sold: 580, category: "Electronics" },
+            { region: "North", month: "2025-11", revenue: 175000, cost: 105000, units_sold: 625, category: "Electronics" },
+            { region: "North", month: "2025-12", revenue: 198000, cost: 118000, units_sold: 710, category: "Electronics" },
+            { region: "South", month: "2025-01", revenue: 98000, cost: 65000, units_sold: 380, category: "Electronics" },
+            { region: "South", month: "2025-02", revenue: 105000, cost: 68000, units_sold: 400, category: "Electronics" },
+            { region: "South", month: "2025-03", revenue: 92000, cost: 62000, units_sold: 355, category: "Electronics" },
+            { region: "South", month: "2025-04", revenue: 112000, cost: 72000, units_sold: 430, category: "Electronics" },
+            { region: "South", month: "2025-05", revenue: 119000, cost: 75000, units_sold: 455, category: "Electronics" },
+            { region: "South", month: "2025-06", revenue: 128000, cost: 80000, units_sold: 490, category: "Electronics" },
+            { region: "South", month: "2025-07", revenue: 115000, cost: 73000, units_sold: 440, category: "Electronics" },
+            { region: "South", month: "2025-08", revenue: 110000, cost: 71000, units_sold: 425, category: "Electronics" },
+            { region: "South", month: "2025-09", revenue: 121000, cost: 76000, units_sold: 465, category: "Electronics" },
+            { region: "South", month: "2025-10", revenue: 130000, cost: 81000, units_sold: 500, category: "Electronics" },
+            { region: "South", month: "2025-11", revenue: 140000, cost: 86000, units_sold: 535, category: "Electronics" },
+            { region: "South", month: "2025-12", revenue: 158000, cost: 95000, units_sold: 605, category: "Electronics" },
+            { region: "East", month: "2025-01", revenue: 85000, cost: 58000, units_sold: 320, category: "Home" },
+            { region: "East", month: "2025-02", revenue: 89000, cost: 60000, units_sold: 335, category: "Home" },
+            { region: "East", month: "2025-03", revenue: 82000, cost: 56000, units_sold: 310, category: "Home" },
+            { region: "East", month: "2025-04", revenue: 95000, cost: 63000, units_sold: 360, category: "Home" },
+            { region: "East", month: "2025-05", revenue: 102000, cost: 67000, units_sold: 385, category: "Home" },
+            { region: "East", month: "2025-06", revenue: 110000, cost: 71000, units_sold: 415, category: "Home" },
+            { region: "East", month: "2025-07", revenue: 98000, cost: 65000, units_sold: 370, category: "Home" },
+            { region: "East", month: "2025-08", revenue: 94000, cost: 63000, units_sold: 355, category: "Home" },
+            { region: "East", month: "2025-09", revenue: 101000, cost: 66000, units_sold: 380, category: "Home" },
+            { region: "East", month: "2025-10", revenue: 108000, cost: 70000, units_sold: 408, category: "Home" },
+            { region: "East", month: "2025-11", revenue: 116000, cost: 74000, units_sold: 438, category: "Home" },
+            { region: "East", month: "2025-12", revenue: 132000, cost: 83000, units_sold: 498, category: "Home" },
+            { region: "West", month: "2025-01", revenue: 72000, cost: 50000, units_sold: 280, category: "Home" },
+            { region: "West", month: "2025-02", revenue: 76000, cost: 52000, units_sold: 295, category: "Home" },
+            { region: "West", month: "2025-03", revenue: 68000, cost: 48000, units_sold: 265, category: "Home" },
+            { region: "West", month: "2025-04", revenue: 82000, cost: 55000, units_sold: 320, category: "Home" },
+            { region: "West", month: "2025-05", revenue: 88000, cost: 58000, units_sold: 342, category: "Home" },
+            { region: "West", month: "2025-06", revenue: 95000, cost: 62000, units_sold: 370, category: "Home" },
+            { region: "West", month: "2025-07", revenue: 85000, cost: 57000, units_sold: 330, category: "Home" },
+            { region: "West", month: "2025-08", revenue: 81000, cost: 55000, units_sold: 315, category: "Home" },
+            { region: "West", month: "2025-09", revenue: 87000, cost: 57500, units_sold: 338, category: "Home" },
+            { region: "West", month: "2025-10", revenue: 93000, cost: 60500, units_sold: 362, category: "Home" },
+            { region: "West", month: "2025-11", revenue: 100000, cost: 64000, units_sold: 390, category: "Home" },
+            { region: "West", month: "2025-12", revenue: 115000, cost: 72000, units_sold: 448, category: "Home" },
+            { region: "Central", month: "2025-01", revenue: 65000, cost: 45000, units_sold: 250, category: "Fashion" },
+            { region: "Central", month: "2025-02", revenue: 68000, cost: 47000, units_sold: 262, category: "Fashion" },
+            { region: "Central", month: "2025-03", revenue: 62000, cost: 43000, units_sold: 240, category: "Fashion" },
+            { region: "Central", month: "2025-04", revenue: 74000, cost: 49000, units_sold: 288, category: "Fashion" },
+            { region: "Central", month: "2025-05", revenue: 79000, cost: 52000, units_sold: 308, category: "Fashion" },
+            { region: "Central", month: "2025-06", revenue: 86000, cost: 56000, units_sold: 335, category: "Fashion" },
+            { region: "Central", month: "2025-07", revenue: 76000, cost: 50000, units_sold: 295, category: "Fashion" },
+            { region: "Central", month: "2025-08", revenue: 73000, cost: 49000, units_sold: 282, category: "Fashion" },
+            { region: "Central", month: "2025-09", revenue: 78000, cost: 51500, units_sold: 302, category: "Fashion" },
+            { region: "Central", month: "2025-10", revenue: 84000, cost: 54500, units_sold: 326, category: "Fashion" },
+            { region: "Central", month: "2025-11", revenue: 91000, cost: 58000, units_sold: 353, category: "Fashion" },
+            { region: "Central", month: "2025-12", revenue: 104000, cost: 65000, units_sold: 403, category: "Fashion" }
+        ];
+
+        // 聚合数据计算
+        function calculateAggregations(data) {
+            const total = { revenue: 0, cost: 0, profit: 0, units_sold: 0 };
+            const byRegion = {};
+            const byMonth = {};
+
+            // 初始化区域和月份对象
+            data.forEach(item => {
+                if (!byRegion[item.region]) {
+                    byRegion[item.region] = { revenue: 0, cost: 0, profit: 0, units_sold: 0, monthlyTrend: [] };
+                }
+                if (!byMonth[item.month]) {
+                    byMonth[item.month] = { revenue: 0, cost: 0, profit: 0, units_sold: 0 };
+                }
+            });
+
+            // 计算聚合
+            data.forEach(item => {
+                const profit = item.revenue - item.cost;
+                
+                // 总计
+                total.revenue += item.revenue;
+                total.cost += item.cost;
+                total.profit += profit;
+                total.units_sold += item.units_sold;
+                
+                // 按区域
+                byRegion[item.region].revenue += item.revenue;
+                byRegion[item.region].cost += item.cost;
+                byRegion[item.region].profit += profit;
+                byRegion[item.region].units_sold += item.units_sold;
+                byRegion[item.region].monthlyTrend.push(item.revenue);
+                
+                // 按月份
+                byMonth[item.month].revenue += item.revenue;
+                byMonth[item.month].cost += item.cost;
+                byMonth[item.month].profit += profit;
+                byMonth[item.month].units_sold += item.units_sold;
+            });
+
+            total.profitMargin = (total.profit / total.revenue) * 100;
+
+            return { total, byRegion, byMonth };
+        }
+
+        // 格式化货币
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        // 格式化百分比
+        function formatPercentage(percentage) {
+            return percentage.toFixed(2) + '%';
+        }
+
+        // 生成KPI卡片
+        function renderKPICards(aggregatedData) {
+            const kpiGrid = document.getElementById('kpiGrid');
+            const { total } = aggregatedData;
+            
+            const kpis = [
+                { label: "年度总收入", value: formatCurrency(total.revenue), icon: "💰" },
+                { label: "年度总成本", value: formatCurrency(total.cost), icon: "📦" },
+                { label: "年度总利润", value: formatCurrency(total.profit), icon: "📈" },
+                { label: "整体利润率", value: formatPercentage(total.profitMargin), icon: "📊" },
+                { label: "总销售数量", value: total.units_sold.toLocaleString(), icon: "🛒" }
+            ];
+
+            kpiGrid.innerHTML = kpis.map(kpi => `
+                <div class="kpi-card">
+                    <div class="kpi-label">${kpi.icon} ${kpi.label}</div>
+                    <div class="kpi-value">${kpi.value}</div>
+                </div>
+            `).join('');
+        }
+
+        // 生成数据表格
+        function renderDataTable(data, sortColumn = 'region', ascending = true) {
+            const tbody = document.getElementById('salesTableBody');
+            
+            // 排序数据
+            const sortedData = [...data].sort((a, b) => {
+                if (ascending) {
+                    return a[sortColumn] > b[sortColumn] ? 1 : -1;
+                } else {
+                    return a[sortColumn] < b[sortColumn] ? 1 : -1;
+                }
+            });
+
+            // 更新排序指示器
+            document.querySelectorAll('.data-table th').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+                if (th.dataset.sort === sortColumn) {
+                    th.classList.add(ascending ? 'sorted-asc' : 'sorted-desc');
+                }
+            });
+
+            // 生成表格行
+            tbody.innerHTML = sortedData.map(item => {
+                const profit = item.revenue - item.cost;
+                const regionClass = `region-${item.region.toLowerCase()}`;
+                
+                return `
+                    <tr>
+                        <td><span class="region-badge ${regionClass}">${item.region}</span></td>
+                        <td>${item.month}</td>
+                        <td class="currency">${formatCurrency(item.revenue)}</td>
+                        <td class="currency">${formatCurrency(item.cost)}</td>
+                        <td>${item.units_sold.toLocaleString()}</td>
+                        <td>${item.category}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            // 添加汇总行
+            const totalRevenue = data.reduce((sum, item) => sum + item.revenue, 0);
+            const totalCost = data.reduce((sum, item) => sum + item.cost, 0);
+            const totalUnits = data.reduce((sum, item) => sum + item.units_sold, 0);
+            const totalProfit = totalRevenue - totalCost;
+
+            tbody.innerHTML += `
+                <tr style="font-weight: bold; background-color: #f0f4f8;">
+                    <td>汇总</td>
+                    <td>全部</td>
+                    <td class="currency">${formatCurrency(totalRevenue)}</td>
+                    <td class="currency">${formatCurrency(totalCost)}</td>
+                    <td>${totalUnits.toLocaleString()}</td>
+                    <td>全部</td>
+                </tr

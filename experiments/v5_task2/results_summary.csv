@@ -1,0 +1,15 @@
+provider,condition,mean_tokens,std_tokens,min_tokens,max_tokens,n
+deepseek,A,6933,228.2,6672,7095,3
+deepseek,B,103566.3,1815.4,101923,105515,3
+deepseek,C,48393.3,1564.1,46588,49339,3
+deepseek,D,59321.7,2948.9,57195,62688,3
+mimo,A,7124,1569.2,5312,8030,3
+mimo,B,102008.3,505.7,101425,102323,3
+mimo,C,53707.3,1202.4,52323,54492,3
+mimo,D,71214.7,1600.5,70090,73047,3
+
+provider,comparison,t_stat,p_value,cohens_d,significant_005
+deepseek,C_vs_B,-39.8807,2e-06,-32.5625,True
+deepseek,C_vs_D,-5.6706,0.00477,-4.63,True
+mimo,C_vs_B,-64.1344,0.0,-52.3655,True
+mimo,C_vs_D,-15.1478,0.000111,-12.3681,True

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拼豆图纸生成器</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--primary:#6C63FF;--secondary:#FF6584;--success:#00C9A7;--text:#1A1A2E;--text2:#6B7280;--border:#E5E7EB;--card:#FFF;--shadow:0 4px 24px rgba(0,0,0,.08)}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:16px;color:var(--text)}
+        .app{max-width:1500px;margin:0 auto}
+        .header{background:rgba(255,255,255,.97);backdrop-filter:blur(20px);border-radius:16px;padding:20px 28px;margin-bottom:16px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+        .logo{display:flex;align-items:center;gap:14px}
+        .logo-icon{width:50px;height:50px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 15px rgba(108,99,255,.3)}
+        .logo-text h1{font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .logo-text p{font-size:.8rem;color:var(--text2)}
+        .badge{background:linear-gradient(135deg,var(--success),#00B894);color:#fff;padding:6px 16px;border-radius:20px;font-size:.8rem;font-weight:600}
+        .layout{display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start}
+        .sidebar{display:flex;flex-direction:column;gap:16px;position:sticky;top:16px}
+        .card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+        .card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;font-weight:700;font-size:.95rem}
+        .card-header-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+        .card-body{padding:18px}
+        .upload-zone{border:2px dashed var(--border);border-radius:10px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .3s;background:linear-gradient(135deg,#F8F9FF,#F0F4FF);position:relative}
+        .upload-zone:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:0 8px 25px rgba(108,99,255,.15)}
+        .upload-zone.has-image{border-style:solid;border-color:var(--success);background:linear-gradient(135deg,#F0FFF8,#E8FFF5);padding:12px}
+        .upload-icon{font-size:42px;display:block;margin-bottom:10px}
+        .upload-zone h4{font-size:.95rem;margin-bottom:4px}
+        .upload-zone p{font-size:.78rem;color:var(--text2)}
+        .formats{display:flex;justify-content:center;gap:5px;margin-top:10px;flex-wrap:wrap}
+        .format-tag{background:#fff;padding:2px 7px;border-radius:4px;font-size:.65rem;color:var(--text2);border:1px solid var(--border)}
+        .preview-thumb{width:100%;max-height:160px;object-fit:contain;border-radius:8px;background:#F8F9FA;border:1px solid var(--border)}
+        .image-meta{display:flex;justify-content:space-between;margin-top:8px;font-size:.72rem;color:var(--text2)}
+        .form-group{margin-bottom:16px}
+        .form-group:last-child{margin-bottom:0}
+        .form-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;font-size:.85rem;font-weight:600}
+        .label-badge{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;padding:2px 8px;border-radius:10px;font-size:.6rem;font-weight:700}
+        .select{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:8px;font-size:.85rem;background:#fff;cursor:pointer;transition:all .2s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%236B7280' d='M5 7L1 3h8z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+        .select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(108,99,255,.15)}
+        .range-wrap{display:flex;align-items:center;gap:10px}
+        .range{flex:1;height:6px;border-radius:3px;background:linear-gradient(to right,#E2E8F0,#CBD5E0);cursor:pointer;-webkit-appearance:none;appearance:none}
+        .range::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--primary);cursor:pointer;box-shadow:0 2px 8px rgba(108,99,255,.3)}
+        .range-val{min-width:40px;padding:5px 8px;background:var(--primary);color:#fff;border-radius:6px;font-size:.85rem;font-weight:700;text-align:center}
+        .btn-gen{width:100%;padding:14px;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+        .btn-gen:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(108,99,255,.35)}
+        .btn-gen:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+        .content{display:flex;flex-direction:column;gap:16px}
+        .preview-panel{background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+        .toolbar{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+        .toolbar h3{font-size:.95rem;font-weight:700;display:flex;align-items:center;gap:8px}
+        .toolbar-controls{display:flex;align-items:center;gap:6px}
+        .btn-icon{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s}
+        .btn-icon:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+        .zoom-display{padding:5px 10px;background:#F3F4F6;border-radius:8px;font-size:.78rem;font-weight:700;color:var(--primary);min-width:55px;text-align:center}
+        .canvas-area{position:relative;height:520px;overflow:hidden;background:linear-gradient(45deg,#F5F5F5 25%,transparent 25%,transparent 75%,#F5F5F5 75%),linear-gradient(45deg,#F5F5F5 25%,transparent 25%,transparent 75%,#F5F5F5 75%);background-size:20px 20px;background-position:0 0,10px 10px;background-color:#FAFAFA;cursor:grab}
+        .canvas-area.dragging{cursor:grabbing}
+        .canvas-area canvas{position:absolute;image-rendering:pixelated;image-rendering:crisp-edges;transform-origin:0 0;will-change:transform}
+        .empty-state{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}
+        .empty-icon{font-size:70px;opacity:.5;margin-bottom:16px}
+        .empty-state h3{font-size:1.15rem;margin-bottom:6px}
+        .empty-state p{font-size:.85rem;color:var(--text2);max-width:280px}
+        .loading-overlay{display:none;position:absolute;inset:0;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+        .loading-overlay.active{display:flex}
+        .spinner{width:50px;height:50px;border:4px solid #E5E7EB;border-top:4px solid var(--primary);border-radius:50%;animation:spin .8s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .loading-text{font-size:.95rem;font-weight:600;color:var(--primary)}
+        .progress-bar{width:220px;height:6px;background:#E5E7EB;border-radius:3px;overflow:hidden}
+        .progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--secondary));border-radius:3px;width:0%;transition:width .3s}
+        .loading-status{font-size:.78rem;color:var(--text2)}
+        .stats-panel{background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+        .stats-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px;border-bottom:1px solid var(--border)}
+        .summary-card{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;padding:14px 12px;border-radius:10px;text-align:center}
+        .summary-value{font-size:1.5rem;font-weight:800;display:block;line-height:1.2}
+        .summary-label{font-size:.7rem;opacity:.9;margin-top:3px}
+        .stats-table-wrap{max-height:380px;overflow-y:auto}
+        .stats-table{width:100%;border-collapse:collapse}
+        .stats-table thead{position:sticky;top:0;z-index:10}
+        .stats-table th{background:var(--primary);color:#fff;padding:10px 14px;text-align:left;font-size:.78rem;font-weight:600}
+        .stats-table td{padding:9px 14px;border-bottom:1px solid var(--border);font-size:.82rem}
+        .stats-table tbody tr:hover{background:#F8F9FF}
+        .stats-table tbody tr:nth-child(even){background:#F9FAFB}
+        .color-cell{display:flex;align-items:center;gap:8px}
+        .swatch{width:26px;height:26px;border-radius:6px;border:2px solid var(--border);box-shadow:0 2px 4px rgba(0,0,0,.08);flex-shrink:0}
+        .color-hex{font-family:'Courier New',monospace;font-weight:600;font-size:.78rem}
+        .percent-bar{width:100%;height:4px;background:#E5E7EB;border-radius:2px;margin-top:3px;overflow:hidden}
+        .percent-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--secondary));border-radius:2px}
+        .empty-stats{padding:50px 20px;text-align:center;color:var(--text2)}
+        .empty-stats-icon{font-size:50px;opacity:.35;margin-bottom:12px}
+        .btn-export{padding:7px 14px;background:var(--success);color:#fff;border:none;border-radius:8px;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}
+        .btn-export:hover{background:#00B894;transform:translateY(-1px)}
+        .footer{text-align:center;padding:18px;color:rgba(255,255,255,.8);font-size:.78rem;margin-top:16px}
+        .zoom-info{position:absolute;bottom:12px;left:12px;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);padding:6px 12px;border-radius:8px;font-size:.72rem;color:var(--text2);box-shadow:var(--shadow);z-index:50;display:none}
+        .zoom-info.active{display:block}
+        @media(max-width:1024px){.layout{grid-template-columns:1fr}.sidebar{position:static}}
+        @media(max-width:768px){body{padding:10px}.header{padding:16px;flex-direction:column;text-align:center}.logo{flex-direction:column}.canvas-area{height:380px}.stats-summary{grid-template-columns:1fr}.toolbar{flex-direction:column;align-items:flex-start}.toolbar-controls{align-self:flex-end}}
+        @media(max-width:480px){.canvas-area{height:300px}.card-body{padding:14px}}
+        ::-webkit-scrollbar{width:6px;height:6px}
+        ::-webkit-scrollbar-track{background:#F1F1F1;border-radius:3px}
+        ::-webkit-scrollbar-thumb{background:#C1C1C1;border-radius:3px}
+        ::-webkit-scrollbar-thumb:hover{background:#A1A1A1}
+    </style>
+</head>
+<body>
+<div class="app">
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">🧩</div>
+            <div class="logo-text">
+                <h1>拼豆图纸生成器</h1>
+                <p>将任意图片转换为精美的拼豆图纸</p>
+            </div>
+        </div>
+        <span class="badge">✨ 纯前端版</span>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-icon" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff">📁</div>
+                    上传图片
+                </div>
+                <div class="card-body">
+                    <div class="upload-zone" id="uploadZone">
+                        <span class="upload-icon">📤</span>
+                        <h4>点击或拖放图片</h4>
+                        <p>选择要转换的图片文件</p>
+                        <div class="formats">
+                            <span class="format-tag">JPG</span>
+                            <span class="format-tag">PNG</span>
+                            <span class="format-tag">GIF</span>
+                            <span class="format-tag">WebP</span>
+                        </div>
+                        <input type="file" id="fileInput" accept="image/*" hidden>
+                    </div>
+                    <div id="imagePreview" style="display:none;margin-top:14px">
+                        <img id="previewThumb" class="preview-thumb" alt="预览">
+                        <div class="image-meta">
+                            <span id="imageSize">-</span>
+                            <span id="imageFormat">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-header-icon" style="background:linear-gradient(135deg,#00C9A7,#00B894);color:#fff">⚙️</div>
+                    图纸设置
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <div class="form-label"><span>📐 网格大小</span><span class="label-badge">推荐32</span></div>
+                        <select id="gridSize" class="select">
+                            <option value="16">16×16 (迷你)</option>
+                            <option value="24">24×24 (小型)</option>
+                            <option value="32" selected>32×32 (标准)</option>
+                            <option value="48">48×48 (精细)</option>
+                            <option value="64">64×64 (超精细)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-label"><span>🎨 颜色数量</span></div>
+                        <div class="range-wrap">
+                            <input type="range" id="colorCount" class="range" min="5" max="30" value="15">
+                            <span class="range-val" id="colorValue">15</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-label"><span>🔬 降色算法</span></div>
+                        <select id="colorMethod" class="select">
+                            <option value="median-cut" selected>中位切分法 (推荐)</option>
+                            <option value="k-means">K-Means聚类</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-label"><span>✨ 抖动效果</span></div>
+                        <select id="dithering" class="select">
+                            <option value="none" selected>无抖动</option>
+                            <option value="floyd-steinberg">Floyd-Steinberg</option>
+                        </select>
+                    </div>
+                    <button class="btn-gen" id="generateBtn" disabled>
+                        <span>✨</span><span>生成拼豆图纸</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content">
+            <div class="preview-panel">
+                <div class="toolbar">
+                    <h3>📄 图纸预览</h3>
+                    <div class="toolbar-controls">
+                        <button class="btn-icon" id="zoomOutBtn" title="缩小">−</button>
+                        <span class="zoom-display" id="zoomDisplay">100%</span>
+                        <button class="btn-icon" id="zoomInBtn" title="放大">+</button>
+                        <button class="btn-icon" id="fitBtn" title="适应窗口">⊞</button>
+                        <button class="btn-icon" id="resetBtn" title="重置">↺</button>
+                    </div>
+                </div>
+                <div class="canvas-area" id="canvasArea">
+                    <div class="empty-state" id="emptyState">
+                        <div class="empty-icon">🧩</div>
+                        <h3>等待生成图纸</h3>
+                        <p>上传图片并设置参数后，点击"生成拼豆图纸"按钮</p>
+                    </div>
+                    <canvas id="gridCanvas" style="display:none"></canvas>
+                    <div class="loading-overlay" id="loadingOverlay">
+                        <div class="spinner"></div>
+                        <div class="loading-text">正在处理图片...</div>
+                        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                        <div class="loading-status" id="loadingStatus">准备中...</div>
+                    </div>
+                    <div class="zoom-info" id="zoomInfo">滚轮缩放 · 拖拽平移</div>
+                </div>
+            </div>
+
+            <div class="stats-panel">
+                <div class="toolbar">
+                    <h3>📊 颜色统计</h3>
+                    <button class="btn-export" id="exportBtn" style="display:none"><span>📥</span><span>导出图片</span></button>
+                </div>
+                <div class="stats-summary" id="statsSummary" style="display:none">
+                    <div class="summary-card"><span class="summary-value" id="totalColors">0</span><span class="summary-label">颜色种类</span></div>
+                    <div class="summary-card"><span class="summary-value" id="totalBeads">0</span><span class="summary-label">总拼豆数</span></div>
+                    <div class="summary-card"><span class="summary-value" id="gridDisplay">32×32</span><span class="summary-label">网格大小</span></div>
+                </div>
+                <div class="stats-table-wrap" id="statsTableWrap" style="display:none">
+                    <table class="stats-table">
+                        <thead><tr><th>颜色</th><th>HEX</th><th>数量</th><th>占比</th></tr></thead>
+                        <tbody id="statsBody"></tbody>
+                    </table>
+                </div>
+                <div class="empty-stats" id="emptyStats">
+                    <div class="empty-stats-icon">📊</div>
+                    <h4>暂无统计数据</h4>
+                    <p>生成图纸后将显示颜色统计信息</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="footer">拼豆图纸生成器 · 纯前端实现 · 支持桌面和移动端</footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const APP = { image: null, zoom: 1.0, panX: 0, panY: 0, isDragging: false, dragStartX: 0, dragStartY: 0, panStartX: 0, panStartY: 0, isProcessing: false, cellSize: 14, minZoom: 0.2, maxZoom: 8.0, zoomStep: 0.15, gridSize: 32 };
+const DOM = {
+    fileInput:$('fileInput'),uploadZone:$('uploadZone'),imagePreview:$('imagePreview'),previewThumb:$('previewThumb'),imageSize:$('imageSize'),imageFormat:$('imageFormat'),
+    gridSize:$('gridSize'),colorCount:$('colorCount'),colorValue:$('colorValue'),colorMethod:$('colorMethod'),dithering:$('dithering'),
+    generateBtn:$('generateBtn'),emptyState:$('emptyState'),canvasArea:$('canvasArea'),gridCanvas:$('gridCanvas'),
+    loadingOverlay:$('loadingOverlay'),progressFill:$('progressFill'),loadingStatus:$('loadingStatus'),
+    zoomInBtn:$('zoomInBtn'),zoomOutBtn:$('zoomOutBtn'),fitBtn:$('fitBtn'),resetBtn:$('resetBtn'),zoomDisplay:$('zoomDisplay'),zoomInfo:$('zoomInfo'),
+    statsSummary:$('statsSummary'),statsTableWrap:$('statsTableWrap'),emptyStats:$('emptyStats'),statsBody:$('statsBody'),
+    totalColors:$('totalColors'),totalBeads:$('totalBeads'),gridDisplay:$('gridDisplay'),exportBtn:$('exportBtn')
+};
+
+function init(){
+    DOM.uploadZone.addEventListener('click',()=>DOM.fileInput.click());
+    DOM.fileInput.addEventListener('change',handleFileSelect);
+    DOM.uploadZone.addEventListener('dragover',e=>{e.preventDefault();DOM.uploadZone.style.borderColor='#00C9A7';DOM.uploadZone.style.background='linear-gradient(135deg,#F0FFF8,#E8FFF5)'});
+    DOM.uploadZone.addEventListener('dragleave',()=>{if(!DOM.uploadZone.classList.contains('has-image')){DOM.uploadZone.style.borderColor='';DOM.uploadZone.style.background=''}});
+    DOM.uploadZone.addEventListener('drop',e=>{e.preventDefault();if(e.dataTransfer.files.length>0){DOM.fileInput.files=e.dataTransfer.files;handleFileSelect()}});
+    DOM.colorCount.addEventListener('input',()=>{DOM.colorValue.textContent=DOM.colorCount.value});
+    DOM.generateBtn.addEventListener('click',generatePattern);
+    DOM.zoomInBtn.addEventListener('click',()=>zoom(APP.zoomStep));
+    DOM.zoomOutBtn.addEventListener('click',()=>zoom(-APP.zoomStep));
+    DOM.fitBtn.addEventListener('click',fitToView);
+    DOM.resetBtn.addEventListener('click',resetView);
+    DOM.exportBtn.addEventListener('click',exportImage);
+    DOM.canvasArea.addEventListener('wheel',e=>{e.preventDefault();zoom(e.deltaY>0?-APP.zoomStep:APP.zoomStep)},{passive:false});
+    DOM.canvasArea.addEventListener('mousedown',startDrag);
+    DOM.canvasArea.addEventListener('mousemove',doDrag);
+    DOM.canvasArea.addEventListener('mouseup',endDrag);
+    DOM.canvasArea.addEventListener('mouseleave',endDrag);
+    DOM.canvasArea.addEventListener('touchstart',handleTouchStart,{passive:false});
+    DOM.canvasArea.addEventListener('touchmove',handleTouchMove,{passive:false});
+    DOM.canvasArea.addEventListener('touchend',handleTouchEnd);
+    updateZoomDisplay();
+}
+
+function handleFileSelect(){
+    const file=DOM.fileInput.files[0];
+    if(!file||!file.type.match('image.*')){alert('请选择有效的图片文件');return}
+    const reader=new FileReader();
+    reader.onload=e=>{
+        const img=new Image();
+        img.onload=()=>{
+            APP.image=img;
+            DOM.previewThumb.src=e.target.result;
+            DOM.imageSize.textContent=img.width+'×'+img.height+' 像素';
+            DOM.imageFormat.textContent=(file.size/1024).toFixed(1)+' KB';
+            DOM.imagePreview.style.display='block';
+            DOM.uploadZone.classList.add('has-image');
+            DOM.uploadZone.querySelector('h4').textContent='✅ 图片已加载';
+            DOM.uploadZone.querySelector('p').textContent=file.name;
+            DOM.generateBtn.disabled=false;
+        };
+        img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function zoom(delta){APP.zoom=Math.min(APP.maxZoom,Math.max(APP.minZoom,APP.zoom+delta));updateZoomDisplay();applyTransform()}
+function resetView(){APP.zoom=1;APP.panX=0;APP.panY=0;updateZoomDisplay();applyTransform()}
+function fitToView(){
+    if(!APP.imageData)return;
+    const area=DOM.canvasArea,gs=APP.gridSize,cs=APP.cellSize;
+    const cw=gs*cs+2,ch=gs*cs+2;
+    const scale=Math.min((area.clientWidth-40)/cw,(area.clientHeight-40)/ch,APP.maxZoom);
+    APP.zoom=Math.max(scale,APP.minZoom);
+    APP.panX=0;APP.panY=0;
+    updateZoomDisplay();applyTransform();
+}
+function updateZoomDisplay(){DOM.zoomDisplay.textContent=Math.round(APP.zoom*100)+'%'}
+function applyTransform(){
+    const canvas=DOM.gridCanvas;
+    if(canvas.style.display==='none')return;
+    const cw=APP.gridSize*APP.cellSize+2,ch=APP.gridSize*APP.cellSize+2;
+    const aw=DOM.canvasArea.clientWidth,ah=DOM.canvasArea.clientHeight;
+    const x=Math.max(0,(aw-cw*APP.zoom)/2)+APP.panX;
+    const y=Math.max(0,(ah-ch*APP.zoom)/2)+APP.panY;
+    canvas.style.transform=`translate(${x}px,${y}px) scale(${APP.zoom})`;
+}
+
+function startDrag(e){
+    if(DOM.gridCanvas.style.display==='none')return;
+    APP.isDragging=true;APP.dragStartX=e.clientX;APP.dragStartY=e.clientY;APP.panStartX=APP.panX;APP.panStartY=APP.panY;
+    DOM.canvasArea.classList.add('dragging');
+}
+function doDrag(e){
+    if(!APP.isDragging)return;
+    APP.panX=APP.panStartX+(e.clientX-APP.dragStartX);
+    APP.panY=APP.panStartY+(e.clientY-APP.dragStartY);
+    applyTransform();
+}
+function endDrag(){APP.isDragging=false;DOM.canvasArea.classList.remove('dragging')}
+
+let lastTouchDist=0;
+function handleTouchStart(e){
+    if(DOM.gridCanvas.style.display==='none')return;
+    if(e.touches.length===1){
+        APP.isDragging=true;APP.dragStartX=e.touches[0].clientX;APP.dragStartY=e.touches[0].clientY;APP.panStartX=APP.panX;APP.panStartY=APP.panY;
+    }else if(e.touches.length===2){
+        APP.isDragging=false;
+        lastTouchDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    }
+    e.preventDefault();
+}
+function handleTouchMove(e){
+    if(e.touches.length===1&&APP.isDragging){
+        APP.panX=APP.panStartX+(e.touches[0].clientX-APP.dragStartX);
+        APP.panY=APP.panStartY+(e.touches[0].clientY-APP.dragStartY);
+        applyTransform();
+    }else if(e.touches.length===2){
+        const dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+        if(lastTouchDist>0){const scale=dist/lastTouchDist;APP.zoom=Math.min(APP.maxZoom,Math.max(APP.minZoom,APP.zoom*scale));updateZoomDisplay();applyTransform()}
+        lastTouchDist=dist;
+    }
+    e.preventDefault();
+}
+function handleTouchEnd(){APP.isDragging=false;lastTouchDist=0}
+
+async function generatePattern(){
+    if(!APP.image||APP.isProcessing)return;
+    APP.isProcessing=true;DOM.generateBtn.disabled=true;
+    showLoading(true);setProgress(0,'准备中...');
+
+    try{
+        const gs=parseInt(DOM.gridSize.value);
+        const cc=parseInt(DOM.colorCount.value);
+        const method=DOM.colorMethod.value;
+        const dither=DOM.dithering.value;
+        APP.gridSize=gs;
+
+        setProgress(10,'提取像素...');
+        await delay(30);
+
+        const tempCanvas=document.createElement('canvas');
+        tempCanvas.width=gs;tempCanvas.height=gs;
+        const tempCtx=tempCanvas.getContext('2d',{willReadFrequently:true});
+        tempCtx.drawImage(APP.image,0,0,gs,gs);
+        const imageData=tempCtx.getImageData(0,0,gs,gs);
+        const pixels=[];
+        for(let i=0;i<imageData.data.length;i+=4){pixels.push({r:imageData.data[i],g:imageData.data[i+1],b:imageData.data[i+2]})}
+
+        setProgress(25,'颜色量化...');
+        await delay(30);
+
+        let result;
+        if(method==='median-cut'){result=medianCutQuantization(pixels,cc)}
+        else{result=kMeansQuantization(pixels,cc)}
+
+        setProgress(50,'处理颜色映射...');
+        await delay(30);
+
+        if(dither==='floyd-steinberg'){applyFloydSteinberg(pixels,result.colorMap,result.quantizedPixels,gs)}
+
+        APP.imageData=result;
+        APP.cellSize=gs<=16?16:gs<=32?14:gs<=48?10:8;
+
+        setProgress(70,'渲染网格...');
+        await delay(30);
+        renderGrid(result,gs);
+
+        setProgress(90,'生成统计...');
+        await delay(30);
+        updateStats(result,gs);
+
+        setProgress(100,'完成！');
+        await delay(200);
+
+        DOM.emptyState.style.display='none';
+        DOM.gridCanvas.style.display='block';
+        DOM.exportBtn.style.display='flex';
+        fitToView();
+
+    }catch(err){
+        console.error(err);
+        alert('处理出错: '+err.message);
+    }finally{
+        APP.isProcessing=false;DOM.generateBtn.disabled=false;showLoading(false);
+    }
+}
+
+function medianCutQuantization(pixels,colorCount){
+    const colors=pixels.map(p=>({r:p.r,g:p.g,b:p.b}));
+    const boxes=medianCut(colors,colorCount);
+    const colorMap=boxes.map(box=>{
+        const avg={r:0,g:0,b:0};
+        box.forEach(c=>{avg.r+=c.r;avg.g+=c.g;avg.b+=c.b});
+        return{r:Math.round(avg.r/box.length),g:Math.round(avg.g/box.length),b:Math.round(avg.b/box.length)};
+    });
+    const quantizedPixels=pixels.map(pixel=>{
+        let minD=Infinity,minI=0;
+        for(let i=0;i<colorMap.length;i++){
+            const d=colorDist(pixel,colorMap[i]);
+            if(d<minD){minD=d;minI=i}
+        }
+        return minI;
+    });
+    return{colorMap,quantizedPixels};
+}
+
+function medianCut(colors,depth){
+    if(depth<=1||colors.length<=1)return[colors];
+    let rMin=255,rMax=0,gMin=255,gMax=0,bMin=255,bMax=0;
+    colors.forEach(c=>{rMin=Math.min(rMin,c.r);rMax=Math.max(rMax,c.r);gMin=Math.min(gMin,c.g);gMax=Math.max(gMax,c.g);bMin=Math.min(bMin,c.b);bMax=Math.max(bMax,c.b)});
+    const rR=rMax-rMin,gR=gMax-gMin,bR=bMax-bMin;
+    let ch='r';if(gR>=rR&&gR>=bR)ch='g';else if(bR>=rR&&bR>=gR)ch='

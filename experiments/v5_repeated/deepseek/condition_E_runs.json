@@ -1,0 +1,20 @@
+{
+  "E": [
+    {
+      "condition": "E",
+      "run": 1,
+      "tokens": 67211,
+      "time": 147.9,
+      "html_length": 30621,
+      "max_context_chars": 32346
+    },
+    {
+      "condition": "E",
+      "run": 2,
+      "tokens": 62057,
+      "time": 145.0,
+      "html_length": 28734,
+      "max_context_chars": 29203
+    }
+  ]
+}

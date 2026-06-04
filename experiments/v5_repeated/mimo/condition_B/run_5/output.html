@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>拼豆图纸生成器</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--pri:#6366f1;--pri-d:#4f46e5;--pri-l:#a5b4fc;--sec:#ec4899;
+--bg:#f1f5f9;--sf:#fff;--txt:#1e293b;--txt2:#64748b;
+--bdr:#e2e8f0;--ok:#10b981;--warn:#f59e0b;
+--sh:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06);
+--sh2:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);
+}
+html{-webkit-text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased}
+.hdr{background:linear-gradient(135deg,var(--pri) 0%,var(--sec) 100%);color:#fff;padding:18px 16px;text-align:center;box-shadow:var(--sh2);position:relative;overflow:hidden}
+.hdr::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 60%);animation:pulse 5s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.1);opacity:.7}}
+.hdr h1{font-size:1.6rem;font-weight:700;margin-bottom:4px;position:relative;z-index:1}
+.hdr p{opacity:.9;font-size:.9rem;position:relative;z-index:1}
+.wrap{max-width:1400px;margin:0 auto;padding:12px}
+.layout{display:grid;grid-template-columns:300px 1fr;gap:12px;margin-top:12px}
+@media(max-width:1024px){.layout{grid-template-columns:1fr}}
+.panel{background:var(--sf);border-radius:12px;box-shadow:var(--sh);overflow:hidden}
+.ph{padding:12px 16px;background:linear-gradient(to right,#f8fafc,#f1f5f9);border-bottom:1px solid var(--bdr);font-weight:600;font-size:.95rem;display:flex;align-items:center;gap:8px}
+.ph .ic{font-size:1.1rem}
+.pb{padding:14px}
+.up{border:2px dashed var(--bdr);border-radius:12px;padding:28px 14px;text-align:center;cursor:pointer;transition:all .3s;background:var(--bg);position:relative;overflow:hidden}
+.up:hover{border-color:var(--pri);background:#eef2ff}
+.up.drag{border-color:var(--pri);background:#e0e7ff;transform:scale(1.01)}
+.up.done{padding:8px;border-style:solid;border-color:var(--ok)}
+.up-ico{font-size:2.2rem;margin-bottom:8px;display:block}
+.up-txt{color:var(--txt2);margin-bottom:4px;font-size:.92rem}
+.up-hint{font-size:.78rem;color:var(--txt2);opacity:.8}
+.up img{max-width:100%;max-height:160px;border-radius:8px;object-fit:contain}
+#fileIn{display:none}
+.cg{margin-bottom:14px}
+.cg:last-child{margin-bottom:0}
+.cl{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-weight:500;font-size:.88rem}
+.cv{background:var(--pri);color:#fff;padding:2px 10px;border-radius:12px;font-size:.78rem}
+select,input[type=range]{width:100%;padding:9px 12px;border:1px solid var(--bdr);border-radius:8px;background:var(--sf);font-size:.92rem;color:var(--txt);transition:all .2s;outline:none}
+select:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+input[type=range]{-webkit-appearance:none;padding:0;height:6px;border-radius:3px;background:linear-gradient(to right,var(--pri-l),var(--pri));cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--pri);box-shadow:var(--sh);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--pri);box-shadow:var(--sh);cursor:pointer}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ro{position:relative}
+.ro input{position:absolute;opacity:0;width:0;height:0}
+.ro label{display:block;padding:9px;text-align:center;border:2px solid var(--bdr);border-radius:8px;cursor:pointer;transition:all .2s;font-size:.82rem}
+.ro input:checked+label{border-color:var(--pri);background:#eef2ff;color:var(--pri);font-weight:600}
+.tw{display:flex;align-items:center;gap:8px}
+.tg{position:relative;width:40px;height:22px;flex-shrink:0}
+.tg input{opacity:0;width:0;height:0}
+.ts{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--bdr);border-radius:22px;transition:.3s}
+.ts::before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+.tg input:checked+.ts{background:var(--pri)}
+.tg input:checked+.ts::before{transform:translateX(18px)}
+.tl{font-size:.88rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border:none;border-radius:8px;font-size:.92rem;font-weight:600;cursor:pointer;transition:all .2s;width:100%}
+.bp{background:linear-gradient(135deg,var(--pri) 0%,var(--pri-d) 100%);color:#fff;box-shadow:0 4px 14px rgba(99,102,241,.4)}
+.bp:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 20px rgba(99,102,241,.5)}
+.bp:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+.bs{background:var(--bg);color:var(--txt);border:1px solid var(--bdr)}
+.bs:hover{background:var(--bdr)}
+.bg{display:flex;gap:8px;margin-top:10px}
+.bg .btn{flex:1}
+.bok{background:linear-gradient(135deg,var(--ok) 0%,#059669 100%);color:#fff}
+.cw{position:relative;background:#1a1a2e;border-radius:12px;overflow:hidden;min-height:380px}
+.cc{width:100%;height:500px;overflow:hidden;cursor:grab;position:relative;touch-action:none}
+.cc:active{cursor:grabbing}
+#cv{display:block;image-rendering:pixelated;image-rendering:crisp-edges;transform-origin:0 0;position:absolute;top:0;left:0}
+.cp{text-align:center;color:rgba(255,255,255,.45);padding:40px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;width:90%}
+.cp .ic{font-size:3rem;margin-bottom:10px;display:block}
+.cp h3{margin-bottom:6px;font-size:1.1rem}
+.cp p{font-size:.85rem}
+.cctl{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;background:rgba(0,0,0,.75);padding:5px 8px;border-radius:10px;backdrop-filter:blur(10px);z-index:10}
+.cb{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.15);border:none;border-radius:7px;color:#fff;cursor:pointer;font-size:.95rem;transition:all .2s}
+.cb:hover{background:rgba(255,255,255,.3)}
+.cb:active{transform:scale(.92)}
+.zd{color:#fff;padding:0 8px;display:flex;align-items:center;font-size:.82rem;min-width:55px;justify-content:center}
+.ci{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.7);color:#fff;padding:4px 10px;border-radius:7px;font-size:.78rem;z-index:10}
+.sw{margin-top:12px}
+.ss{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px}
+.sc{background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--bdr)}
+.sc .v{font-size:1.3rem;font-weight:700;color:var(--pri)}
+.sc .l{font-size:.78rem;color:var(--txt2);margin-top:2px}
+.stw{max-height:350px;overflow-y:auto;border-radius:8px;border:1px solid var(--bdr)}
+table{width:100%;border-collapse:collapse}
+thead{position:sticky;top:0;z-index:1}
+th{background:var(--pri);color:#fff;padding:9px 10px;text-align:left;font-weight:600;font-size:.82rem}
+td{padding:7px 10px;border-bottom:1px solid var(--bdr);font-size:.82rem}
+tr:nth-child(even){background:#f8fafc}
+tr:hover{background:#eef2ff}
+.cs{width:22px;height:22px;border-radius:4px;display:inline-block;vertical-align:middle;border:1px solid var(--bdr);margin-right:6px}
+.cc2{font-family:'Courier New',monospace;font-size:.78rem;background:#f1f5f9;padding:1px 5px;border-radius:3px}
+.lo{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)}
+.lo.on{display:flex}
+.lc{background:#fff;padding:28px 36px;border-radius:14px;text-align:center;box-shadow:var(--sh2)}
+.sp{width:40px;height:40px;border:3px solid var(--bdr);border-top-color:var(--pri);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lt{color:var(--txt);font-weight:500;font-size:.92rem}
+.tip{position:fixed;background:rgba(0,0,0,.9);color:#fff;padding:6px 10px;border-radius:6px;font-size:.78rem;pointer-events:none;z-index:100;white-space:nowrap;display:none;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.tip-c{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:middle;border:1px solid rgba(255,255,255,.3)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--txt);color:#fff;padding:10px 20px;border-radius:10px;font-size:.88rem;z-index:2000;transition:transform .3s;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:90%}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.ft{text-align:center;padding:14px;color:var(--txt2);font-size:.82rem;margin-top:14px}
+@media(max-width:768px){
+.hdr h1{font-size:1.3rem}
+.hdr p{font-size:.82rem}
+.wrap{padding:8px}
+.layout{gap:10px}
+.pb{padding:10px}
+.cc{height:360px}
+.cw{min-height:300px}
+.cctl{flex-wrap:wrap;justify-content:center;gap:4px}
+.cb{width:28px;height:28px;font-size:.85rem}
+.ss{grid-template-columns:repeat(2,1fr)}
+.btn{padding:9px 14px;font-size:.88rem}
+.bg{flex-direction:column;gap:6px}
+.up{padding:20px 10px}
+.up-ico{font-size:1.8rem}
+}
+@media(max-width:480px){
+.hdr{padding:14px 10px}
+.hdr h1{font-size:1.15rem}
+.cc{height:300px}
+.cw{min-height:250px}
+}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--txt2)}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+<h1>🎨 拼豆图纸生成器</h1>
+<p>上传图片，智能生成拼豆图纸与颜色统计</p>
+</header>
+
+<div class="wrap">
+<div class="layout">
+<div class="left-panel">
+<div class="panel">
+<div class="ph"><span class="ic">📷</span>图片上传</div>
+<div class="pb">
+<div class="up" id="uploadArea">
+<span class="up-ico">🖼️</span>
+<p class="up-txt">点击或拖拽上传图片</p>
+<p class="up-hint">支持 JPG/PNG/BMP/WebP，也可 Ctrl+V 粘贴</p>
+<input type="file" id="fileIn" accept="image/*">
+</div>
+</div>
+</div>
+<div class="panel" style="margin-top:10px">
+<div class="ph"><span class="ic">⚙️</span>参数设置</div>
+<div class="pb">
+<div class="cg"><div class="cl"><span>网格大小</span></div>
+<select id="gridSize">
+<option value="16">16×16 (简单)</option>
+<option value="24">24×24</option>
+<option value="32" selected>32×32 (标准)</option>
+<option value="48">48×48</option>
+<option value="64">64×64 (精细)</option>
+</select></div>
+<div class="cg"><div class="cl"><span>颜色数量</span><span class="cv" id="ccDisp">16</span></div>
+<input type="range" id="colorCnt" min="5" max="40" value="16"></div>
+<div class="cg"><div class="cl"><span>量化算法</span></div>
+<div class="rg">
+<div class="ro"><input type="radio" name="algo" id="aMed" value="median" checked><label for="aMed">中位切分</label></div>
+<div class="ro"><input type="radio" name="algo" id="aKm" value="kmeans"><label for="aKm">K-Means</label></div>
+</div></div>
+<div class="cg"><div class="tw"><label class="tg"><input type="checkbox" id="showGrid" checked><span class="ts"></span></label><span class="tl">显示网格线</span></div></div>
+<div class="cg"><div class="tw"><label class="tg"><input type="checkbox" id="showNum"><span class="ts"></span></label><span class="tl">显示颜色编号</span></div></div>
+<button class="btn bp" id="genBtn" disabled>🚀 生成图纸</button>
+<div class="bg">
+<button class="btn bok" id="dlImg" disabled>💾 保存图片</button>
+<button class="btn bs" id="dlCsv" disabled>📊 导出CSV</button>
+</div>
+</div>
+</div>
+</div>
+
+<div class="right-panel">
+<div class="panel">
+<div class="ph"><span class="ic">🖼️</span>拼豆图纸预览
+<span style="margin-left:auto;font-size:.78rem;color:var(--txt2)">滚轮缩放 · 拖拽平移</span>
+</div>
+<div class="pb" style="padding:0">
+<div class="cw">
+<div class="cc" id="canvasWrap">
+<canvas id="cv"></canvas>
+<div class="cp" id="placeholder">
+<span class="ic">🎨</span>
+<h3>欢迎使用拼豆图纸生成器</h3>
+<p>请上传图片后调整参数，点击「生成图纸」</p>
+</div>
+<div class="ci" id="cInfo" style="display:none"></div>
+</div>
+<div class="cctl" id="cctl" style="display:none">
+<button class="cb" id="zOut" title="缩小">➖</button>
+<span class="zd" id="zDisp">100%</span>
+<button class="cb" id="zIn" title="放大">➕</button>
+<button class="cb" id="zFit" title="适应窗口">📐</button>
+<button class="cb" id="zReset" title="重置">🔄</button>
+</div>
+</div>
+</div>
+</div>
+
+<div class="panel sw" id="statsPanel" style="display:none">
+<div class="ph"><span class="ic">📊</span>颜色统计</div>
+<div class="pb">
+<div class="ss" id="statsSummary"></div>
+<div class="stw">
+<table>
+<thead><tr><th>编号</th><th>颜色</th><th>HEX</th><th>数量</th><th>占比</th></tr></thead>
+<tbody id="statsBody"></tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="lo" id="loader">
+<div class="lc"><div class="sp"></div><p class="lt" id="loadTxt">正在处理图像…</p></div>
+</div>
+<div class="tip" id="tip"></div>
+<div class="toast" id="toast"></div>
+
+<footer class="ft">拼豆图纸生成器 · 纯前端实现，图片不会上传到服务器</footer>
+
+<script>
+class PerlerBeadGenerator {
+    constructor() {
+        this.uploadArea = document.getElementById('uploadArea');
+        this.fileIn = document.getElementById('fileIn');
+        this.gridSizeSel = document.getElementById('gridSize');
+        this.colorCntIn = document.getElementById('colorCnt');
+        this.ccDisp = document.getElementById('ccDisp');
+        this.genBtn = document.getElementById('genBtn');
+        this.dlImg = document.getElementById('dlImg');
+        this.dlCsv = document.getElementById('dlCsv');
+        this.canvasWrap = document.getElementById('canvasWrap');
+        this.cv = document.getElementById('cv');
+        this.ctx = this.cv.getContext('2d');
+        this.placeholder = document.getElementById('placeholder');
+        this.cInfo = document.getElementById('cInfo');
+        this.cctl = document.getElementById('cctl');
+        this.zIn = document.getElementById('zIn');
+        this.zOut = document.getElementById('zOut');
+        this.zFit = document.getElementById('zFit');
+        this.zReset = document.getElementById('zReset');
+        this.zDisp = document.getElementById('zDisp');
+        this.showGridCb = document.getElementById('showGrid');
+        this.showNumCb = document.getElementById('showNum');
+        this.statsPanel = document.getElementById('statsPanel');
+        this.statsSummary = document.getElementById('statsSummary');
+        this.statsBody = document.getElementById('statsBody');
+        this.loader = document.getElementById('loader');
+        this.loadTxt = document.getElementById('loadTxt');
+        this.tipEl = document.getElementById('tip');
+        this.toastEl = document.getElementById('toast');
+
+        this.originalImage = null;
+        this.zoom = 1;
+        this.panX = 0;
+        this.panY = 0;
+        this.dragging = false;
+        this.lastMX = 0;
+        this.lastMY = 0;
+        this.patternData = null;
+        this.palette = [];
+        this.gridN = 32;
+        this.cellPx = 16;
+        this.hasPattern = false;
+        this.colorMap = null;
+
+        this.init();
+    }
+
+    init() {
+        this.uploadArea.addEventListener('click', () => this.fileIn.click());
+        this.fileIn.addEventListener('change', e => { if (e.target.files[0]) this.loadFile(e.target.files[0]); });
+        this.uploadArea.addEventListener('dragover', e => { e.preventDefault(); this.uploadArea.classList.add('drag'); });
+        this.uploadArea.addEventListener('dragleave', () => this.uploadArea.classList.remove('drag'));
+        this.uploadArea.addEventListener('drop', e => {
+            e.preventDefault(); this.uploadArea.classList.remove('drag');
+            if (e.dataTransfer.files[0]) this.loadFile(e.dataTransfer.files[0]);
+        });
+        document.addEventListener('paste', e => {
+            const items = e.clipboardData?.items;
+            if (items) for (const it of items) {
+                if (it.type.startsWith('image/')) { e.preventDefault(); this.loadFile(it.getAsFile()); break; }
+            }
+        });
+
+        this.colorCntIn.addEventListener('input', () => this.ccDisp.textContent = this.colorCntIn.value);
+        this.genBtn.addEventListener('click', () => this.generate());
+        this.dlImg.addEventListener('click', () => this.downloadImage());
+        this.dlCsv.addEventListener('click', () => this.downloadCSV());
+        this.showGridCb.addEventListener('change', () => { if (this.hasPattern) this.redraw(); });
+        this.showNumCb.addEventListener('change', () => { if (this.hasPattern) this.redraw(); });
+
+        this.zIn.addEventListener('click', () => this.zoomTo(this.zoom * 1.4));
+        this.zOut.addEventListener('click', () => this.zoomTo(this.zoom / 1.4));
+        this.zFit.addEventListener('click', () => this.fitView());
+        this.zReset.addEventListener('click', () => { this.zoom = 1; this.panX = 0; this.panY = 0; if (this.hasPattern) { this.fitView(); } else { this.applyTransform(); this.updateZDisp(); } });
+
+        document.addEventListener('keydown', e => {
+            if (!this.hasPattern) return;
+            if (e.key === '+' || e.key === '=') { e.preventDefault(); this.zoomTo(this.zoom * 1.3); }
+            else if (e.key === '-' || e.key === '_') { e.preventDefault(); this.zoomTo(this.zoom / 1.3); }
+            else if (e.key === '0') { e.preventDefault(); this.fitView(); }
+        });
+
+        this.canvasWrap.addEventListener('wheel', e => {
+            e.preventDefault();
+            const rect = this.canvasWrap.getBoundingClientRect();
+            const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+            const f = e.deltaY > 0 ? 0.88 : 1.12;
+            const nz = this.clampZoom(this.zoom * f);
+            const r = nz / this.zoom;
+            this.panX = mx - (mx - this.panX) * r;
+            this.panY = my - (my - this.panY) * r;
+            this.zoom = nz;
+            this.applyTransform(); this.updateZDisp();
+        }, { passive: false });
+
+        this.canvasWrap.addEventListener('mousedown', e => {
+            if (e.button === 0) { this.dragging = true; this.lastMX = e.clientX; this.lastMY = e.clientY; this.canvasWrap.style.cursor = 'grabbing'; }
+        });
+        document.addEventListener('mousemove', e => {
+            if (this.dragging) {
+                this.panX += e.clientX - this.lastMX; this.panY += e.clientY - this.lastMY;
+                this.lastMX = e.clientX; this.lastMY = e.clientY; this.applyTransform();
+            }
+            if (this.hasPattern && !this.dragging) this.handleHover(e.clientX, e.clientY);
+        });
+        document.addEventListener('mouseup', () => { this.dragging = false; this.canvasWrap.style.cursor = 'grab'; this.tipEl.style.display = 'none'; });
+
+        let ltX, ltY, pinchDist0 = 0;
+        this.canvasWrap.addEventListener('touchstart', e => {
+            if (e.touches.length === 1) { this.dragging = true; ltX = e.touches[0].clientX; ltY = e.touches[0].clientY; }
+            else if (e.touches.length === 2) { this.dragging = false; pinchDist0 = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); }
+        }, { passive: true });
+        this.canvasWrap.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if (e.touches.length === 1 && this.dragging) {
+                this.panX += e.touches[0].clientX - ltX; this.panY += e.touches[0].clientY - ltY;
+                ltX = e.touches[0].clientX; ltY = e.touches[0].clientY; this.applyTransform();
+            } else if (e.touches.length === 2 && pinchDist0 > 0) {
+                const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                const rect = this.canvasWrap.getBoundingClientRect();
+                const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+                const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+                const nz = this.clampZoom(this.zoom * (d / pinchDist0));
+                const r = nz / this.zoom;
+                this.panX = cx - (cx - this.panX) * r; this.panY = cy - (cy - this.panY) * r;
+                this.zoom = nz; pinchDist0 = d; this.applyTransform(); this.updateZDisp();
+            }
+        }, { passive: false });
+        this.canvasWrap.addEventListener('touchend', () => { this.dragging = false; pinchDist0 = 0; }, { passive: true });
+    }
+
+    clampZoom(z) { return Math.max(0.1, Math.min(30, z)); }
+    updateZDisp() { this.zDisp.textContent = Math.round(this.zoom * 100) + '%'; }
+    applyTransform() { this.cv.style.transform = `translate(${this.panX}px,${this.panY}px) scale(${this.zoom})`; }
+
+    zoomTo(nz) {
+        nz = this.clampZoom(nz);
+        const rect = this.canvasWrap.getBoundingClientRect();
+        const cx = rect.width / 2, cy = rect.height / 2;
+        const r = nz / this.zoom;
+        this.panX = cx - (cx - this.panX) * r; this.panY = cy - (cy - this.panY) * r;
+        this.zoom = nz; this.applyTransform(); this.updateZDisp();
+    }
+
+    fitView() {
+        if (!this.hasPattern) return;
+        const rect = this.canvasWrap.getBoundingClientRect();
+        const cw = this.gridN * this.cellPx, ch = this.gridN * this.cellPx;
+        const sx = (rect.width - 40) / cw, sy = (rect.height - 40) / ch;
+        this.zoom = Math.min(sx, sy, 10);
+        this.panX = (rect.width - cw * this.zoom) / 2;
+        this.panY = (rect.height - ch * this.zoom) / 2;
+        this.applyTransform(); this.updateZDisp();
+    }
+
+    loadFile(file) {
+        if (!file || !file.type.match('image.*')) { this.showToast('请选择有效图片文件'); return; }
+        const reader = new FileReader();
+        reader.onload = e => {
+            const img = new Image();
+            img.onload = () => {
+                this.originalImage = img;
+                this.uploadArea.innerHTML = '';
+                this.uploadArea.classList.add('done');
+                const preview = document.createElement('img');
+                preview.src = e.target.result; preview.alt = '预览';
+                this.uploadArea.appendChild(preview);
+                this.genBtn.disabled = false;
+                this.showToast('图片已加载');
+            };
+            img.onerror = () => this.showToast('图片加载失败');
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async generate() {
+        if (!this.originalImage) { this.showToast('请先上传图片'); return; }
+        this.showLoader(true, '正在处理图像…');
+        await this.sleep(30);
+        try {
+            this.gridN = parseInt(this.gridSizeSel.value);
+            const colorCount = parseInt(this.colorCntIn.value);
+            const algo = document.querySelector('input[name="algo"]:checked').value;
+
+            this.showLoader(true, '正在网格化…'); await this.sleep(10);
+            const tmpC = document.createElement('canvas');
+            const tmpX = tmpC.getContext('2d');
+            tmpC.width = this.originalImage.width; tmpC.height = this.originalImage.height;
+            tmpX.drawImage(this.originalImage, 0, 0);
+            const imgData = tmpX.getImageData(0, 0, tmpC.width, tmpC.height);
+            const pixelated = this.pixelate(imgData, this.gridN);
+
+            this.showLoader(true, '正在量化颜色…'); await this.sleep(10);
+            let result = algo === 'kmeans'
+                ? this.kMeansQuantize(pixelated, colorCount)
+                : this.medianCutQuantize(pixelated, colorCount);
+
+            this.patternData = result.data;
+            this.palette = result.palette;
+            this.buildColorMap();
+
+            this.showLoader(true, '正在渲染图纸…'); await this.sleep(10);
+            this.renderPattern();
+            this.hasPattern = true;
+            this.renderStats();
+
+            this.dlImg.disabled = false; this.dlCsv.disabled = false;
+            this.placeholder.style.display = 'none';
+            this.cctl.style.display = 'flex';
+            this.cInfo.style.display = 'block';
+            this.cInfo.textContent = `${this.gridN}×${this.gridN} · ${this.palette.length}色`;
+            this.statsPanel.style.display = 'block';
+            this.fitView();
+            this.showToast('生成完成！');
+        } catch (err) { console.error(err); this.showToast('处理出错: ' + err.message); }
+        finally { this.showLoader(false); }
+    }
+
+    pixelate(imgData, n) {
+        const w = imgData.width, h = imgData.height, src = imgData.data;
+        const out = new Uint8ClampedArray(n * n * 4);
+        const bw = w / n, bh = h / n;
+        for (let gy = 0; gy < n; gy++) for (let gx = 0; gx < n; gx++) {
+            let r = 0, g = 0, b = 0, cnt = 0;
+            const sx = Math.floor(gx * bw), sy = Math.floor(gy * bh);
+            const ex = Math.min(Math.floor((gx + 1) * bw), w), ey = Math.min(Math.floor((gy + 1) * bh), h);
+            for (let iy = sy; iy < ey; iy++) for (let ix = sx; ix < ex; ix++) {
+                const i = (iy * w + ix) * 4;
+                r += src[i]; g += src[i + 1]; b += src[i + 2]; cnt++;
+            }
+            const o = (gy * n + gx) * 4;
+            out[o] = Math.round(r / cnt); out[o + 1] = Math.round(g / cnt);
+            out[o + 2] = Math.round(b / cnt); out[o + 3] = 255;
+        }
+        return out;
+    }
+
+    medianCutQuantize(data, colorCount) {
+        const pixels = [];
+        for (let i = 0; i < data.length; i += 4) pixels.push([data[i], data[i + 1], data[i + 2]]);
+        if (pixels.length === 0) return { data: data, palette: [] };
+
+        let buckets = [pixels];
+        while (buckets.length < colorCount) {
+            let maxLen = 0, max
